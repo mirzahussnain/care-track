@@ -7,6 +7,14 @@ obj/
 *.userosscache
 *.sln.docstates
 
+# ASP.NET Core local configuration / secrets
+appsettings.Development.json
+appsettings.*.local.json
+*.secrets.json
+
+# Keep safe example configs
+!appsettings.Development.example.json
+
 # VS Code
 .vscode/*
 !.vscode/settings.json
@@ -32,8 +40,23 @@ pnpm-debug.log*
 secrets.*
 *.secret
 
+# Test results / coverage
+TestResults/
+*.trx
+coverage.*
+coverage-results/
+
 # Build artifacts and temp
 out/
 tmp/
 .temp/
 *.log
+
+# Local databases / temporary data
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
