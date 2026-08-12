@@ -2,6 +2,7 @@ using CareTrack.Api.ErrorHandling;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.Application.Patients.GetPatient;
+using CareTrack.Application.Patients.SearchPatients;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ builder.Services.AddDbContext<CareTrackDbContext>(options =>
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<CreatePatientService>();
 builder.Services.AddScoped<GetPatientService>();
+builder.Services.AddScoped<SearchPatientsService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

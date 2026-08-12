@@ -1,4 +1,5 @@
 using CareTrack.Application.Common.Interfaces;
+using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,36 @@ public class PatientRepository : IPatientRepository
         .FirstOrDefaultAsync(
             patient => patient.Id == id,
             cancellationToken);
+  }
+
+  public async Task<PagedResult<Patient>> SearchAsync(
+    string? search,
+    int page,
+    int pageSize,
+    CancellationToken cancellationToken = default)
+  {
+    IQueryable<Patient> query = _dbContext.Patients.AsNoTracking();
+
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+      query = query.Where(patient =>
+        patient.PatientReference.Contains(search) ||
+        patient.FirstName.Contains(search) ||
+        patient.LastName.Contains(search));
+    }
+
+    var totalCount = await query.CountAsync(cancellationToken);
+    var items = await query
+      .OrderBy(patient => patient.LastName)
+      .ThenBy(patient => patient.FirstName)
+      .ThenBy(patient => patient.PatientReference)
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync(cancellationToken);
+
+    var totalPages = (totalCount + pageSize - 1) / pageSize;
+
+    return new PagedResult<Patient>(items, page, pageSize, totalCount, totalPages);
   }
 
   public async Task AddAsync(Patient patient, CancellationToken cancellationToken = default)
