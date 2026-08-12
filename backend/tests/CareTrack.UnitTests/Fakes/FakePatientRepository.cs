@@ -11,6 +11,15 @@ public class FakePatientRepository : IPatientRepository
     var patient = _patients.FirstOrDefault(patient => patient.PatientReference == patientReference);
     return Task.FromResult(patient);
   }
+  public Task<Patient?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default)
+  {
+    var patient = _patients.FirstOrDefault(
+        patient => patient.Id == id);
+
+    return Task.FromResult(patient);
+  }
   public Task AddAsync(Patient patient, CancellationToken cancellationToken = default)
   {
 

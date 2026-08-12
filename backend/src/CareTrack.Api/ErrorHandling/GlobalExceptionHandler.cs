@@ -22,6 +22,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
       ConflictException => (StatusCodes.Status409Conflict, "Conflic"),
       ArgumentException => (StatusCodes.Status400BadRequest, "Bad Request"),
+      NotFoundException => (StatusCodes.Status404NotFound, "Not Found"),
       _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
     };
     httpContext.Response.StatusCode = statusCode;

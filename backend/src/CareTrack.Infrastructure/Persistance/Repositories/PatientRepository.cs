@@ -19,6 +19,15 @@ public class PatientRepository : IPatientRepository
     patient => patient.PatientReference == patientReference, cancellationToken
     );
   }
+  public async Task<Patient?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default)
+  {
+    return await _dbContext.Patients
+        .FirstOrDefaultAsync(
+            patient => patient.Id == id,
+            cancellationToken);
+  }
 
   public async Task AddAsync(Patient patient, CancellationToken cancellationToken = default)
   {
