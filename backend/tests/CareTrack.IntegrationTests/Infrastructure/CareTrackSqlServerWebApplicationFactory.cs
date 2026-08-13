@@ -86,6 +86,9 @@ public sealed class CareTrackSqlServerWebApplicationFactory
             .GetRequiredService<
                 CareTrackDbContext>();
 
+    dbContext.Referrals.RemoveRange(
+        dbContext.Referrals);
+
     dbContext.Patients.RemoveRange(
         dbContext.Patients);
 

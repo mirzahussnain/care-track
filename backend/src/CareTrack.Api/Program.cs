@@ -4,8 +4,10 @@ using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.Application.Patients.GetPatient;
 using CareTrack.Application.Patients.SearchPatients;
 using CareTrack.Application.Patients.UpdatePatient;
+using CareTrack.Application.Referrals.CreateReferral;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.Infrastructure.Persistance.Repositories;
+
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,10 +22,12 @@ builder.Services.AddDbContext<CareTrackDbContext>(options =>
   );
 });
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<CreatePatientService>();
 builder.Services.AddScoped<GetPatientService>();
 builder.Services.AddScoped<SearchPatientsService>();
 builder.Services.AddScoped<UpdatePatientService>();
+builder.Services.AddScoped<CreateReferralService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
