@@ -14,6 +14,8 @@ public class Patient
   public DateTime CreatedAt { get; private set; }
 
   public string FullName => $"{FirstName} {LastName}";
+
+  public byte[] RowVersion { get; private set; }
   public Patient(
   string patientReference,
   string firstName,

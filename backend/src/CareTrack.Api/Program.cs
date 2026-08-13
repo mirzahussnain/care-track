@@ -3,6 +3,7 @@ using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.Application.Patients.GetPatient;
 using CareTrack.Application.Patients.SearchPatients;
+using CareTrack.Application.Patients.UpdatePatient;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.Infrastructure.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<CreatePatientService>();
 builder.Services.AddScoped<GetPatientService>();
 builder.Services.AddScoped<SearchPatientsService>();
+builder.Services.AddScoped<UpdatePatientService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -71,3 +73,6 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
   public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+
+
+public partial class Program;

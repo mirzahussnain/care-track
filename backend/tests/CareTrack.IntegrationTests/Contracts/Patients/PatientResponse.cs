@@ -1,4 +1,4 @@
-namespace CareTrack.Api.Contracts.Patients;
+namespace CareTrack.IntegrationTests.Contracts.Patients;
 
 public sealed record PatientResponse(
 Guid Id,

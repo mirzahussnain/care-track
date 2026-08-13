@@ -1,16 +1,24 @@
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.UnitTests.Fakes;
+using Microsoft.Extensions.Logging.Abstractions;
 namespace CareTrack.UnitTests.Application;
 
 public class CreatePatientServiceTests
 {
+  private static CreatePatientService CreateService(
+    FakePatientRepository repository)
+  {
+    return new CreatePatientService(
+        repository,
+        NullLogger<CreatePatientService>.Instance);
+  }
   [Fact]
   public async Task ExecuteAsync_WithValidCommand_CreatesPatient()
   {
     //Arrange
     var repository = new FakePatientRepository();
-    var service = new CreatePatientService(repository);
+    var service = CreateService(repository);
     var command = new CreatePatientCommand(
         "PAT-002",
          "Jane",
@@ -32,7 +40,7 @@ public class CreatePatientServiceTests
   {
     //Arrange
     var repository = new FakePatientRepository();
-    var service = new CreatePatientService(repository);
+    var service = CreateService(repository);
     var firstCommand = new CreatePatientCommand(
       "PAT-002",
             "Jane",

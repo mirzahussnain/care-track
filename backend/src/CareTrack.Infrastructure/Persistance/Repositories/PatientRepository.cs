@@ -1,8 +1,8 @@
+using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-
 namespace CareTrack.Infrastructure.Persistance.Repositories;
 
 public class PatientRepository : IPatientRepository
@@ -12,6 +12,16 @@ public class PatientRepository : IPatientRepository
   {
     _dbContext = dbContext;
   }
+  public void SetOriginalRowVersion(
+    Patient patient,
+    byte[] rowVersion)
+  {
+    _dbContext
+        .Entry(patient)
+        .Property(p => p.RowVersion)
+        .OriginalValue = rowVersion;
+  }
+
   public async Task<Patient?> GetByReferenceAsync(
   string patientReference, CancellationToken cancellationToken = default
   )
@@ -34,6 +44,8 @@ public class PatientRepository : IPatientRepository
     string? search,
     int page,
     int pageSize,
+    string sortBy,
+    string sortDirection,
     CancellationToken cancellationToken = default)
   {
     IQueryable<Patient> query = _dbContext.Patients.AsNoTracking();
@@ -47,10 +59,18 @@ public class PatientRepository : IPatientRepository
     }
 
     var totalCount = await query.CountAsync(cancellationToken);
+
+    var descending = sortDirection == "desc";
+    query = sortBy switch
+    {
+      "firstname" => descending ? query.OrderByDescending(patient => patient.FirstName) : query.OrderBy(patient => patient.FirstName),
+      "patientreference" => descending ? query.OrderByDescending(patient => patient.PatientReference) : query.OrderBy(patient => patient.PatientReference),
+      "createdat" => descending ? query.OrderByDescending(patient => patient.CreatedAt) : query.OrderBy(patient => patient.CreatedAt),
+      _ => descending ? query.OrderByDescending(patient => patient.LastName) : query.OrderBy(patient => patient.LastName)
+    };
+
+    query = ((IOrderedQueryable<Patient>)query).ThenBy(patient => patient.PatientReference);
     var items = await query
-      .OrderBy(patient => patient.LastName)
-      .ThenBy(patient => patient.FirstName)
-      .ThenBy(patient => patient.PatientReference)
       .Skip((page - 1) * pageSize)
       .Take(pageSize)
       .ToListAsync(cancellationToken);
@@ -64,5 +84,21 @@ public class PatientRepository : IPatientRepository
   {
     await _dbContext.Patients.AddAsync(patient, cancellationToken);
     await _dbContext.SaveChangesAsync(cancellationToken);
+  }
+
+  public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+  {
+    try
+    {
+      await _dbContext.SaveChangesAsync(
+          cancellationToken);
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+      throw new ConcurrencyException(
+          "The patient was modified by another user. Reload the latest data and try again.",
+          ex);
+    }
+
   }
 }

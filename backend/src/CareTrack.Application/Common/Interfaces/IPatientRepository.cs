@@ -4,6 +4,10 @@ namespace CareTrack.Application.Common.Interfaces;
 
 public interface IPatientRepository
 {
+  void SetOriginalRowVersion(
+    Patient patient,
+    byte[] rowVersion);
+
   Task<Patient?> GetByReferenceAsync(
   string patientReference,
   CancellationToken cancellationToken = default
@@ -13,10 +17,13 @@ public interface IPatientRepository
     Guid id,
     CancellationToken cancellationToken = default);
   Task<PagedResult<Patient>> SearchAsync(
-    string? search,
+     string? search,
     int page,
     int pageSize,
+    string sortBy,
+    string sortDirection,
     CancellationToken cancellationToken = default);
 
   Task AddAsync(Patient patient, CancellationToken cancellationToken = default);
+  Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

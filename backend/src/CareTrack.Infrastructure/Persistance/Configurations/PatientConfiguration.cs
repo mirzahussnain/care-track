@@ -16,5 +16,6 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
     builder.Property(patient => patient.LastName).IsRequired().HasMaxLength(100);
     builder.Property(patient => patient.DateOfBirth).IsRequired();
     builder.Property(patient => patient.CreatedAt).IsRequired();
+    builder.Property(patient => patient.RowVersion).IsRowVersion();
   }
 }
