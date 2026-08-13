@@ -43,4 +43,21 @@ public sealed class ReferralRepository
     await _dbContext.SaveChangesAsync(
         cancellationToken);
   }
+
+  public Task<Referral?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default)
+  {
+    return _dbContext.Referrals
+        .SingleOrDefaultAsync(
+            referral => referral.Id == id,
+            cancellationToken);
+  }
+
+  public Task SaveChangesAsync(
+    CancellationToken cancellationToken = default)
+  {
+    return _dbContext.SaveChangesAsync(
+        cancellationToken);
+  }
 }

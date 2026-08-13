@@ -8,7 +8,7 @@ public sealed class FakeReferralRepository
 {
   private readonly List<Referral>
       _referrals = [];
-
+  public int SaveChangesCallCount { get; private set; }
   public Task<Referral?>
       GetByReferenceAsync(
           string referralReference,
@@ -31,6 +31,23 @@ public sealed class FakeReferralRepository
   {
     _referrals.Add(referral);
 
+    return Task.CompletedTask;
+  }
+
+  public Task<Referral?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default)
+  {
+    var referral =
+        _referrals.SingleOrDefault(
+            referral => referral.Id == id);
+
+    return Task.FromResult(referral);
+  }
+  public Task SaveChangesAsync(
+    CancellationToken cancellationToken = default)
+  {
+    SaveChangesCallCount++;
     return Task.CompletedTask;
   }
 

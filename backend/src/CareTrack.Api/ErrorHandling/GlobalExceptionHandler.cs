@@ -36,6 +36,11 @@ public class GlobalExceptionHandler : IExceptionHandler
       ConcurrencyException =>
           (StatusCodes.Status409Conflict, "Concurrency Conflict"),
 
+      InvalidStateTransitionException =>
+          (
+              StatusCodes.Status409Conflict,
+              "Invalid Referral State Transition"
+          ),
       _ =>
           (StatusCodes.Status500InternalServerError,
               "Internal Server Error")

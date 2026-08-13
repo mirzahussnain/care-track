@@ -5,6 +5,22 @@ namespace CareTrack.UnitTests.Domain;
 
 public class ReferralTests
 {
+  private static Referral CreateAwaitingTriageReferral()
+  {
+    var referral =
+        new Referral(
+            $"REF-{Guid.NewGuid():N}"[..12],
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    referral.Submit();
+    referral.StartTriage();
+
+    return referral;
+  }
+
+
   [Fact]
   public void Constructor_WithValidValues_CreatesDraftReferral()
   {
@@ -125,5 +141,172 @@ public class ReferralTests
 
     Assert.Throws<InvalidOperationException>(
         () => referral.Submit());
+  }
+
+  [Fact]
+  public void StartTriage_WhenSubmitted_ChangesStatusToAwaitingTriage()
+  {
+    // Arrange
+    var referral =
+        new Referral(
+            "REF-TRIAGE-001",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    referral.Submit();
+
+    var previousUpdatedAt =
+        referral.UpdatedAt;
+
+    // Act
+    referral.StartTriage();
+
+    // Assert
+    Assert.Equal(
+        ReferralStatus.AwaitingTriage,
+        referral.Status);
+
+    Assert.NotNull(
+        referral.UpdatedAt);
+
+    Assert.True(
+        referral.UpdatedAt >= previousUpdatedAt);
+  }
+
+  [Fact]
+  public void StartTriage_WhenDraft_ThrowsInvalidOperationException()
+  {
+    var referral =
+        new Referral(
+            "REF-TRIAGE-002",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.StartTriage());
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        referral.Status);
+  }
+
+  [Fact]
+  public void Accept_WhenAwaitingTriage_ChangesStatusToAccepted()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.Accept();
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
+
+    Assert.NotNull(
+        referral.UpdatedAt);
+  }
+
+  [Fact]
+  public void Accept_WhenSubmitted_ThrowsInvalidOperationException()
+  {
+    var referral =
+        new Referral(
+            "REF-ACC-001",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    referral.Submit();
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.Accept());
+
+    Assert.Equal(
+        ReferralStatus.Submitted,
+        referral.Status);
+  }
+
+  [Fact]
+  public void Reject_WhenAwaitingTriage_ChangesStatusToRejected()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.Reject();
+
+    Assert.Equal(
+        ReferralStatus.Rejected,
+        referral.Status);
+  }
+
+  [Fact]
+  public void RequestMoreInformation_WhenAwaitingTriage_ChangesStatus()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.RequestMoreInformation();
+
+    Assert.Equal(
+        ReferralStatus.MoreInformationRequired,
+        referral.Status);
+  }
+
+  [Fact]
+  public void Resubmit_WhenMoreInformationRequired_ReturnsToSubmitted()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.RequestMoreInformation();
+
+    var originalSubmittedAt =
+        referral.SubmittedAt;
+
+    referral.Resubmit();
+
+    Assert.Equal(
+        ReferralStatus.Submitted,
+        referral.Status);
+
+    Assert.Equal(
+        originalSubmittedAt,
+        referral.SubmittedAt);
+  }
+
+  [Fact]
+  public void Resubmit_WhenDraft_ThrowsInvalidOperationException()
+  {
+    var referral =
+        new Referral(
+            "REF-RESUB-001",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.Resubmit());
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        referral.Status);
+  }
+
+  [Fact]
+  public void StartTriage_WhenAccepted_ThrowsInvalidOperationException()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.Accept();
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.StartTriage());
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
   }
 }

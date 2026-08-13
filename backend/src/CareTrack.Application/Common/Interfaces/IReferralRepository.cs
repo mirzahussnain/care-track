@@ -11,4 +11,11 @@ public interface IReferralRepository
   Task AddAsync(
       Referral referral,
       CancellationToken cancellationToken = default);
+  Task<Referral?> GetByIdAsync(
+      Guid id,
+      CancellationToken cancellationToken = default);
+
+  Task SaveChangesAsync(
+      CancellationToken cancellationToken = default);
+
 }

@@ -106,10 +106,65 @@ public class Referral
     Status =
         ReferralStatus.Submitted;
 
-    SubmittedAt =
-        DateTime.UtcNow;
+    var now = DateTime.UtcNow;
 
-    UpdatedAt =
-        DateTime.UtcNow;
+    Status = ReferralStatus.Submitted;
+    SubmittedAt = now;
+    UpdatedAt = now;
+  }
+  public void StartTriage()
+  {
+    if (Status != ReferralStatus.Submitted)
+    {
+      throw new InvalidOperationException(
+          "Only submitted referrals can enter triage.");
+    }
+
+    Status = ReferralStatus.AwaitingTriage;
+    UpdatedAt = DateTime.UtcNow;
+  }
+  public void RequestMoreInformation()
+  {
+    if (Status != ReferralStatus.AwaitingTriage)
+    {
+      throw new InvalidOperationException(
+          "More information can only be requested for referrals awaiting triage.");
+    }
+
+    Status = ReferralStatus.MoreInformationRequired;
+    UpdatedAt = DateTime.UtcNow;
+  }
+  public void Resubmit()
+  {
+    if (Status != ReferralStatus.MoreInformationRequired)
+    {
+      throw new InvalidOperationException(
+          "Only referrals requiring more information can be resubmitted.");
+    }
+
+    Status = ReferralStatus.Submitted;
+    UpdatedAt = DateTime.UtcNow;
+  }
+  public void Accept()
+  {
+    if (Status != ReferralStatus.AwaitingTriage)
+    {
+      throw new InvalidOperationException(
+          "Only referrals awaiting triage can be accepted.");
+    }
+
+    Status = ReferralStatus.Accepted;
+    UpdatedAt = DateTime.UtcNow;
+  }
+  public void Reject()
+  {
+    if (Status != ReferralStatus.AwaitingTriage)
+    {
+      throw new InvalidOperationException(
+          "Only referrals awaiting triage can be rejected.");
+    }
+
+    Status = ReferralStatus.Rejected;
+    UpdatedAt = DateTime.UtcNow;
   }
 }
