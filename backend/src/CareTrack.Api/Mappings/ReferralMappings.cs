@@ -15,8 +15,10 @@ public static class ReferralMappings
         referral.Status,
         referral.Priority,
         referral.Reason,
+        referral.TriageNote,
         referral.CreatedAt,
         referral.SubmittedAt,
-        referral.UpdatedAt);
+        referral.UpdatedAt,
+        referral.TriagedAt);
   }
 }

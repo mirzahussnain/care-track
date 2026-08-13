@@ -22,6 +22,10 @@ public class Referral
 
   public DateTime? UpdatedAt { get; private set; }
 
+  public string? TriageNote { get; private set; }
+
+  public DateTime? TriagedAt { get; private set; }
+
   private Referral()
   {
     ReferralReference = null!;
@@ -166,5 +170,44 @@ public class Referral
 
     Status = ReferralStatus.Rejected;
     UpdatedAt = DateTime.UtcNow;
+  }
+
+  public void RecordTriageAssessment(
+    ReferralPriority priority,
+    string note)
+  {
+    if (Status != ReferralStatus.AwaitingTriage)
+    {
+      throw new InvalidOperationException(
+          "Triage assessment can only be recorded for referrals awaiting triage.");
+    }
+
+    if (!Enum.IsDefined(priority))
+    {
+      throw new ArgumentOutOfRangeException(
+          nameof(priority),
+          "Invalid referral priority.");
+    }
+
+    if (string.IsNullOrWhiteSpace(note))
+    {
+      throw new ArgumentException(
+          "Triage note is required.",
+          nameof(note));
+    }
+
+    if (note.Length > 2000)
+    {
+      throw new ArgumentException(
+          "Triage note cannot exceed 2000 characters.",
+          nameof(note));
+    }
+
+    var now = DateTime.UtcNow;
+
+    Priority = priority;
+    TriageNote = note.Trim();
+    TriagedAt = now;
+    UpdatedAt = now;
   }
 }

@@ -10,4 +10,6 @@ public sealed record ReferralResponse(
     string Reason,
     DateTime CreatedAt,
     DateTime? SubmittedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    string? TriageNote,
+    DateTime? TriagedAt);

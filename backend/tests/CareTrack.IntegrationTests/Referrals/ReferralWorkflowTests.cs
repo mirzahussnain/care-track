@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using CareTrack.Domain.Enums;
-using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Contracts.Referrals;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;

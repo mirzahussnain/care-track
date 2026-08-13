@@ -51,6 +51,13 @@ public sealed class ReferralConfiguration
 
 
     builder.HasOne<Patient>().WithMany().HasForeignKey(referral => referral.PatientId).OnDelete(DeleteBehavior.Restrict);
+    builder.Property(
+        referral => referral.TriageNote)
+    .HasMaxLength(2000);
+
+    builder.Property(
+        referral => referral.TriagedAt);
+
   }
 
 

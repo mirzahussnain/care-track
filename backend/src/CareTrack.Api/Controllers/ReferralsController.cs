@@ -2,6 +2,7 @@ using CareTrack.Api.Contracts.Referrals;
 using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.CreateReferral;
+using CareTrack.Application.Referrals.RecordTriageAssessment;
 using CareTrack.Application.Referrals.RejectReferral;
 using CareTrack.Application.Referrals.RequestMoreInformation;
 using CareTrack.Application.Referrals.ResubmitReferral;
@@ -27,6 +28,8 @@ public sealed class ReferralsController
   private readonly RequestMoreInformationService _requestMoreInformationService;
 
   private readonly ResubmitReferralService _resubmitReferralService;
+
+  private readonly RecordTriageAssessmentService _recordTriageAssessmentService;
   public ReferralsController(
       CreateReferralService createReferralService,
       SubmitReferralService submitReferralService,
@@ -34,7 +37,8 @@ public sealed class ReferralsController
       StartTriageService startTriageService,
       RejectReferralService rejectReferralService,
       RequestMoreInformationService requestMoreInformationService,
-      ResubmitReferralService resubmitReferralService)
+      ResubmitReferralService resubmitReferralService,
+      RecordTriageAssessmentService recordTriageAssessmentService)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -43,6 +47,7 @@ public sealed class ReferralsController
     _rejectReferralService = rejectReferralService;
     _requestMoreInformationService = requestMoreInformationService;
     _resubmitReferralService = resubmitReferralService;
+    _recordTriageAssessmentService = recordTriageAssessmentService;
   }
 
   [HttpPost]
@@ -136,5 +141,24 @@ public sealed class ReferralsController
         cancellationToken);
     return Ok(
    referral.ToResponse());
+  }
+
+  [HttpPost("{id:guid}/triage-assessment")]
+  public async Task<ActionResult<ReferralResponse>>
+    RecordTriageAssessment(
+        Guid id,
+        RecordTriageAssessmentRequest request,
+        CancellationToken cancellationToken)
+  {
+    var referral =
+        await _recordTriageAssessmentService.ExecuteAsync(
+            new RecordTriageAssessmentCommand(
+                id,
+                request.Priority,
+                request.Note),
+            cancellationToken);
+
+    return Ok(
+        referral.ToResponse());
   }
 }

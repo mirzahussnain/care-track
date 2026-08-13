@@ -9,6 +9,8 @@ public sealed record ReferralResponse(
     ReferralStatus Status,
     ReferralPriority Priority,
     string Reason,
+    string? TriageNote,
     DateTime CreatedAt,
     DateTime? SubmittedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    DateTime? TriagedAt);

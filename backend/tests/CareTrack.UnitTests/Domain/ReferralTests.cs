@@ -309,4 +309,146 @@ public class ReferralTests
         ReferralStatus.Accepted,
         referral.Status);
   }
+
+  [Fact]
+  public void RecordTriageAssessment_WhenAwaitingTriage_UpdatesPriorityAndTriageData()
+  {
+    // Arrange
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    // Act
+    referral.RecordTriageAssessment(
+        ReferralPriority.Urgent,
+        "Symptoms have worsened.");
+
+    // Assert
+    Assert.Equal(
+        ReferralPriority.Urgent,
+        referral.Priority);
+
+    Assert.Equal(
+        "Symptoms have worsened.",
+        referral.TriageNote);
+
+    Assert.NotNull(
+        referral.TriagedAt);
+
+    Assert.NotNull(
+        referral.UpdatedAt);
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_WhenDraft_ThrowsInvalidOperationException()
+  {
+    var referral =
+        new Referral(
+            "REF-TRIAGE-001",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.RecordTriageAssessment(
+            ReferralPriority.Urgent,
+            "Escalated during triage."));
+
+    Assert.Equal(
+        ReferralPriority.Routine,
+        referral.Priority);
+
+    Assert.Null(
+        referral.TriageNote);
+
+    Assert.Null(
+        referral.TriagedAt);
+  }
+  [Fact]
+  public void RecordTriageAssessment_WithBlankNote_ThrowsArgumentException()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    Assert.Throws<ArgumentException>(
+        () => referral.RecordTriageAssessment(
+            ReferralPriority.Urgent,
+            "   "));
+
+    Assert.Null(
+        referral.TriageNote);
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_WithNoteLongerThan2000Characters_ThrowsArgumentException()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    var longNote =
+        new string('A', 2001);
+
+    Assert.Throws<ArgumentException>(
+        () => referral.RecordTriageAssessment(
+            ReferralPriority.Urgent,
+            longNote));
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_WithInvalidPriority_ThrowsArgumentOutOfRangeException()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    var invalidPriority =
+        (ReferralPriority)999;
+
+    Assert.Throws<ArgumentOutOfRangeException>(
+        () => referral.RecordTriageAssessment(
+            invalidPriority,
+            "Triage note."));
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_TrimsTriageNote()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.RecordTriageAssessment(
+        ReferralPriority.Routine,
+        "  Suitable for routine review.  ");
+
+    Assert.Equal(
+        "Suitable for routine review.",
+        referral.TriageNote);
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_WhenCalledAgain_ReplacesCurrentTriageAssessment()
+  {
+    var referral =
+        CreateAwaitingTriageReferral();
+
+    referral.RecordTriageAssessment(
+        ReferralPriority.Routine,
+        "Initially suitable for routine review.");
+
+    var firstTriagedAt =
+        referral.TriagedAt;
+
+    referral.RecordTriageAssessment(
+        ReferralPriority.Urgent,
+        "Condition deteriorated.");
+
+    Assert.Equal(
+        ReferralPriority.Urgent,
+        referral.Priority);
+
+    Assert.Equal(
+        "Condition deteriorated.",
+        referral.TriageNote);
+
+    Assert.True(
+        referral.TriagedAt >= firstTriagedAt);
+  }
 }
