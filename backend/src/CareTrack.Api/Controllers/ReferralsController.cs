@@ -1,7 +1,9 @@
 using CareTrack.Api.Contracts.Referrals;
 using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
+using CareTrack.Application.Referrals.AssignReferral;
 using CareTrack.Application.Referrals.CreateReferral;
+using CareTrack.Application.Referrals.ReassignReferral;
 using CareTrack.Application.Referrals.RecordTriageAssessment;
 using CareTrack.Application.Referrals.RejectReferral;
 using CareTrack.Application.Referrals.RequestMoreInformation;
@@ -30,6 +32,10 @@ public sealed class ReferralsController
   private readonly ResubmitReferralService _resubmitReferralService;
 
   private readonly RecordTriageAssessmentService _recordTriageAssessmentService;
+
+  private readonly AssignReferralService _assignReferralService;
+
+  private readonly ReassignReferralService _reassignReferralService;
   public ReferralsController(
       CreateReferralService createReferralService,
       SubmitReferralService submitReferralService,
@@ -38,7 +44,9 @@ public sealed class ReferralsController
       RejectReferralService rejectReferralService,
       RequestMoreInformationService requestMoreInformationService,
       ResubmitReferralService resubmitReferralService,
-      RecordTriageAssessmentService recordTriageAssessmentService)
+      RecordTriageAssessmentService recordTriageAssessmentService,
+      AssignReferralService assignReferralService,
+      ReassignReferralService reassignReferralSerivce)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -48,6 +56,8 @@ public sealed class ReferralsController
     _requestMoreInformationService = requestMoreInformationService;
     _resubmitReferralService = resubmitReferralService;
     _recordTriageAssessmentService = recordTriageAssessmentService;
+    _assignReferralService = assignReferralService;
+    _reassignReferralService = reassignReferralSerivce;
   }
 
   [HttpPost]
@@ -156,6 +166,42 @@ public sealed class ReferralsController
                 id,
                 request.Priority,
                 request.Note),
+            cancellationToken);
+
+    return Ok(
+        referral.ToResponse());
+  }
+
+  [HttpPost("{id:guid}/assign")]
+  public async Task<ActionResult<ReferralResponse>>
+    AssignReferral(
+        Guid id,
+        AssignReferralRequest request,
+        CancellationToken cancellationToken)
+  {
+    var referral =
+        await _assignReferralService.ExecuteAsync(
+            new AssignReferralCommand(
+                id,
+                request.AssignedTo),
+            cancellationToken);
+
+    return Ok(
+        referral.ToResponse());
+  }
+
+  [HttpPost("{id:guid}/reassign")]
+  public async Task<ActionResult<ReferralResponse>>
+    ReassignReferral(
+        Guid id,
+        AssignReferralRequest request,
+        CancellationToken cancellationToken)
+  {
+    var referral =
+        await _reassignReferralService.ExecuteAsync(
+            new ReassignReferralCommand(
+                id,
+                request.AssignedTo),
             cancellationToken);
 
     return Ok(

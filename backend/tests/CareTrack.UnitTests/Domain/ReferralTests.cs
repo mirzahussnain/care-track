@@ -1,24 +1,11 @@
 using CareTrack.Domain.Entities;
 using CareTrack.Domain.Enums;
+using CareTrack.UnitTests.Helpers;
 namespace CareTrack.UnitTests.Domain;
 
 
 public class ReferralTests
 {
-  private static Referral CreateAwaitingTriageReferral()
-  {
-    var referral =
-        new Referral(
-            $"REF-{Guid.NewGuid():N}"[..12],
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
-
-    referral.Submit();
-    referral.StartTriage();
-
-    return referral;
-  }
 
 
   [Fact]
@@ -196,7 +183,7 @@ public class ReferralTests
   public void Accept_WhenAwaitingTriage_ChangesStatusToAccepted()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.Accept();
 
@@ -232,7 +219,7 @@ public class ReferralTests
   public void Reject_WhenAwaitingTriage_ChangesStatusToRejected()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.Reject();
 
@@ -245,7 +232,7 @@ public class ReferralTests
   public void RequestMoreInformation_WhenAwaitingTriage_ChangesStatus()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.RequestMoreInformation();
 
@@ -258,7 +245,7 @@ public class ReferralTests
   public void Resubmit_WhenMoreInformationRequired_ReturnsToSubmitted()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.RequestMoreInformation();
 
@@ -298,7 +285,7 @@ public class ReferralTests
   public void StartTriage_WhenAccepted_ThrowsInvalidOperationException()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.Accept();
 
@@ -315,7 +302,7 @@ public class ReferralTests
   {
     // Arrange
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     // Act
     referral.RecordTriageAssessment(
@@ -367,7 +354,7 @@ public class ReferralTests
   public void RecordTriageAssessment_WithBlankNote_ThrowsArgumentException()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     Assert.Throws<ArgumentException>(
         () => referral.RecordTriageAssessment(
@@ -382,7 +369,7 @@ public class ReferralTests
   public void RecordTriageAssessment_WithNoteLongerThan2000Characters_ThrowsArgumentException()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     var longNote =
         new string('A', 2001);
@@ -397,7 +384,7 @@ public class ReferralTests
   public void RecordTriageAssessment_WithInvalidPriority_ThrowsArgumentOutOfRangeException()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     var invalidPriority =
         (ReferralPriority)999;
@@ -412,7 +399,7 @@ public class ReferralTests
   public void RecordTriageAssessment_TrimsTriageNote()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.RecordTriageAssessment(
         ReferralPriority.Routine,
@@ -427,7 +414,7 @@ public class ReferralTests
   public void RecordTriageAssessment_WhenCalledAgain_ReplacesCurrentTriageAssessment()
   {
     var referral =
-        CreateAwaitingTriageReferral();
+        ReferralTestHelpers.CreateAwaitingTriageReferral();
 
     referral.RecordTriageAssessment(
         ReferralPriority.Routine,
@@ -450,5 +437,153 @@ public class ReferralTests
 
     Assert.True(
         referral.TriagedAt >= firstTriagedAt);
+  }
+
+  [Fact]
+  public void Assign_WhenAccepted_AssignsReferral()
+  {
+    // Arrange
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    // Act
+    referral.Assign(
+        "Cardiology Team A");
+
+    // Assert
+    Assert.Equal(
+        ReferralStatus.Assigned,
+        referral.Status);
+
+    Assert.Equal(
+        "Cardiology Team A",
+        referral.AssignedTo);
+
+    Assert.NotNull(
+        referral.AssignedAt);
+
+    Assert.NotNull(
+        referral.UpdatedAt);
+  }
+
+  [Fact]
+  public void Assign_TrimsAssignmentTarget()
+  {
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    referral.Assign(
+        "  Cardiology Team A  ");
+
+    Assert.Equal(
+        "Cardiology Team A",
+        referral.AssignedTo);
+  }
+
+  [Fact]
+  public void Assign_WhenDraft_ThrowsInvalidOperationException()
+  {
+    var referral =
+        new Referral(
+            "REF-ASSIGN-001",
+            Guid.NewGuid(),
+            ReferralPriority.Routine,
+            "Reason");
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.Assign(
+            "Cardiology Team A"));
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        referral.Status);
+
+    Assert.Null(
+        referral.AssignedTo);
+
+    Assert.Null(
+        referral.AssignedAt);
+  }
+
+  [Fact]
+  public void Assign_WithBlankTarget_ThrowsArgumentException()
+  {
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    Assert.Throws<ArgumentException>(
+        () => referral.Assign("   "));
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
+
+    Assert.Null(
+        referral.AssignedTo);
+  }
+
+  [Fact]
+  public void Assign_WithTargetLongerThan200Characters_ThrowsArgumentException()
+  {
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    var target =
+        new string('A', 201);
+
+    Assert.Throws<ArgumentException>(
+        () => referral.Assign(target));
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
+  }
+
+  [Fact]
+  public void Reassign_WhenAssigned_UpdatesAssignment()
+  {
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    referral.Assign(
+        "Cardiology Team A");
+
+    var firstAssignedAt =
+        referral.AssignedAt;
+
+    referral.Reassign(
+        "Cardiology Team B");
+
+    Assert.Equal(
+        ReferralStatus.Assigned,
+        referral.Status);
+
+    Assert.Equal(
+        "Cardiology Team B",
+        referral.AssignedTo);
+
+    Assert.NotNull(
+        referral.AssignedAt);
+
+    Assert.True(
+        referral.AssignedAt >= firstAssignedAt);
+  }
+
+  [Fact]
+  public void Reassign_WhenAccepted_ThrowsInvalidOperationException()
+  {
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    Assert.Throws<InvalidOperationException>(
+        () => referral.Reassign(
+            "Cardiology Team B"));
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
+
+    Assert.Null(
+        referral.AssignedTo);
   }
 }

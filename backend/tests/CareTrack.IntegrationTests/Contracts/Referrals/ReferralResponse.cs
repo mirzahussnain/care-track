@@ -12,4 +12,6 @@ public sealed record ReferralResponse(
     DateTime? SubmittedAt,
     DateTime? UpdatedAt,
     string? TriageNote,
-    DateTime? TriagedAt);
+    DateTime? TriagedAt,
+    string? AssignedTo,
+    DateTime? AssignedAt);

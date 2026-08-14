@@ -45,6 +45,54 @@ public class ReferralApiTestHelper
 
     return referral;
   }
+  public static async Task<ReferralResponse> CreateAcceptedReferralAsync(HttpClient client)
+  {
+    var referral = await CreateReferralAsync(client);
+
+    //Draft -> Submitted
+    var submitResponse = await client.PostAsync($"/api/referrals/{referral.Id}/submit", null);
+
+    Assert.Equal(
+      HttpStatusCode.OK,
+      submitResponse.StatusCode);
+
+    // Submitted -> AwaitingTriage
+
+    var startTriageResponse =
+      await client.PostAsync(
+          $"/api/referrals/{referral.Id}/start-triage",
+          null);
+
+    Assert.Equal(
+      HttpStatusCode.OK,
+      startTriageResponse.StatusCode);
+
+    // AwaitingTriage -> Accepted
+    var acceptResponse =
+        await client.PostAsync(
+            $"/api/referrals/{referral.Id}/accept",
+            null);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        acceptResponse.StatusCode);
+
+
+    var acceptedReferral =
+        await acceptResponse.Content
+            .ReadFromJsonAsync<ReferralResponse>();
+
+    Assert.NotNull(
+        acceptedReferral);
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        acceptedReferral.Status);
+
+    return acceptedReferral;
+
+
+  }
 
 }
 

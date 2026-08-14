@@ -26,6 +26,9 @@ public class Referral
 
   public DateTime? TriagedAt { get; private set; }
 
+  public string? AssignedTo { get; private set; }
+
+  public DateTime? AssignedAt { get; private set; }
   private Referral()
   {
     ReferralReference = null!;
@@ -98,6 +101,26 @@ public class Referral
 
     CreatedAt =
         DateTime.UtcNow;
+  }
+
+  private static string ValidateAssignmentTarget(
+    string assignedTo)
+  {
+    if (string.IsNullOrWhiteSpace(assignedTo))
+    {
+      throw new ArgumentException(
+          "Assignment target is required.",
+          nameof(assignedTo));
+    }
+
+    if (assignedTo.Length > 200)
+    {
+      throw new ArgumentException(
+          "Assignment target cannot exceed 200 characters.",
+          nameof(assignedTo));
+    }
+
+    return assignedTo.Trim();
   }
   public void Submit()
   {
@@ -208,6 +231,39 @@ public class Referral
     Priority = priority;
     TriageNote = note.Trim();
     TriagedAt = now;
+    UpdatedAt = now;
+  }
+
+  public void Assign(string assignedTo)
+  {
+    if (Status != ReferralStatus.Accepted)
+    {
+      throw new InvalidOperationException(
+          "Only accepted referrals can be assigned.");
+    }
+    var normalizedAssignedTo = ValidateAssignmentTarget(assignedTo);
+
+    var now = DateTime.UtcNow;
+
+    AssignedTo = normalizedAssignedTo.Trim();
+    AssignedAt = now;
+    Status = ReferralStatus.Assigned;
+    UpdatedAt = now;
+  }
+
+  public void Reassign(string assignedTo)
+  {
+    if (Status != ReferralStatus.Assigned)
+    {
+      throw new InvalidOperationException(
+          "Only assigned referrals can be reassigned.");
+    }
+    var normalizedAssignedTo = ValidateAssignmentTarget(assignedTo);
+
+    var now = DateTime.UtcNow;
+
+    AssignedTo = normalizedAssignedTo.Trim();
+    AssignedAt = now;
     UpdatedAt = now;
   }
 }
