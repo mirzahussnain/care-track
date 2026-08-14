@@ -15,7 +15,8 @@ public interface IReferralRepository
       Guid id,
       CancellationToken cancellationToken = default);
 
+  Task<IReadOnlyList<ReferralHistoryEntry>> GetHistoryAsync(Guid referralId, CancellationToken cancellationToken = default);
   Task SaveChangesAsync(
-      CancellationToken cancellationToken = default);
+    CancellationToken cancellationToken = default);
 
 }

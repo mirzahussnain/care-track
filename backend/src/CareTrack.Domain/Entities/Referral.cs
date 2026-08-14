@@ -29,6 +29,10 @@ public class Referral
   public string? AssignedTo { get; private set; }
 
   public DateTime? AssignedAt { get; private set; }
+
+  private readonly List<ReferralHistoryEntry> _history = [];
+
+  public IReadOnlyCollection<ReferralHistoryEntry> History => _history;
   private Referral()
   {
     ReferralReference = null!;
@@ -82,25 +86,49 @@ public class Referral
           nameof(referralReference));
     }
 
+    var now = DateTime.UtcNow;
+
     Id = Guid.NewGuid();
 
-    ReferralReference =
-        referralReference.Trim();
+    ReferralReference = referralReference.Trim();
 
-    PatientId =
-        patientId;
+    PatientId = patientId;
 
-    Priority =
-        priority;
+    Priority = priority;
 
-    Reason =
-        reason.Trim();
+    Reason = reason.Trim();
 
-    Status =
-        ReferralStatus.Draft;
+    Status = ReferralStatus.Draft;
 
-    CreatedAt =
-        DateTime.UtcNow;
+    CreatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.Created,
+    null,
+    ReferralStatus.Draft,
+    now,
+    priority: Priority
+    );
+  }
+
+  private void AddHistory(
+    ReferralHistoryEventType eventType,
+    ReferralStatus? fromStatus,
+    ReferralStatus? toStatus,
+    DateTime occurredAt,
+    ReferralPriority? priority = null,
+    string? triageNote = null,
+    string? assignedTo = null)
+  {
+    _history.Add(new ReferralHistoryEntry(
+            Id,
+            eventType,
+            fromStatus,
+            toStatus,
+            occurredAt,
+            priority,
+            triageNote,
+            assignedTo));
   }
 
   private static string ValidateAssignmentTarget(
@@ -130,14 +158,24 @@ public class Referral
           "Only draft referrals can be submitted.");
     }
 
-    Status =
-        ReferralStatus.Submitted;
+    var fromStatus = Status;
 
     var now = DateTime.UtcNow;
+
 
     Status = ReferralStatus.Submitted;
     SubmittedAt = now;
     UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.Submitted,
+    fromStatus,
+    Status,
+    now
+
+
+
+    );
   }
   public void StartTriage()
   {
@@ -147,8 +185,18 @@ public class Referral
           "Only submitted referrals can enter triage.");
     }
 
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
     Status = ReferralStatus.AwaitingTriage;
-    UpdatedAt = DateTime.UtcNow;
+    UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.TriageStarted,
+    fromStatus,
+    Status,
+    now
+    );
   }
   public void RequestMoreInformation()
   {
@@ -157,9 +205,18 @@ public class Referral
       throw new InvalidOperationException(
           "More information can only be requested for referrals awaiting triage.");
     }
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
 
     Status = ReferralStatus.MoreInformationRequired;
-    UpdatedAt = DateTime.UtcNow;
+    UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.MoreInformationRequested,
+    fromStatus,
+    Status,
+    now
+    );
   }
   public void Resubmit()
   {
@@ -168,9 +225,17 @@ public class Referral
       throw new InvalidOperationException(
           "Only referrals requiring more information can be resubmitted.");
     }
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
 
     Status = ReferralStatus.Submitted;
-    UpdatedAt = DateTime.UtcNow;
+    UpdatedAt = now;
+
+    AddHistory(
+        ReferralHistoryEventType.Resubmitted,
+        fromStatus,
+        Status,
+        now);
   }
   public void Accept()
   {
@@ -180,8 +245,18 @@ public class Referral
           "Only referrals awaiting triage can be accepted.");
     }
 
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
     Status = ReferralStatus.Accepted;
-    UpdatedAt = DateTime.UtcNow;
+    UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.Accepted,
+    fromStatus,
+    Status,
+    now);
+
   }
   public void Reject()
   {
@@ -191,8 +266,17 @@ public class Referral
           "Only referrals awaiting triage can be rejected.");
     }
 
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
     Status = ReferralStatus.Rejected;
-    UpdatedAt = DateTime.UtcNow;
+    UpdatedAt = now;
+
+    AddHistory(
+ReferralHistoryEventType.Rejected,
+fromStatus,
+Status,
+now);
   }
 
   public void RecordTriageAssessment(
@@ -232,6 +316,14 @@ public class Referral
     TriageNote = note.Trim();
     TriagedAt = now;
     UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.TriageAssessmentRecorded,
+    Status,
+    Status,
+    now,
+    priority: Priority,
+    triageNote: TriageNote);
   }
 
   public void Assign(string assignedTo)
@@ -244,11 +336,19 @@ public class Referral
     var normalizedAssignedTo = ValidateAssignmentTarget(assignedTo);
 
     var now = DateTime.UtcNow;
+    var fromStatus = Status;
 
     AssignedTo = normalizedAssignedTo.Trim();
     AssignedAt = now;
     Status = ReferralStatus.Assigned;
     UpdatedAt = now;
+
+    AddHistory(
+    ReferralHistoryEventType.Assigned,
+    fromStatus,
+    Status,
+    now,
+    assignedTo: AssignedTo);
   }
 
   public void Reassign(string assignedTo)
@@ -265,5 +365,12 @@ public class Referral
     AssignedTo = normalizedAssignedTo.Trim();
     AssignedAt = now;
     UpdatedAt = now;
+
+    AddHistory(
+       ReferralHistoryEventType.Reassigned,
+       Status,
+       Status,
+       now,
+       assignedTo: AssignedTo);
   }
 }

@@ -55,7 +55,18 @@ public sealed class ReferralConfiguration
     builder.Property(referral => referral.TriagedAt);
     builder.Property(referral => referral.AssignedTo).HasMaxLength(200);
     builder.Property(referral => referral.AssignedAt);
+    builder.HasMany(
+        referral => referral.History)
+    .WithOne()
+    .HasForeignKey(
+        history => history.ReferralId)
+    .OnDelete(
+        DeleteBehavior.Cascade);
 
+    builder.Navigation(
+            referral => referral.History)
+        .UsePropertyAccessMode(
+            PropertyAccessMode.Field);
   }
 
 

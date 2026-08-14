@@ -15,6 +15,17 @@ public sealed class ReferralRepository
   {
     _dbContext = dbContext;
   }
+  public Task SaveChangesAsync(
+    CancellationToken cancellationToken = default)
+  {
+    foreach (var entry in _dbContext.ChangeTracker.Entries())
+    {
+      Console.WriteLine(
+          $"{entry.Entity.GetType().Name} - {entry.State}");
+    }
+    return _dbContext.SaveChangesAsync(
+        cancellationToken);
+  }
 
   public Task<Referral?>
       GetByReferenceAsync(
@@ -54,10 +65,23 @@ public sealed class ReferralRepository
             cancellationToken);
   }
 
-  public Task SaveChangesAsync(
-    CancellationToken cancellationToken = default)
+  public async Task<IReadOnlyList<ReferralHistoryEntry>>
+    GetHistoryAsync(
+        Guid referralId,
+        CancellationToken cancellationToken = default)
   {
-    return _dbContext.SaveChangesAsync(
-        cancellationToken);
+    return await _dbContext
+        .ReferralHistoryEntries
+        .AsNoTracking()
+        .Where(history =>
+            history.ReferralId == referralId)
+        .OrderBy(history =>
+            history.OccurredAt)
+        .ThenBy(history =>
+            history.Id)
+        .ToListAsync(
+            cancellationToken);
   }
+
+
 }

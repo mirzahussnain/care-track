@@ -94,12 +94,7 @@ public class ReferralTests
   [Fact]
   public void Submit_WhenDraft_ChangesStatusToSubmitted()
   {
-    var referral =
-        new Referral(
-            "REF-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     referral.Submit();
 
@@ -117,12 +112,7 @@ public class ReferralTests
   [Fact]
   public void Submit_WhenAlreadySubmitted_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     referral.Submit();
 
@@ -134,13 +124,7 @@ public class ReferralTests
   public void StartTriage_WhenSubmitted_ChangesStatusToAwaitingTriage()
   {
     // Arrange
-    var referral =
-        new Referral(
-            "REF-TRIAGE-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
-
+    var referral = ReferralTestHelpers.CreateNewReferral();
     referral.Submit();
 
     var previousUpdatedAt =
@@ -164,13 +148,7 @@ public class ReferralTests
   [Fact]
   public void StartTriage_WhenDraft_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-TRIAGE-002",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
-
+    var referral = ReferralTestHelpers.CreateNewReferral();
     Assert.Throws<InvalidOperationException>(
         () => referral.StartTriage());
 
@@ -198,12 +176,7 @@ public class ReferralTests
   [Fact]
   public void Accept_WhenSubmitted_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-ACC-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     referral.Submit();
 
@@ -266,12 +239,7 @@ public class ReferralTests
   [Fact]
   public void Resubmit_WhenDraft_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-RESUB-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     Assert.Throws<InvalidOperationException>(
         () => referral.Resubmit());
@@ -328,12 +296,7 @@ public class ReferralTests
   [Fact]
   public void RecordTriageAssessment_WhenDraft_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-TRIAGE-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     Assert.Throws<InvalidOperationException>(
         () => referral.RecordTriageAssessment(
@@ -483,12 +446,7 @@ public class ReferralTests
   [Fact]
   public void Assign_WhenDraft_ThrowsInvalidOperationException()
   {
-    var referral =
-        new Referral(
-            "REF-ASSIGN-001",
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = ReferralTestHelpers.CreateNewReferral();
 
     Assert.Throws<InvalidOperationException>(
         () => referral.Assign(
@@ -585,5 +543,248 @@ public class ReferralTests
 
     Assert.Null(
         referral.AssignedTo);
+  }
+
+  [Fact]
+  public void Constructor_CreatesCreatedHistoryEntry()
+  {
+    // Arrange / Act
+    var referral = ReferralTestHelpers.CreateNewReferral();
+    // Assert
+    var history =
+        Assert.Single(
+            referral.History);
+
+    Assert.Equal(
+        ReferralHistoryEventType.Created,
+        history.EventType);
+
+    Assert.Null(
+        history.FromStatus);
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        history.ToStatus);
+
+    Assert.Equal(
+        ReferralPriority.Routine,
+        history.Priority);
+
+    Assert.Equal(
+        referral.CreatedAt,
+        history.OccurredAt);
+  }
+
+  [Fact]
+  public void Submit_AddsSubmittedHistoryEntry()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateNewReferral();
+
+    // Act
+    referral.Submit();
+
+    // Assert
+    var history =
+        referral.History
+            .Last();
+
+    Assert.Equal(
+        ReferralHistoryEventType.Submitted,
+        history.EventType);
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        history.FromStatus);
+
+    Assert.Equal(
+        ReferralStatus.Submitted,
+        history.ToStatus);
+
+    Assert.Equal(
+        referral.UpdatedAt,
+        history.OccurredAt);
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_AddsHistoryWithAssessmentData()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateNewReferral();
+
+    referral.Submit();
+    referral.StartTriage();
+
+    // Act
+    referral.RecordTriageAssessment(
+        ReferralPriority.Urgent,
+        "Symptoms have worsened.");
+
+    // Assert
+    var history =
+        referral.History.Last();
+
+    Assert.Equal(
+        ReferralHistoryEventType.TriageAssessmentRecorded,
+        history.EventType);
+
+    Assert.Equal(
+        ReferralStatus.AwaitingTriage,
+        history.FromStatus);
+
+    Assert.Equal(
+        ReferralStatus.AwaitingTriage,
+        history.ToStatus);
+
+    Assert.Equal(
+        ReferralPriority.Urgent,
+        history.Priority);
+
+    Assert.Equal(
+        "Symptoms have worsened.",
+        history.TriageNote);
+
+    Assert.Equal(
+        referral.TriagedAt,
+        history.OccurredAt);
+  }
+
+  [Fact]
+  public void RecordTriageAssessment_WhenReassessed_PreservesBothHistoryEntries()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateNewReferral();
+
+    referral.Submit();
+    referral.StartTriage();
+
+    // Act
+    referral.RecordTriageAssessment(
+        ReferralPriority.Routine,
+        "Routine review.");
+
+    referral.RecordTriageAssessment(
+        ReferralPriority.Urgent,
+        "Condition worsened.");
+
+    // Assert
+    var assessments =
+        referral.History
+            .Where(
+                history =>
+                    history.EventType ==
+                    ReferralHistoryEventType
+                        .TriageAssessmentRecorded)
+            .ToList();
+
+    Assert.Equal(
+        2,
+        assessments.Count);
+
+    Assert.Equal(
+        ReferralPriority.Routine,
+        assessments[0].Priority);
+
+    Assert.Equal(
+        "Routine review.",
+        assessments[0].TriageNote);
+
+    Assert.Equal(
+        ReferralPriority.Urgent,
+        assessments[1].Priority);
+
+    Assert.Equal(
+        "Condition worsened.",
+        assessments[1].TriageNote);
+  }
+
+  [Fact]
+  public void Assign_AddsAssignmentHistory()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateAcceptedReferral();
+
+    // Act
+    referral.Assign(
+        "Cardiology Team A");
+
+    // Assert
+    var history =
+        referral.History.Last();
+
+    Assert.Equal(
+        ReferralHistoryEventType.Assigned,
+        history.EventType);
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        history.FromStatus);
+
+    Assert.Equal(
+        ReferralStatus.Assigned,
+        history.ToStatus);
+
+    Assert.Equal(
+        "Cardiology Team A",
+        history.AssignedTo);
+  }
+
+  [Fact]
+  public void Reassign_PreservesPreviousAssignmentHistory()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateAcceptedReferral();
+
+    referral.Assign(
+        "Cardiology Team A");
+
+    // Act
+    referral.Reassign(
+        "Cardiology Team B");
+
+    // Assert
+    var assignmentHistory =
+        referral.History
+            .Where(
+                history =>
+                    history.EventType ==
+                        ReferralHistoryEventType.Assigned
+                    ||
+                    history.EventType ==
+                        ReferralHistoryEventType.Reassigned)
+            .ToList();
+
+    Assert.Equal(
+        2,
+        assignmentHistory.Count);
+
+    Assert.Equal(
+        "Cardiology Team A",
+        assignmentHistory[0].AssignedTo);
+
+    Assert.Equal(
+        "Cardiology Team B",
+        assignmentHistory[1].AssignedTo);
+  }
+
+  [Fact]
+  public void Assign_WhenReferralIsDraft_DoesNotAddHistory()
+  {
+    // Arrange
+    var referral = ReferralTestHelpers.CreateNewReferral();
+
+    var historyCountBefore =
+        referral.History.Count;
+
+    // Act
+    Assert.Throws<InvalidOperationException>(
+        () =>
+            referral.Assign(
+                "Cardiology Team A"));
+
+    // Assert
+    Assert.Equal(
+        historyCountBefore,
+        referral.History.Count);
   }
 }

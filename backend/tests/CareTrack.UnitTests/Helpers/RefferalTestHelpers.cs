@@ -5,7 +5,7 @@ namespace CareTrack.UnitTests.Helpers;
 
 public class ReferralTestHelpers
 {
-  public static Referral CreateAcceptedReferral()
+  public static Referral CreateNewReferral()
   {
     var referral =
         new Referral(
@@ -13,6 +13,11 @@ public class ReferralTestHelpers
             Guid.NewGuid(),
             ReferralPriority.Routine,
             "Referral reason.");
+    return referral;
+  }
+  public static Referral CreateAcceptedReferral()
+  {
+    var referral = CreateNewReferral();
 
     referral.Submit();
     referral.StartTriage();
@@ -23,12 +28,7 @@ public class ReferralTestHelpers
 
   public static Referral CreateAwaitingTriageReferral()
   {
-    var referral =
-        new Referral(
-            $"REF-{Guid.NewGuid():N}"[..12],
-            Guid.NewGuid(),
-            ReferralPriority.Routine,
-            "Reason");
+    var referral = CreateNewReferral();
 
     referral.Submit();
     referral.StartTriage();

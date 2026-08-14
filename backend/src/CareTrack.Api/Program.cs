@@ -7,6 +7,7 @@ using CareTrack.Application.Patients.UpdatePatient;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
 using CareTrack.Application.Referrals.CreateReferral;
+using CareTrack.Application.Referrals.GetReferralHistory;
 using CareTrack.Application.Referrals.ReassignReferral;
 using CareTrack.Application.Referrals.RecordTriageAssessment;
 using CareTrack.Application.Referrals.RejectReferral;
@@ -46,7 +47,7 @@ builder.Services.AddScoped<ResubmitReferralService>();
 builder.Services.AddScoped<RecordTriageAssessmentService>();
 builder.Services.AddScoped<AssignReferralService>();
 builder.Services.AddScoped<ReassignReferralService>();
-
+builder.Services.AddScoped<GetReferralHistoryService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

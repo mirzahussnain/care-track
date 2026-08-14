@@ -44,6 +44,28 @@ public sealed class FakeReferralRepository
 
     return Task.FromResult(referral);
   }
+
+  public Task<IReadOnlyList<ReferralHistoryEntry>>
+    GetHistoryAsync(
+        Guid referralId,
+        CancellationToken cancellationToken = default)
+  {
+    var referral =
+        _referrals.FirstOrDefault(
+            referral =>
+                referral.Id == referralId);
+
+    IReadOnlyList<ReferralHistoryEntry> result =
+        referral?.History
+            .OrderBy(
+                history =>
+                    history.OccurredAt)
+            .ToList()
+        ?? [];
+
+    return Task.FromResult(
+        result);
+  }
   public Task SaveChangesAsync(
     CancellationToken cancellationToken = default)
   {

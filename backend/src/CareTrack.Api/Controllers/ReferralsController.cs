@@ -3,6 +3,7 @@ using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
 using CareTrack.Application.Referrals.CreateReferral;
+using CareTrack.Application.Referrals.GetReferralHistory;
 using CareTrack.Application.Referrals.ReassignReferral;
 using CareTrack.Application.Referrals.RecordTriageAssessment;
 using CareTrack.Application.Referrals.RejectReferral;
@@ -36,6 +37,8 @@ public sealed class ReferralsController
   private readonly AssignReferralService _assignReferralService;
 
   private readonly ReassignReferralService _reassignReferralService;
+
+  private readonly GetReferralHistoryService _getReferralHistoryService;
   public ReferralsController(
       CreateReferralService createReferralService,
       SubmitReferralService submitReferralService,
@@ -46,7 +49,8 @@ public sealed class ReferralsController
       ResubmitReferralService resubmitReferralService,
       RecordTriageAssessmentService recordTriageAssessmentService,
       AssignReferralService assignReferralService,
-      ReassignReferralService reassignReferralSerivce)
+      ReassignReferralService reassignReferralSerivce,
+      GetReferralHistoryService getReferralHistoryService)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -58,6 +62,7 @@ public sealed class ReferralsController
     _recordTriageAssessmentService = recordTriageAssessmentService;
     _assignReferralService = assignReferralService;
     _reassignReferralService = reassignReferralSerivce;
+    _getReferralHistoryService = getReferralHistoryService;
   }
 
   [HttpPost]
@@ -206,5 +211,25 @@ public sealed class ReferralsController
 
     return Ok(
         referral.ToResponse());
+  }
+
+  [HttpGet("{id:guid}/history")]
+  public async Task<
+    ActionResult<IReadOnlyList<ReferralHistoryResponse>>>
+    GetHistory(
+        Guid id,
+        CancellationToken cancellationToken)
+  {
+    var history = await _getReferralHistoryService
+            .ExecuteAsync(
+                new GetReferralHistoryCommand(id),
+                cancellationToken);
+
+    return Ok(
+        history
+            .Select(
+                entry =>
+                    entry.ToResponse())
+            .ToList());
   }
 }
