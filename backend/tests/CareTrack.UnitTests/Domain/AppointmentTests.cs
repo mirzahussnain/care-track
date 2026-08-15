@@ -332,4 +332,376 @@ public class AppointmentTests
         action);
   }
 
+  [Fact]
+  public void CheckIn_WhenScheduled_SetsCheckedInStatusAndTimestamp()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    // Act
+    appointment.CheckIn();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.CheckedIn,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.CheckedInAt);
+
+    Assert.Equal(
+        appointment.CheckedInAt,
+        appointment.UpdatedAt);
+  }
+
+  [Fact]
+  public void CheckIn_WhenAlreadyCheckedIn_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+
+    // Act
+    var action =
+        () => appointment.CheckIn();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
+  [Fact]
+  public void Start_WhenCheckedIn_SetsInProgressStatusAndTimestamp()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+
+    // Act
+    appointment.Start();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.InProgress,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.StartedAt);
+
+    Assert.Equal(
+        appointment.StartedAt,
+        appointment.UpdatedAt);
+  }
+
+  [Fact]
+  public void Start_WhenScheduled_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    // Act
+    var action =
+        () => appointment.Start();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
+  [Fact]
+  public void Complete_WhenInProgress_SetsCompletedStatusAndTimestamp()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+    appointment.Start();
+
+    // Act
+    appointment.Complete();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.Completed,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.CompletedAt);
+
+    Assert.Equal(
+        appointment.CompletedAt,
+        appointment.UpdatedAt);
+  }
+
+  [Fact]
+  public void Complete_WhenScheduled_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    // Act
+    var action =
+        () => appointment.Complete();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
+  [Fact]
+  public void Cancel_WhenScheduled_SetsCancelledStatusAndTimestamp()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    // Act
+    appointment.Cancel();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.Cancelled,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.CancelledAt);
+
+    Assert.Equal(
+        appointment.CancelledAt,
+        appointment.UpdatedAt);
+  }
+
+  [Fact]
+  public void Cancel_WhenCheckedIn_SetsCancelledStatus()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+
+    // Act
+    appointment.Cancel();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.Cancelled,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.CancelledAt);
+  }
+
+  [Fact]
+  public void Cancel_WhenInProgress_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+    appointment.Start();
+
+    // Act
+    var action =
+        () => appointment.Cancel();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
+  [Fact]
+  public void MarkDidNotAttend_WhenScheduled_SetsDidNotAttendStatusAndTimestamp()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    // Act
+    appointment.MarkDidNotAttend();
+
+    // Assert
+    Assert.Equal(
+        AppointmentStatus.DidNotAttend,
+        appointment.Status);
+
+    Assert.NotNull(
+        appointment.DidNotAttendAt);
+
+    Assert.Equal(
+        appointment.DidNotAttendAt,
+        appointment.UpdatedAt);
+  }
+
+  [Fact]
+  public void MarkDidNotAttend_WhenCheckedIn_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+
+    // Act
+    var action =
+        () => appointment.MarkDidNotAttend();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
+  [Fact]
+  public void CheckIn_WhenCancelled_ThrowsInvalidStateTransitionException()
+  {
+    // Arrange
+    var start =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.Cancel();
+
+    // Act
+    var action =
+        () => appointment.CheckIn();
+
+    // Assert
+    Assert.Throws<
+        InvalidOperationException>(
+        action);
+  }
+
 }

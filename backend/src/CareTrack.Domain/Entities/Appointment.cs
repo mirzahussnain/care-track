@@ -62,6 +62,36 @@ public class Appointment
     private set;
   }
 
+  public DateTime? CheckedInAt
+  {
+    get;
+    private set;
+  }
+
+  public DateTime? StartedAt
+  {
+    get;
+    private set;
+  }
+
+  public DateTime? CompletedAt
+  {
+    get;
+    private set;
+  }
+
+  public DateTime? CancelledAt
+  {
+    get;
+    private set;
+  }
+
+  public DateTime? DidNotAttendAt
+  {
+    get;
+    private set;
+  }
+
   private Appointment()
   {
   }
@@ -154,5 +184,110 @@ public class Appointment
 
     CreatedAt =
         DateTime.UtcNow;
+  }
+
+  public void CheckIn()
+  {
+    if (Status != AppointmentStatus.Scheduled)
+    {
+      throw new InvalidOperationException(
+          $"Cannot check in an appointment from status '{Status}'.");
+    }
+
+    var now = DateTime.UtcNow;
+
+    Status =
+        AppointmentStatus.CheckedIn;
+
+    CheckedInAt =
+        now;
+
+    UpdatedAt =
+        now;
+  }
+
+  public void Start()
+  {
+    if (Status != AppointmentStatus.CheckedIn)
+    {
+      throw new InvalidOperationException(
+          $"Cannot start an appointment from status '{Status}'.");
+    }
+
+    var now =
+        DateTime.UtcNow;
+
+    Status =
+        AppointmentStatus.InProgress;
+
+    StartedAt =
+        now;
+
+    UpdatedAt =
+        now;
+  }
+
+  public void Complete()
+  {
+    if (Status != AppointmentStatus.InProgress)
+    {
+      throw new InvalidOperationException(
+          $"Cannot complete an appointment from status '{Status}'.");
+    }
+
+    var now =
+        DateTime.UtcNow;
+
+    Status =
+        AppointmentStatus.Completed;
+
+    CompletedAt =
+        now;
+
+    UpdatedAt =
+        now;
+  }
+
+  public void Cancel()
+  {
+    if (Status != AppointmentStatus.Scheduled
+        && Status != AppointmentStatus.CheckedIn)
+    {
+      throw new InvalidOperationException(
+          $"Cannot cancel an appointment from status '{Status}'.");
+    }
+
+    var now =
+        DateTime.UtcNow;
+
+    Status =
+        AppointmentStatus.Cancelled;
+
+    CancelledAt =
+        now;
+
+    UpdatedAt =
+        now;
+  }
+
+  public void MarkDidNotAttend()
+  {
+    if (Status != AppointmentStatus.Scheduled)
+    {
+      throw new InvalidOperationException(
+          $"Cannot mark an appointment as did not attend from status '{Status}'.");
+    }
+
+    var now =
+        DateTime.UtcNow;
+
+    Status =
+        AppointmentStatus.DidNotAttend;
+
+    DidNotAttendAt =
+        now;
+
+    UpdatedAt =
+        now;
   }
 }

@@ -72,6 +72,26 @@ public class AppointmentConfiguration
         appointment =>
             appointment.UpdatedAt);
 
+    builder.Property(
+    appointment =>
+        appointment.CheckedInAt);
+
+    builder.Property(
+        appointment =>
+            appointment.StartedAt);
+
+    builder.Property(
+        appointment =>
+            appointment.CompletedAt);
+
+    builder.Property(
+        appointment =>
+            appointment.CancelledAt);
+
+    builder.Property(
+        appointment =>
+            appointment.DidNotAttendAt);
+
     builder.HasIndex(
         appointment =>
             appointment.PatientId);

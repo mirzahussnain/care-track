@@ -13,4 +13,9 @@ public sealed record CreateAppointmentResult(
     string Location,
     AppointmentStatus Status,
     DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    DateTime? CheckedInAt,
+    DateTime? StartedAt,
+    DateTime? CompletedAt,
+    DateTime? CancelledAt,
+    DateTime? DidNotAttendAt);

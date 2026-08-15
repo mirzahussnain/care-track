@@ -112,6 +112,11 @@ public class CreateAppointmentService
         appointment.Location,
         appointment.Status,
         appointment.CreatedAt,
-        appointment.UpdatedAt);
+        appointment.UpdatedAt,
+        appointment.CheckedInAt,
+        appointment.StartedAt,
+     appointment.CompletedAt,
+    appointment.CancelledAt,
+    appointment.DidNotAttendAt);
   }
 }
