@@ -3,12 +3,14 @@ using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
 using CareTrack.Application.Referrals.CreateReferral;
+using CareTrack.Application.Referrals.GetReferralById;
 using CareTrack.Application.Referrals.GetReferralHistory;
 using CareTrack.Application.Referrals.ReassignReferral;
 using CareTrack.Application.Referrals.RecordTriageAssessment;
 using CareTrack.Application.Referrals.RejectReferral;
 using CareTrack.Application.Referrals.RequestMoreInformation;
 using CareTrack.Application.Referrals.ResubmitReferral;
+using CareTrack.Application.Referrals.SearchReferrals;
 using CareTrack.Application.Referrals.StartTriage;
 using CareTrack.Application.Referrals.SubmitReferral;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +41,10 @@ public sealed class ReferralsController
   private readonly ReassignReferralService _reassignReferralService;
 
   private readonly GetReferralHistoryService _getReferralHistoryService;
+
+  private readonly GetReferralByIdService _getReferralByIdService;
+  private readonly SearchReferralsService _searchReferralsService;
+
   public ReferralsController(
       CreateReferralService createReferralService,
       SubmitReferralService submitReferralService,
@@ -50,7 +56,9 @@ public sealed class ReferralsController
       RecordTriageAssessmentService recordTriageAssessmentService,
       AssignReferralService assignReferralService,
       ReassignReferralService reassignReferralSerivce,
-      GetReferralHistoryService getReferralHistoryService)
+      GetReferralHistoryService getReferralHistoryService,
+      GetReferralByIdService getReferralByIdService,
+      SearchReferralsService searchReferralsService)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -63,6 +71,8 @@ public sealed class ReferralsController
     _assignReferralService = assignReferralService;
     _reassignReferralService = reassignReferralSerivce;
     _getReferralHistoryService = getReferralHistoryService;
+    _getReferralByIdService = getReferralByIdService;
+    _searchReferralsService = searchReferralsService;
   }
 
   [HttpPost]
@@ -231,5 +241,59 @@ public sealed class ReferralsController
                 entry =>
                     entry.ToResponse())
             .ToList());
+  }
+
+  [HttpGet]
+  public async Task<
+    ActionResult<
+        PagedReferralResponse>>
+    SearchReferrals(
+        [FromQuery]
+        SearchReferralRequest request,
+        CancellationToken cancellationToken)
+  {
+    var result =
+        await _searchReferralsService
+            .ExecuteAsync(
+                new SearchReferralsCommand(
+                    request.Status,
+                    request.Priority,
+                    request.PatientId,
+                    request.AssignedTo,
+                    request.CreatedFrom,
+                    request.CreatedTo,
+                    request.SortBy,
+                    request.SortDirection,
+                    request.Page,
+                    request.PageSize),
+                cancellationToken);
+
+    return Ok(
+        new PagedReferralResponse(
+            result.Items
+                .Select(
+                    referral =>
+                        referral.ToResponse())
+                .ToList(),
+            result.Page,
+            result.PageSize,
+            result.TotalCount,
+            result.TotalPages));
+  }
+
+  [HttpGet("{id:guid}")]
+  public async Task<ActionResult<ReferralResponse>>
+    GetReferralById(
+        Guid id,
+        CancellationToken cancellationToken)
+  {
+    var referral =
+        await _getReferralByIdService
+            .ExecuteAsync(
+                new GetReferralByIdCommand(id),
+                cancellationToken);
+
+    return Ok(
+        referral.ToResponse());
   }
 }

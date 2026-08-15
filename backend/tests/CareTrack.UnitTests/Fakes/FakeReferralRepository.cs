@@ -1,5 +1,7 @@
 using CareTrack.Application.Common.Interfaces;
+using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
+using CareTrack.Domain.Enums;
 
 namespace CareTrack.UnitTests.Fakes;
 
@@ -65,6 +67,56 @@ public sealed class FakeReferralRepository
 
     return Task.FromResult(
         result);
+  }
+  public Task<PagedResult<Referral>>
+    SearchAsync(
+         ReferralStatus? status,
+    ReferralPriority? priority,
+    Guid? patientId,
+    string? assignedTo,
+    DateOnly? createdFrom,
+    DateOnly? createdTo,
+    int page,
+    int pageSize,
+    string sortBy,
+    string sortDirection,
+    CancellationToken cancellationToken = default)
+  {
+    IEnumerable<Referral> query =
+        _referrals;
+
+    if (status.HasValue)
+    {
+      query =
+          query.Where(
+              r =>
+                  r.Status ==
+                  status);
+    }
+
+    // Repeat relevant filtering for fake.
+
+    var totalCount =
+        query.Count();
+
+    var totalPages = (totalCount + pageSize - 1) / pageSize;
+
+    var items =
+        query
+            .Skip(
+                (page - 1)
+                * pageSize)
+            .Take(
+                pageSize)
+            .ToList();
+
+    return Task.FromResult(
+        new PagedResult<Referral>(
+            items,
+            page,
+            pageSize,
+            totalCount,
+            totalPages));
   }
   public Task SaveChangesAsync(
     CancellationToken cancellationToken = default)
