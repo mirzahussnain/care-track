@@ -21,4 +21,5 @@ public class CareTrackDbContext : DbContext
   public DbSet<Patient> Patients => Set<Patient>();
   public DbSet<Referral> Referrals => Set<Referral>();
   public DbSet<ReferralHistoryEntry> ReferralHistoryEntries => Set<ReferralHistoryEntry>();
+  public DbSet<Appointment> Appointments => Set<Appointment>();
 }

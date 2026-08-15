@@ -1,4 +1,5 @@
 using CareTrack.Api.ErrorHandling;
+using CareTrack.Application.Appointments.CreateAppointment;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.Application.Patients.GetPatient;
@@ -35,6 +36,7 @@ builder.Services.AddDbContext<CareTrackDbContext>(options =>
 });
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<CreatePatientService>();
 builder.Services.AddScoped<GetPatientService>();
 builder.Services.AddScoped<SearchPatientsService>();
@@ -52,6 +54,7 @@ builder.Services.AddScoped<ReassignReferralService>();
 builder.Services.AddScoped<GetReferralHistoryService>();
 builder.Services.AddScoped<GetReferralByIdService>();
 builder.Services.AddScoped<SearchReferralsService>();
+builder.Services.AddScoped<CreateAppointmentService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
