@@ -1,25 +1,30 @@
 using System.Net;
 using System.Net.Http.Json;
 using CareTrack.Domain.Enums;
-using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Contracts.Referrals;
-using CareTrack.IntegrationTests.Infrastructure;
 
 namespace CareTrack.IntegrationTests.Helpers;
 
-public class ReferralApiTestHelper
+public static class ReferralApiTestHelper
 {
-  public static async Task<ReferralResponse> CreateReferralAsync(HttpClient client, Guid? passedPatientId = null)
+  public static async Task<ReferralResponse>
+      CreateReferralAsync(
+          HttpClient client,
+          Guid? passedPatientId = null)
   {
-    Guid _patientId;
-    if (!passedPatientId.HasValue)
+    Guid patientId;
+
+    if (passedPatientId.HasValue)
     {
-      var patient = await PatientApiTestHelper.CreatePatientAsync(client);
-      _patientId = patient.Id;
+      patientId = passedPatientId.Value;
     }
     else
     {
-      _patientId = passedPatientId.Value;
+      var patient =
+          await PatientApiTestHelper
+              .CreatePatientAsync(client);
+
+      patientId = patient.Id;
     }
 
     var request = new
@@ -27,8 +32,7 @@ public class ReferralApiTestHelper
       referralReference =
             $"REF-{Guid.NewGuid():N}"[..12],
 
-      patientId =
-            _patientId,
+      patientId,
 
       priority =
             ReferralPriority.Routine,
@@ -55,17 +59,19 @@ public class ReferralApiTestHelper
     return referral;
   }
 
-  public static async Task<ReferralResponse> CreateReferralWithPriorityAsync(
-        HttpClient client,
-        ReferralPriority passedPriority =
-            ReferralPriority.Routine,
-        Guid? passedPatientId = null)
+  public static async Task<ReferralResponse>
+      CreateReferralWithPriorityAsync(
+          HttpClient client,
+          ReferralPriority passedPriority =
+              ReferralPriority.Routine,
+          Guid? passedPatientId = null)
   {
     Guid patientId;
 
     if (passedPatientId.HasValue)
     {
-      patientId = passedPatientId.Value;
+      patientId =
+          passedPatientId.Value;
     }
     else
     {
@@ -73,7 +79,8 @@ public class ReferralApiTestHelper
           await PatientApiTestHelper
               .CreatePatientAsync(client);
 
-      patientId = patient.Id;
+      patientId =
+          patient.Id;
     }
 
     var request = new
@@ -83,7 +90,8 @@ public class ReferralApiTestHelper
 
       patientId,
 
-      priority = passedPriority,
+      priority =
+            passedPriority,
 
       reason =
             "Persistent shoulder pain."
@@ -106,28 +114,26 @@ public class ReferralApiTestHelper
 
     return referral;
   }
-  public static async Task CreateSeveralReferralsAsync(
-       HttpClient client,
-       Guid passedPatientId,
-       int count)
-  {
 
+  public static async Task
+      CreateSeveralReferralsAsync(
+          HttpClient client,
+          Guid passedPatientId,
+          int count)
+  {
     for (var i = 0; i < count; i++)
     {
-
       await CreateReferralAsync(
-           client,
-           passedPatientId);
-
+          client,
+          passedPatientId);
     }
-
-
   }
+
   public static async Task<ReferralResponse>
-    CreateAcceptedReferralAsync(
-        HttpClient client,
-        ReferralPriority? passedPriority = null,
-        Guid? passedPatientId = null)
+      CreateAcceptedReferralAsync(
+          HttpClient client,
+          ReferralPriority? passedPriority = null,
+          Guid? passedPatientId = null)
   {
     ReferralResponse referral;
 
@@ -192,11 +198,11 @@ public class ReferralApiTestHelper
   }
 
   public static async Task<ReferralResponse>
-    CreateAssignedReferralAsync(
-        HttpClient client,
-        string assignedTo,
-        ReferralPriority? passedPriority = null,
-        Guid? passedPatientId = null)
+      CreateAssignedReferralAsync(
+          HttpClient client,
+          string assignedTo,
+          ReferralPriority? passedPriority = null,
+          Guid? passedPatientId = null)
   {
     var referral =
         await CreateAcceptedReferralAsync(
@@ -233,6 +239,4 @@ public class ReferralApiTestHelper
 
     return assignedReferral;
   }
-
 }
-

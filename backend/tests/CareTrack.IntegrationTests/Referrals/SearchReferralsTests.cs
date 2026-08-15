@@ -691,5 +691,179 @@ public class SearchReferralsTests : IClassFixture<CareTrackSqlServerWebApplicati
         response.StatusCode);
   }
 
+  [Fact]
+  public async Task
+    SearchReferrals_WhenNoReferralsMatch_ReturnsEmptyPage()
+  {
+    // Arrange
+    var patient =
+        await PatientApiTestHelper
+            .CreatePatientAsync(_client);
+
+    await ReferralApiTestHelper
+        .CreateReferralWithPriorityAsync(
+            _client,
+            ReferralPriority.Routine,
+            patient.Id);
+
+    // Act
+    var response =
+        await _client.GetAsync(
+            $"/api/referrals" +
+            $"?patientId={patient.Id}" +
+            "&priority=Urgent" +
+            "&page=1" +
+            "&pageSize=20" +
+            "&sortBy=createdat" +
+            "&sortDirection=desc");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<
+                PagedResult<ReferralResponse>>();
+
+    Assert.NotNull(result);
+
+    Assert.Empty(
+        result.Items);
+
+    Assert.Equal(
+        0,
+        result.TotalCount);
+
+    Assert.Equal(
+        0,
+        result.TotalPages);
+  }
+
+  [Fact]
+  public async Task
+    SearchReferrals_WhenPageIsBeyondLastPage_ReturnsEmptyItems()
+  {
+    // Arrange
+    var patient =
+        await PatientApiTestHelper
+            .CreatePatientAsync(_client);
+
+    await ReferralApiTestHelper
+        .CreateSeveralReferralsAsync(
+            _client,
+            patient.Id,
+            3);
+
+    // Act
+    var response =
+        await _client.GetAsync(
+            $"/api/referrals" +
+            $"?patientId={patient.Id}" +
+            "&page=3" +
+            "&pageSize=2" +
+            "&sortBy=createdat" +
+            "&sortDirection=desc");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<
+                PagedResult<ReferralResponse>>();
+
+    Assert.NotNull(result);
+
+    Assert.Empty(
+        result.Items);
+
+    Assert.Equal(
+        3,
+        result.TotalCount);
+
+    Assert.Equal(
+        2,
+        result.TotalPages);
+
+    Assert.Equal(
+        3,
+        result.Page);
+  }
+
+  [Fact]
+  public async Task
+    SearchReferrals_WhenCreatedFromIsAfterCreatedTo_ReturnsBadRequest()
+  {
+    // Act
+    var response =
+        await _client.GetAsync(
+            "/api/referrals" +
+            "?createdFrom=2026-08-20" +
+            "&createdTo=2026-08-10" +
+            "&page=1" +
+            "&pageSize=20" +
+            "&sortBy=createdat" +
+            "&sortDirection=desc");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task
+    SearchReferrals_WithInvalidStatus_ReturnsBadRequest()
+  {
+    // Act
+    var response =
+        await _client.GetAsync(
+            "/api/referrals" +
+            "?status=DefinitelyNotAStatus" +
+            "&page=1" +
+            "&pageSize=20" +
+            "&sortBy=createdat" +
+            "&sortDirection=desc");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task
+    SearchReferrals_WithUppercaseSortDirection_ReturnsOk()
+  {
+    // Arrange
+    var patient =
+        await PatientApiTestHelper
+            .CreatePatientAsync(_client);
+
+    await ReferralApiTestHelper
+        .CreateSeveralReferralsAsync(
+            _client,
+            patient.Id,
+            2);
+
+    // Act
+    var response =
+        await _client.GetAsync(
+            $"/api/referrals" +
+            $"?patientId={patient.Id}" +
+            "&page=1" +
+            "&pageSize=20" +
+            "&sortBy=createdat" +
+            "&sortDirection=DESC");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+  }
 
 }

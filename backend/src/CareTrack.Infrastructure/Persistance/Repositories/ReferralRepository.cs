@@ -131,11 +131,11 @@ public sealed class ReferralRepository
     // Historical assignments remain in ReferralHistoryEntries.
     if (!string.IsNullOrWhiteSpace(assignedTo))
     {
-      var _assignedTo = assignedTo.Trim();
+      var trimmedAssignedTo = assignedTo.Trim();
 
       query = query.Where(
           referral =>
-              referral.AssignedTo == _assignedTo);
+              referral.AssignedTo == trimmedAssignedTo);
     }
 
     // Filter referrals created from a specified timestamp.
