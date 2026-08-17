@@ -1,3 +1,4 @@
+using CareTrack.Application.ClinicalNotes.Common;
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
@@ -32,7 +33,7 @@ public sealed class CreateClinicalNoteService
         logger;
   }
 
-  public async Task<CreateClinicalNoteResult>
+  public async Task<ClinicalNoteResult>
       ExecuteAsync(
           CreateClinicalNoteCommand command,
           CancellationToken cancellationToken = default)
@@ -65,7 +66,7 @@ public sealed class CreateClinicalNoteService
         note.Id,
         note.AppointmentId);
 
-    return new CreateClinicalNoteResult(
+    return new ClinicalNoteResult(
         note.Id,
         note.AppointmentId,
         note.Content,

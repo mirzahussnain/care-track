@@ -1,7 +1,10 @@
+using System.Net;
+using System.Net.Http.Json;
 using CareTrack.Application.ClinicalNotes.CreateClinicalNote;
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Infrastructure.Persistance;
+using CareTrack.IntegrationTests.Contracts.ClinicalNotes;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -418,5 +421,620 @@ public sealed class ClinicalNotesTests
         DbUpdateException>(
         action);
   }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenRequestIsValid_ReturnsCreated()
+  {
+    // Arrange
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var request =
+        new
+        {
+          content =
+                "Patient reports reduced pain.",
+
+          createdBy =
+                "clinician.demo"
+        };
+
+    // Act
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{appointment.Id}/clinical-notes",
+            request);
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.Created,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<ClinicalNoteResponse>();
+
+    Assert.NotNull(
+        result);
+
+    Assert.Equal(
+        appointment.Id,
+        result.AppointmentId);
+
+    Assert.Equal(
+        "Patient reports reduced pain.",
+        result.Content);
+
+    Assert.Equal(
+        "clinician.demo",
+        result.CreatedBy);
+
+    Assert.Null(
+        result.UpdatedAt);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenAppointmentDoesNotExist_ReturnsNotFound()
+  {
+    var request =
+        new
+        {
+          content =
+                "Clinical note",
+
+          createdBy =
+                "clinician.demo"
+        };
+
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{Guid.NewGuid()}/clinical-notes",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.NotFound,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenContentIsBlank_ReturnsBadRequest()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var request =
+        new
+        {
+          content = "   ",
+          createdBy = "clinician.demo"
+        };
+
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{appointment.Id}/clinical-notes",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenContentExceedsMaximum_ReturnsBadRequest()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var request =
+        new
+        {
+          content =
+                new string('a', 5001),
+
+          createdBy =
+                "clinician.demo"
+        };
+
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{appointment.Id}/clinical-notes",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenCreatedByIsBlank_ReturnsBadRequest()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var request =
+        new
+        {
+          content =
+                "Patient improving.",
+
+          createdBy =
+                "   "
+        };
+
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{appointment.Id}/clinical-notes",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task GetClinicalNoteById_WhenNoteExists_ReturnsOk()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var note =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment.Id);
+
+    var response =
+        await _client.GetAsync(
+            $"/api/clinical-notes/{note.Id}");
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<ClinicalNoteResponse>();
+
+    Assert.NotNull(
+        result);
+
+    Assert.Equal(
+        note.Id,
+        result.Id);
+
+    Assert.Equal(
+        appointment.Id,
+        result.AppointmentId);
+  }
+
+  [Fact]
+  public async Task GetClinicalNoteById_WhenNoteDoesNotExist_ReturnsNotFound()
+  {
+    var response =
+        await _client.GetAsync(
+            $"/api/clinical-notes/{Guid.NewGuid()}");
+
+    Assert.Equal(
+        HttpStatusCode.NotFound,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task GetClinicalNotesByAppointment_ReturnsOnlyAppointmentNotes()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral1 =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var referral2 =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var start =
+        DateTime.UtcNow.AddDays(5);
+
+    var appointment1 =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral1.Id,
+            scheduledStart: start,
+            scheduledEnd:
+                start.AddMinutes(30));
+
+    var appointment2 =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral2.Id,
+            scheduledStart:
+                start.AddHours(1),
+            scheduledEnd:
+                start.AddHours(1)
+                    .AddMinutes(30));
+
+    var note1 =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment1.Id,
+            "First note");
+
+    var note2 =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment1.Id,
+            "Second note");
+
+    await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+        _client,
+        appointment2.Id,
+        "Different appointment");
+
+    var response =
+        await _client.GetAsync(
+            $"/api/appointments/{appointment1.Id}/clinical-notes");
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var results =
+        await response.Content
+            .ReadFromJsonAsync<List<ClinicalNoteResponse>>();
+
+    Assert.NotNull(
+        results);
+
+    Assert.Equal(
+        2,
+        results.Count);
+
+    Assert.Contains(
+        results,
+        n => n.Id == note1.Id);
+
+    Assert.Contains(
+        results,
+        n => n.Id == note2.Id);
+
+    Assert.All(
+        results,
+        n =>
+            Assert.Equal(
+                appointment1.Id,
+                n.AppointmentId));
+  }
+
+  [Fact]
+  public async Task GetClinicalNotesByAppointment_WhenNoNotesExist_ReturnsEmptyList()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var response =
+        await _client.GetAsync(
+            $"/api/appointments/{appointment.Id}/clinical-notes");
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var results =
+        await response.Content
+            .ReadFromJsonAsync<List<ClinicalNoteResponse>>();
+
+    Assert.NotNull(
+        results);
+
+    Assert.Empty(
+        results);
+  }
+
+  [Fact]
+  public async Task GetClinicalNotesByAppointment_WhenAppointmentDoesNotExist_ReturnsNotFound()
+  {
+    var response =
+        await _client.GetAsync(
+            $"/api/appointments/{Guid.NewGuid()}/clinical-notes");
+
+    Assert.Equal(
+        HttpStatusCode.NotFound,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task UpdateClinicalNote_WhenRequestIsValid_ReturnsUpdatedNote()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var note =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment.Id,
+            "Original note",
+            "clinician.demo");
+
+    var request =
+        new
+        {
+          content =
+                "Updated clinical note"
+        };
+
+    var response =
+        await _client.PutAsJsonAsync(
+            $"/api/clinical-notes/{note.Id}",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<ClinicalNoteResponse>();
+
+    Assert.NotNull(
+        result);
+
+    Assert.Equal(
+        "Updated clinical note",
+        result.Content);
+
+    Assert.Equal(
+        "clinician.demo",
+        result.CreatedBy);
+
+    Assert.NotNull(
+        result.UpdatedAt);
+  }
+
+  [Fact]
+  public async Task UpdateClinicalNote_WhenNoteDoesNotExist_ReturnsNotFound()
+  {
+    var request =
+        new
+        {
+          content =
+                "Updated"
+        };
+
+    var response =
+        await _client.PutAsJsonAsync(
+            $"/api/clinical-notes/{Guid.NewGuid()}",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.NotFound,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task UpdateClinicalNote_WhenContentIsBlank_ReturnsBadRequest()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var note =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment.Id);
+
+    var request =
+        new
+        {
+          content = "   "
+        };
+
+    var response =
+        await _client.PutAsJsonAsync(
+            $"/api/clinical-notes/{note.Id}",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task UpdateClinicalNote_WhenContentExceedsMaximum_ReturnsBadRequest()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var note =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment.Id);
+
+    var request =
+        new
+        {
+          content =
+                new string('a', 5001)
+        };
+
+    var response =
+        await _client.PutAsJsonAsync(
+            $"/api/clinical-notes/{note.Id}",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.BadRequest,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task UpdateClinicalNote_PersistsChangeToDatabase()
+  {
+    var patient =
+        await PatientApiTestHelper.CreatePatientAsync(
+            _client);
+
+    var referral =
+        await ReferralApiTestHelper.CreateReferralAsync(
+            _client,
+            patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper.CreateAppointmentAsync(
+            _client,
+            patient.Id,
+            referral.Id);
+
+    var note =
+        await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
+            _client,
+            appointment.Id);
+
+    var request =
+        new
+        {
+          content =
+                "Persisted update"
+        };
+
+    var updateResponse =
+        await _client.PutAsJsonAsync(
+            $"/api/clinical-notes/{note.Id}",
+            request);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        updateResponse.StatusCode);
+
+    var getResponse =
+        await _client.GetAsync(
+            $"/api/clinical-notes/{note.Id}");
+
+    var persisted =
+        await getResponse.Content
+            .ReadFromJsonAsync<ClinicalNoteResponse>();
+
+    Assert.NotNull(
+        persisted);
+
+    Assert.Equal(
+        "Persisted update",
+        persisted.Content);
+
+    Assert.NotNull(
+        persisted.UpdatedAt);
+  }
+
 
 }
