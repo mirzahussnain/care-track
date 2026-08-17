@@ -89,6 +89,9 @@ public sealed class CareTrackSqlServerWebApplicationFactory
     dbContext.Appointments.RemoveRange(
           dbContext.Appointments);
 
+    dbContext.ClinicalNotes.RemoveRange(
+        dbContext.ClinicalNotes);
+
     dbContext.Referrals.RemoveRange(
         dbContext.Referrals);
 
