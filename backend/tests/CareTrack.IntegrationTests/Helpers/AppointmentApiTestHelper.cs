@@ -14,11 +14,18 @@ public static class AppointmentApiTestHelper
           Guid patientId,
           Guid referralId,
           AppointmentType appointmentType =
-              AppointmentType.Consultation)
+              AppointmentType.Consultation,
+               DateTime? scheduledStart = null,
+    DateTime? scheduledEnd = null,
+    string location = "Birmingham Clinic")
   {
     var start =
-        DateTime.UtcNow.AddDays(2);
+        scheduledStart
+        ?? DateTime.UtcNow.AddDays(5);
 
+    var end =
+        scheduledEnd
+        ?? start.AddMinutes(30);
     var request =
         new
         {
@@ -29,16 +36,16 @@ public static class AppointmentApiTestHelper
 
           referralId,
 
-          appointmentType,
+          appointmentType =
+            (int)appointmentType,
 
           scheduledStart =
                 start,
 
           scheduledEnd =
-                start.AddMinutes(30),
+            end,
 
-          location =
-                "Birmingham Clinic"
+          location
         };
 
     var response =
@@ -67,6 +74,49 @@ public static class AppointmentApiTestHelper
     return appointment
         ?? throw new InvalidOperationException(
             "Appointment response was empty.");
+  }
+
+  public static Task<HttpResponseMessage> SendCreateAppointmentRequestAsync(
+    HttpClient client,
+    Guid patientId,
+    Guid referralId,
+    AppointmentType appointmentType = AppointmentType.Consultation,
+    DateTime? scheduledStart = null,
+    DateTime? scheduledEnd = null,
+    string location = "Birmingham Clinic")
+  {
+    var start =
+        scheduledStart
+        ?? DateTime.UtcNow.AddDays(5);
+
+    var end =
+        scheduledEnd
+        ?? start.AddMinutes(30);
+
+    var request = new
+    {
+      appointmentReference =
+            $"APT-{Guid.NewGuid():N}"[..16],
+
+      patientId,
+
+      referralId,
+
+      appointmentType =
+            (int)appointmentType,
+
+      scheduledStart =
+            start,
+
+      scheduledEnd =
+            end,
+
+      location
+    };
+
+    return client.PostAsJsonAsync(
+        "/api/appointments",
+        request);
   }
 
   public static async Task<AppointmentResponse>

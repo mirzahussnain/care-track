@@ -4,6 +4,8 @@ using CareTrack.Application.Appointments.CheckInAppointment;
 using CareTrack.Application.Appointments.CompleteAppointment;
 using CareTrack.Application.Appointments.CreateAppointment;
 using CareTrack.Application.Appointments.DidNotAttendAppointment;
+using CareTrack.Application.Appointments.GetAppointmentById;
+using CareTrack.Application.Appointments.SearchAppointments;
 using CareTrack.Application.Appointments.StartAppointment;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
@@ -22,13 +24,20 @@ public class AppointmentsController : ControllerBase
   private readonly CompleteAppointmentService _completeAppointmentService;
   private readonly CancelAppointmentService _cancelAppointmentService;
   private readonly MarkAppointmentDidNotAttendService _didNotAttendService;
+
+  private readonly GetAppointmentByIdService _getAppointmentByIdService;
+  private readonly SearchAppointmentsService _searchAppointmentsService;
+
   public AppointmentsController(
       CreateAppointmentService createAppointmentService,
        CheckInAppointmentService checkInAppointmentService,
     StartAppointmentService startAppointmentService,
     CompleteAppointmentService completeAppointmentService,
     CancelAppointmentService cancelAppointmentService,
-    MarkAppointmentDidNotAttendService didNotAttendService)
+    MarkAppointmentDidNotAttendService didNotAttendService,
+    GetAppointmentByIdService getAppointmentByIdService,
+    SearchAppointmentsService searchAppointmentsService
+  )
   {
     _createAppointmentService = createAppointmentService;
     _checkInAppointmentService = checkInAppointmentService;
@@ -36,6 +45,8 @@ public class AppointmentsController : ControllerBase
     _completeAppointmentService = completeAppointmentService;
     _cancelAppointmentService = cancelAppointmentService;
     _didNotAttendService = didNotAttendService;
+    _getAppointmentByIdService = getAppointmentByIdService;
+    _searchAppointmentsService = searchAppointmentsService;
 
   }
 
@@ -62,7 +73,7 @@ public class AppointmentsController : ControllerBase
   }
 
   private static AppointmentResponse ToResponse(
-    CreateAppointmentResult result)
+    AppointmentDetailsResult result)
   {
     return new AppointmentResponse(
         result.Id,
@@ -191,5 +202,49 @@ public class AppointmentsController : ControllerBase
 
     return Ok(
         ToResponse(appointment));
+  }
+
+  [HttpGet("{id:guid}")]
+  public async Task<ActionResult<AppointmentResponse>>
+    GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+  {
+    var result = await _getAppointmentByIdService
+            .ExecuteAsync(
+                id,
+                cancellationToken);
+
+    return Ok(
+        ToResponse(result));
+  }
+
+  [HttpGet]
+  public async Task<ActionResult<PagedResult<AppointmentSearchItem>>>
+    Search(
+        [FromQuery] SearchAppointmentsRequest request,
+        CancellationToken cancellationToken)
+  {
+    var query =
+        new AppointmentSearchCommand(
+            request.PatientId,
+            request.ReferralId,
+            request.Status,
+            request.AppointmentType,
+            request.Location,
+            request.ScheduledFrom,
+            request.ScheduledTo,
+            request.Page,
+            request.PageSize,
+            request.SortBy,
+            request.SortDirection);
+
+    var result =
+        await _searchAppointmentsService
+            .ExecuteAsync(
+                query,
+                cancellationToken);
+
+    return Ok(result);
   }
 }

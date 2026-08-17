@@ -1,8 +1,6 @@
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
-using CareTrack.Application.Patients;
-using CareTrack.Application.Referrals;
 using CareTrack.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +32,7 @@ public class CreateAppointmentService
         logger;
   }
 
-  public async Task<CreateAppointmentResult>
+  public async Task<AppointmentDetailsResult>
       ExecuteAsync(
           CreateAppointmentCommand command,
           CancellationToken cancellationToken = default)
@@ -91,6 +89,19 @@ public class CreateAppointmentService
             command.ScheduledEnd,
             command.Location);
 
+    var hasSchedulingConflict =
+    await _appointmentRepository
+        .HasSchedulingConflictAsync(
+            appointment.PatientId,
+            appointment.ScheduledStart,
+            appointment.ScheduledEnd,
+            cancellationToken: cancellationToken);
+
+    if (hasSchedulingConflict)
+    {
+      throw new ConflictException(
+          "The patient already has an overlapping appointment.");
+    }
 
     await _appointmentRepository.AddAsync(
         appointment,
@@ -101,7 +112,7 @@ public class CreateAppointmentService
         "Appointment {AppointmentId} created successfully",
         appointment.Id);
 
-    return new CreateAppointmentResult(
+    return new AppointmentDetailsResult(
         appointment.Id,
         appointment.AppointmentReference,
         appointment.PatientId,

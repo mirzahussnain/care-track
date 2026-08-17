@@ -2,7 +2,7 @@ using CareTrack.Domain.Enums;
 
 namespace CareTrack.Application.Common.Models;
 
-public sealed record CreateAppointmentResult(
+public sealed record AppointmentDetailsResult(
     Guid Id,
     string AppointmentReference,
     Guid PatientId,

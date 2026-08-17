@@ -100,6 +100,14 @@ public class AppointmentConfiguration
         appointment =>
             appointment.ReferralId);
 
+    builder.HasIndex(
+        a => new
+        {
+          a.PatientId,
+          a.ScheduledStart,
+          a.ScheduledEnd
+        });
+
     builder.HasOne<Patient>()
     .WithMany()
     .HasForeignKey(
