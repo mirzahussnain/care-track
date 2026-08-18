@@ -14,6 +14,11 @@ public interface IAppointmentRepository
       string appointmentReference,
       CancellationToken cancellationToken = default);
 
+  Task<IReadOnlyList<Appointment>>
+    GetByReferralIdAsync(
+        Guid referralId,
+        CancellationToken cancellationToken = default);
+  
   Task<PagedResult<Appointment>> SearchAsync(
     AppointmentSearchCommand query,
     CancellationToken cancellationToken = default);

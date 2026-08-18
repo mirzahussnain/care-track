@@ -11,5 +11,8 @@ public enum ReferralHistoryEventType
   Rejected = 6,
   TriageAssessmentRecorded = 7,
   Assigned = 8,
-  Reassigned = 9
+  Reassigned = 9,
+  Scheduled = 10,
+  Started=11,
+  Completed=12
 }

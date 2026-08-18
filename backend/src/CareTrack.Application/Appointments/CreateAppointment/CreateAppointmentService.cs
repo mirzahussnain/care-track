@@ -2,6 +2,7 @@ using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
+using CareTrack.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace CareTrack.Application.Appointments.CreateAppointment;
@@ -12,12 +13,14 @@ public class CreateAppointmentService
   private readonly IPatientRepository _patientRepository;
   private readonly IReferralRepository _referralRepository;
   private readonly ILogger<CreateAppointmentService> _logger;
-
+  private readonly IApplicationTransaction _applicationTransaction;
   public CreateAppointmentService(
       IAppointmentRepository appointmentRepository,
       IPatientRepository patientRepository,
       IReferralRepository referralRepository,
-      ILogger<CreateAppointmentService> logger)
+      IApplicationTransaction applicationTransaction,
+      ILogger<CreateAppointmentService> logger
+      )
   {
     _appointmentRepository =
         appointmentRepository;
@@ -30,6 +33,9 @@ public class CreateAppointmentService
 
     _logger =
         logger;
+
+    _applicationTransaction =
+        applicationTransaction;
   }
 
   public async Task<AppointmentDetailsResult>
@@ -79,6 +85,12 @@ public class CreateAppointmentService
           "The referral does not belong to the specified patient.");
     }
 
+    if (!referral.CanScheduleAppointment())
+{
+    throw new ConflictException(
+        $"Referral '{referral.Id}' cannot be scheduled while in status '{referral.Status}'.");
+}
+
     var appointment =
         new Appointment(
             command.AppointmentReference,
@@ -103,10 +115,22 @@ public class CreateAppointmentService
           "The patient already has an overlapping appointment.");
     }
 
-    await _appointmentRepository.AddAsync(
-        appointment,
-        cancellationToken);
+    await _applicationTransaction.ExecuteAsync(
+    async ct =>
+    {
+        await _appointmentRepository.AddAsync(
+            appointment,
+            ct);
 
+        if (referral.Status == ReferralStatus.Assigned)
+        {
+            referral.Schedule();
+
+            await _referralRepository.SaveChangesAsync(
+                ct);
+        }
+    },
+    cancellationToken);
 
     _logger.LogInformation(
         "Appointment {AppointmentId} created successfully",

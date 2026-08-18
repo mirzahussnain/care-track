@@ -205,6 +205,7 @@ public class SearchAppointmentsTests
   public async Task ExecuteAsync_WhenPatientHasOverlappingAppointment_ThrowsConflictException()
   {
     // Arrange
+    var applicationTransaction = new FakeApplicationTransaction();
     var appointmentRepository =
         new FakeAppointmentRepository
         {
@@ -245,6 +246,7 @@ public class SearchAppointmentsTests
            appointmentRepository,
            patientRepository,
            referralRepository,
+           applicationTransaction,
            logger);
 
     var start =

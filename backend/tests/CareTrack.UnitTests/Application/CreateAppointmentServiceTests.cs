@@ -3,7 +3,6 @@ using CareTrack.Application.Common.Exceptions;
 using CareTrack.Domain.Entities;
 using CareTrack.Domain.Enums;
 using CareTrack.UnitTests.Fakes;
-using CareTrack.UnitTests.Helpers;
 using Microsoft.Extensions.Logging.Abstractions;
 
 
@@ -41,6 +40,11 @@ public class CreateAppointmentTests
             ReferralPriority.Routine,
             "Persistent shoulder pain.");
 
+    referral.Submit();
+    referral.StartTriage();
+    referral.Accept();
+    referral.Assign("Integration Test Team");
+
     await referralRepository.AddAsync(
         referral);
 
@@ -48,12 +52,14 @@ public class CreateAppointmentTests
         NullLogger<CreateAppointmentService>
             .Instance;
 
-    var service =
-        new CreateAppointmentService(
-            appointmentRepository,
-            patientRepository,
-            referralRepository,
-            logger);
+    var transaction = new FakeApplicationTransaction();
+    var service = new CreateAppointmentService(
+     appointmentRepository,
+     patientRepository,
+     referralRepository,
+     transaction,
+     logger
+    );
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -74,6 +80,9 @@ public class CreateAppointmentTests
             command);
 
     // Assert
+    Assert.Equal(
+    ReferralStatus.Scheduled,
+    referral.Status);
     Assert.Equal(
         "APT-001",
         result.AppointmentReference);
@@ -111,12 +120,14 @@ public class CreateAppointmentTests
         NullLogger<CreateAppointmentService>
             .Instance;
 
-    var service =
-        new CreateAppointmentService(
-            appointmentRepository,
-            patientRepository,
-            referralRepository,
-            logger);
+    var transaction = new FakeApplicationTransaction();
+    var service = new CreateAppointmentService(
+    appointmentRepository,
+     patientRepository,
+     referralRepository,
+     transaction,
+     logger
+    );
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -172,12 +183,14 @@ public class CreateAppointmentTests
         NullLogger<CreateAppointmentService>
             .Instance;
 
-    var service =
-        new CreateAppointmentService(
-            appointmentRepository,
-            patientRepository,
-            referralRepository,
-            logger);
+    var transaction = new FakeApplicationTransaction();
+    var service = new CreateAppointmentService(
+     appointmentRepository,
+     patientRepository,
+     referralRepository,
+     transaction,
+     logger
+    );
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -253,12 +266,14 @@ public class CreateAppointmentTests
         NullLogger<CreateAppointmentService>
             .Instance;
 
-    var service =
-        new CreateAppointmentService(
-            appointmentRepository,
-            patientRepository,
-            referralRepository,
-            logger);
+    var transaction = new FakeApplicationTransaction();
+    var service = new CreateAppointmentService(
+     appointmentRepository,
+     patientRepository,
+     referralRepository,
+     transaction,
+     logger
+    );
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -343,12 +358,14 @@ public class CreateAppointmentTests
         NullLogger<CreateAppointmentService>
             .Instance;
 
-    var service =
-        new CreateAppointmentService(
-            appointmentRepository,
-            patientRepository,
-            referralRepository,
-            logger);
+    var transaction = new FakeApplicationTransaction();
+    var service = new CreateAppointmentService(
+     appointmentRepository,
+     patientRepository,
+     referralRepository,
+     transaction,
+     logger
+    );
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -372,5 +389,94 @@ public class CreateAppointmentTests
     await Assert.ThrowsAsync<
         ConflictException>(
         action);
+  }
+
+  [Fact]
+  public async Task ExecuteAsync_WhenReferralIsDraft_ThrowsConflictException()
+  {
+    // Arrange
+
+    var patientId =
+        Guid.NewGuid();
+
+    var patient =
+        new Patient(
+            "PAT-4G-001",
+            "Test",
+            "Patient",
+            new DateOnly(1995, 1, 1));
+
+    var referral =
+        new Referral(
+            "REF-4G-001",
+            patient.Id,
+            ReferralPriority.Routine,
+            "Test referral");
+
+    // Important:
+    // Do NOT submit / triage / accept / assign.
+    // Referral intentionally remains Draft.
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        referral.Status);
+
+    var patientRepository =
+        new FakePatientRepository();
+
+    var referralRepository =
+        new FakeReferralRepository();
+
+    var appointmentRepository =
+        new FakeAppointmentRepository();
+
+    var transaction =
+        new FakeApplicationTransaction();
+
+    var logger =
+        NullLogger<CreateAppointmentService>
+            .Instance;
+
+    await patientRepository.AddAsync(
+        patient);
+
+    await referralRepository.AddAsync(
+        referral);
+
+    var start =
+        DateTime.UtcNow.AddDays(3);
+
+    var command =
+        new CreateAppointmentCommand(
+            "APT-4G-001",
+            patient.Id,
+            referral.Id,
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Cardiology Clinic");
+
+    var service =
+        new CreateAppointmentService(
+            appointmentRepository,
+            patientRepository,
+            referralRepository,
+            transaction,
+            logger);
+
+    // Act
+
+    var action =
+        () => service.ExecuteAsync(
+            command);
+
+    // Assert
+
+    await Assert.ThrowsAsync<ConflictException>(
+        action);
+
+    Assert.Equal(
+        ReferralStatus.Draft,
+        referral.Status);
   }
 }

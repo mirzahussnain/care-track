@@ -18,6 +18,7 @@ using CareTrack.Application.Patients.SearchPatients;
 using CareTrack.Application.Patients.UpdatePatient;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
+using CareTrack.Application.Referrals.CompleteReferral;
 using CareTrack.Application.Referrals.CreateReferral;
 using CareTrack.Application.Referrals.GetReferralById;
 using CareTrack.Application.Referrals.GetReferralHistory;
@@ -45,6 +46,7 @@ builder.Services.AddDbContext<CareTrackDbContext>(options =>
   builder.Configuration.GetConnectionString("CareTrack")
   );
 });
+builder.Services.AddScoped<IApplicationTransaction, ApplicationTransaction>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
@@ -63,6 +65,7 @@ builder.Services.AddScoped<ResubmitReferralService>();
 builder.Services.AddScoped<RecordTriageAssessmentService>();
 builder.Services.AddScoped<AssignReferralService>();
 builder.Services.AddScoped<ReassignReferralService>();
+builder.Services.AddScoped<CompleteReferralService>();
 builder.Services.AddScoped<GetReferralHistoryService>();
 builder.Services.AddScoped<GetReferralByIdService>();
 builder.Services.AddScoped<SearchReferralsService>();

@@ -50,9 +50,10 @@ public sealed class ClinicalNotesTests
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -168,15 +169,17 @@ public sealed class ClinicalNotesTests
 
     var referral1 =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var referral2 =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow.AddDays(3);
@@ -281,9 +284,10 @@ public sealed class ClinicalNotesTests
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -368,9 +372,10 @@ public sealed class ClinicalNotesTests
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -431,9 +436,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -516,9 +522,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -551,9 +558,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -589,9 +597,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -627,9 +636,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -686,14 +696,16 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral1 =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow.AddDays(5);
@@ -778,9 +790,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -827,9 +840,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -907,9 +921,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -946,9 +961,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(
@@ -986,9 +1002,10 @@ public sealed class ClinicalNotesTests
             _client);
 
     var referral =
-        await ReferralApiTestHelper.CreateReferralAsync(
+        await ReferralApiTestHelper.CreateAssignedReferralAsync(
             _client,
-            patient.Id);
+            "Integration Test Team",
+            passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper.CreateAppointmentAsync(

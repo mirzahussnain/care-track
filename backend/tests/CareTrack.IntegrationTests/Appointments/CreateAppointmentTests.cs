@@ -47,9 +47,9 @@ public class CreateAppointmentTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -293,9 +293,9 @@ public class CreateAppointmentTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow.AddDays(2);
@@ -356,10 +356,10 @@ public class CreateAppointmentTests :
             .CreatePatientAsync(_client);
 
     var referral =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+       await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow.AddDays(2);

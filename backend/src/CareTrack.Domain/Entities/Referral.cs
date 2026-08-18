@@ -373,4 +373,75 @@ now);
        now,
        assignedTo: AssignedTo);
   }
+
+  public void Schedule()
+{
+    if (Status != ReferralStatus.Assigned)
+    {
+        throw new InvalidOperationException(
+            "Only assigned referrals can be scheduled.");
+    }
+
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
+    Status = ReferralStatus.Scheduled;
+    UpdatedAt = now;
+
+    AddHistory(
+        ReferralHistoryEventType.Scheduled,
+        fromStatus,
+        Status,
+        now);
+}
+
+public void StartProgress()
+{
+    if (Status != ReferralStatus.Scheduled)
+    {
+        throw new InvalidOperationException(
+            "Only scheduled referrals can enter progress.");
+    }
+
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
+    Status = ReferralStatus.InProgress;
+    UpdatedAt = now;
+
+    AddHistory(
+        ReferralHistoryEventType.Started,
+        fromStatus,
+        Status,
+        now);
+}
+
+public void Complete()
+{
+    if (Status != ReferralStatus.InProgress)
+    {
+        throw new InvalidOperationException(
+            "Only referrals in progress can be completed.");
+    }
+
+    var fromStatus = Status;
+    var now = DateTime.UtcNow;
+
+    Status = ReferralStatus.Completed;
+    UpdatedAt = now;
+
+    AddHistory(
+        ReferralHistoryEventType.Completed,
+        fromStatus,
+        Status,
+        now);
+}
+
+ public bool CanScheduleAppointment()
+{
+    return Status is
+        ReferralStatus.Assigned
+        or ReferralStatus.Scheduled
+        or ReferralStatus.InProgress;
+}
 }

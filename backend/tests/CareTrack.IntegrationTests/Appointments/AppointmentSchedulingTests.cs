@@ -44,16 +44,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -104,16 +104,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -162,16 +162,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -220,16 +220,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -278,16 +278,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -336,16 +336,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -394,16 +394,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -446,16 +446,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -505,16 +505,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient1.Id);
+       await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient1.Id);
 
     var referral2 =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient2.Id);
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient2.Id);
 
     var start =
         DateTime.UtcNow
@@ -559,16 +559,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow
@@ -623,16 +623,16 @@ public sealed class AppointmentSchedulingTests
                 _client);
 
     var referral1 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var referral2 =
-        await ReferralApiTestHelper
-            .CreateReferralAsync(
-                _client,
-                patient.Id);
+         await ReferralApiTestHelper
+        .CreateAssignedReferralAsync(
+            _client,
+            passedPatientId: patient.Id);
 
     var start =
         DateTime.UtcNow

@@ -188,4 +188,39 @@ public static class AppointmentApiTestHelper
         ?? throw new InvalidOperationException(
             "Appointment response was empty.");
   }
+
+  public static async Task<AppointmentResponse>
+    CreateCompletedAppointmentAsync(
+        HttpClient client,
+        Guid patientId,
+        Guid referralId)
+  {
+    var appointment =
+        await CreateInProgressAppointmentAsync(
+            client,
+            patientId,
+            referralId);
+
+    var response =
+        await client.PostAsync(
+            $"/api/appointments/{appointment.Id}/complete",
+            null);
+
+    if (!response.IsSuccessStatusCode)
+    {
+      var body =
+          await response.Content
+              .ReadAsStringAsync();
+
+      throw new InvalidOperationException(
+          $"Appointment completion failed. " +
+          $"Status: {response.StatusCode}. " +
+          $"Body: {body}");
+    }
+
+    return await response.Content
+        .ReadFromJsonAsync<AppointmentResponse>()
+        ?? throw new InvalidOperationException(
+            "Appointment response was empty.");
+  }
 }

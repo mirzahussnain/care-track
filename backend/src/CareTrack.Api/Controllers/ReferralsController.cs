@@ -2,6 +2,7 @@ using CareTrack.Api.Contracts.Referrals;
 using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
+using CareTrack.Application.Referrals.CompleteReferral;
 using CareTrack.Application.Referrals.CreateReferral;
 using CareTrack.Application.Referrals.GetReferralById;
 using CareTrack.Application.Referrals.GetReferralHistory;
@@ -38,9 +39,12 @@ public sealed class ReferralsController
 
   private readonly AssignReferralService _assignReferralService;
 
+
   private readonly ReassignReferralService _reassignReferralService;
 
+  private readonly CompleteReferralService _completeReferralService;
   private readonly GetReferralHistoryService _getReferralHistoryService;
+
 
   private readonly GetReferralByIdService _getReferralByIdService;
   private readonly SearchReferralsService _searchReferralsService;
@@ -58,7 +62,8 @@ public sealed class ReferralsController
       ReassignReferralService reassignReferralSerivce,
       GetReferralHistoryService getReferralHistoryService,
       GetReferralByIdService getReferralByIdService,
-      SearchReferralsService searchReferralsService)
+      SearchReferralsService searchReferralsService,
+      CompleteReferralService completeReferralService)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -73,6 +78,7 @@ public sealed class ReferralsController
     _getReferralHistoryService = getReferralHistoryService;
     _getReferralByIdService = getReferralByIdService;
     _searchReferralsService = searchReferralsService;
+    _completeReferralService = completeReferralService;
   }
 
   [HttpPost]
@@ -221,6 +227,20 @@ public sealed class ReferralsController
 
     return Ok(
         referral.ToResponse());
+  }
+
+  [HttpPost("{id:guid}/complete")]
+  public async Task<IActionResult> Complete(
+    Guid id,
+    CancellationToken cancellationToken)
+  {
+    await _completeReferralService.ExecuteAsync(
+        new CompleteReferralCommand(id),
+        cancellationToken);
+
+    return NoContent();
+
+
   }
 
   [HttpGet("{id:guid}/history")]

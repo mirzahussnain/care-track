@@ -42,6 +42,27 @@ public class AppointmentRepository
             cancellationToken);
   }
 
+  public async Task<IReadOnlyList<Appointment>>
+    GetByReferralIdAsync(
+        Guid referralId,
+        CancellationToken cancellationToken = default)
+{
+    return await _dbContext.Appointments
+        .AsNoTracking()
+        .Where(
+            appointment =>
+                appointment.ReferralId ==
+                referralId)
+        .OrderBy(
+            appointment =>
+                appointment.ScheduledStart)
+        .ThenBy(
+            appointment =>
+                appointment.Id)
+        .ToListAsync(
+            cancellationToken);
+}
+
   public async Task<PagedResult<Appointment>> SearchAsync(
     AppointmentSearchCommand command,
     CancellationToken cancellationToken = default)

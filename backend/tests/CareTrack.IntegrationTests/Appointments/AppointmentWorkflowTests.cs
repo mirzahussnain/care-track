@@ -46,9 +46,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -141,9 +142,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -175,9 +177,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -223,9 +226,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -268,9 +272,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -302,9 +307,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -350,9 +356,10 @@ public class AppointmentWorkflowTests :
 
     var referral =
         await ReferralApiTestHelper
-            .CreateReferralAsync(
+            .CreateAssignedReferralAsync(
                 _client,
-                patient.Id);
+                "Integration Test Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper

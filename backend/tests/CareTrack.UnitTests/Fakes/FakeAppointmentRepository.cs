@@ -49,6 +49,27 @@ public class FakeAppointmentRepository
                 appointmentReference));
   }
 
+  public Task<IReadOnlyList<Appointment>> GetByReferralIdAsync(
+    Guid referralId,
+    CancellationToken cancellationToken = default)
+  {
+    IReadOnlyList<Appointment> appointments =
+        Appointments
+            .Where(
+                appointment =>
+                    appointment.ReferralId == referralId)
+            .OrderBy(
+                appointment =>
+                    appointment.ScheduledStart)
+            .ThenBy(
+                appointment =>
+                    appointment.Id)
+            .ToList();
+
+    return Task.FromResult(
+        appointments);
+  }
+
   public Task<PagedResult<Appointment>> SearchAsync(
     AppointmentSearchCommand command,
     CancellationToken cancellationToken = default)
