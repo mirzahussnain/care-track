@@ -39,7 +39,7 @@ public class GlobalExceptionHandler : IExceptionHandler
       InvalidStateTransitionException =>
           (
               StatusCodes.Status409Conflict,
-              "Invalid Referral State Transition"
+              "Invalid State Transition"
           ),
       _ =>
           (StatusCodes.Status500InternalServerError,

@@ -6,7 +6,7 @@ using CareTrack.IntegrationTests.Contracts.Referrals;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
 
-namespace CareTrack.IntegrationTests;
+namespace CareTrack.IntegrationTests.Appointments;
 
 public class ReferralAppointmentIntegrationTests
     : IClassFixture<CareTrackSqlServerWebApplicationFactory>
@@ -21,94 +21,6 @@ public class ReferralAppointmentIntegrationTests
     _client = factory.CreateClient();
   }
 
-  private async Task<ReferralResponse>
-    CreateAssignedReferralAsync(
-        Guid patientId)
-  {
-    var createRequest =
-        new
-        {
-          referralReference =
-                $"REF-{Guid.NewGuid():N}"[..16],
-
-          patientId,
-
-          priority =
-                (int)ReferralPriority.Routine,
-
-          reason =
-                "Referral appointment integration test."
-        };
-
-    var createResponse =
-        await _client.PostAsJsonAsync(
-            "/api/referrals",
-            createRequest);
-
-    Assert.Equal(
-        HttpStatusCode.Created,
-        createResponse.StatusCode);
-
-    var referral =
-        await createResponse.Content
-            .ReadFromJsonAsync<ReferralResponse>();
-
-    Assert.NotNull(referral);
-
-    var submitResponse =
-        await _client.PostAsync(
-            $"/api/referrals/{referral!.Id}/submit",
-            null);
-
-    Assert.Equal(
-        HttpStatusCode.OK,
-        submitResponse.StatusCode);
-
-    var startTriageResponse =
-        await _client.PostAsync(
-            $"/api/referrals/{referral.Id}/start-triage",
-            null);
-
-    Assert.Equal(
-        HttpStatusCode.OK,
-        startTriageResponse.StatusCode);
-
-    var acceptResponse =
-        await _client.PostAsync(
-            $"/api/referrals/{referral.Id}/accept",
-            null);
-
-    Assert.Equal(
-        HttpStatusCode.OK,
-        acceptResponse.StatusCode);
-
-    var assignResponse =
-        await _client.PostAsJsonAsync(
-            $"/api/referrals/{referral.Id}/assign",
-            new
-            {
-              assignedTo =
-                    "Cardiology Team"
-            });
-
-    Assert.Equal(
-        HttpStatusCode.OK,
-        assignResponse.StatusCode);
-
-    var assignedReferral =
-        await assignResponse.Content
-            .ReadFromJsonAsync<ReferralResponse>();
-
-    Assert.NotNull(
-        assignedReferral);
-
-    Assert.Equal(
-        ReferralStatus.Assigned,
-        assignedReferral!.Status);
-
-    return assignedReferral;
-  }
-
   [Fact]
   public async Task CreateAppointment_WhenReferralIsAssigned_MovesReferralToScheduled()
   {
@@ -119,8 +31,11 @@ public class ReferralAppointmentIntegrationTests
                 _client);
 
     var referral =
-        await CreateAssignedReferralAsync(
-            patient.Id);
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Cardiology Team",
+                passedPatientId: patient.Id);
 
     Assert.Equal(
         ReferralStatus.Assigned,
@@ -240,8 +155,11 @@ public class ReferralAppointmentIntegrationTests
                 _client);
 
     var referral =
-        await CreateAssignedReferralAsync(
-            patient.Id);
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Cardiology Team",
+                passedPatientId: patient.Id);
 
     // Act
     var appointment =
@@ -286,8 +204,11 @@ public class ReferralAppointmentIntegrationTests
                 _client);
 
     var referral =
-        await CreateAssignedReferralAsync(
-            patient.Id);
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Cardiology Team",
+                passedPatientId: patient.Id);
 
     // Act
     var appointment =
@@ -332,8 +253,11 @@ public class ReferralAppointmentIntegrationTests
                 _client);
 
     var referral =
-        await CreateAssignedReferralAsync(
-            patient.Id);
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Cardiology Team",
+                passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
@@ -411,8 +335,11 @@ public class ReferralAppointmentIntegrationTests
                 _client);
 
     var referral =
-        await CreateAssignedReferralAsync(
-            patient.Id);
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Cardiology Team",
+                passedPatientId: patient.Id);
 
     var firstStart =
         DateTime.UtcNow.AddDays(5);

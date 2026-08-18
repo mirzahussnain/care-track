@@ -22,27 +22,29 @@ public class CreatePatientService
       CreatePatientCommand command,
       CancellationToken cancellationToken = default)
   {
+    var patientReference = command.PatientReference.Trim();
+
     var existingPatient =
         await _patientRepository.GetByReferenceAsync(
-            command.PatientReference,
+            patientReference,
             cancellationToken);
 
     if (existingPatient is not null)
     {
       _logger.LogWarning(
           "Patient creation rejected because reference {PatientReference} already exists",
-          command.PatientReference);
+          patientReference);
 
       throw new ConflictException(
-          $"A patient with reference '{command.PatientReference}' already exists.");
+          $"A patient with reference '{patientReference}' already exists.");
     }
 
     _logger.LogInformation(
         "Creating patient with reference {PatientReference}",
-        command.PatientReference);
+        patientReference);
 
     var patient = new Patient(
-        command.PatientReference,
+        patientReference,
         command.FirstName,
         command.LastName,
         command.DateOfBirth);

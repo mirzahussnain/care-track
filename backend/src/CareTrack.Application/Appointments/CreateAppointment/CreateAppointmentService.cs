@@ -1,3 +1,4 @@
+using System.Data;
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
@@ -43,16 +44,18 @@ public class CreateAppointmentService
           CreateAppointmentCommand command,
           CancellationToken cancellationToken = default)
   {
+    var appointmentReference = command.AppointmentReference.Trim();
+
     var existingAppointment =
         await _appointmentRepository
             .GetByReferenceAsync(
-                command.AppointmentReference,
+                appointmentReference,
                 cancellationToken);
 
     if (existingAppointment is not null)
     {
       throw new ConflictException(
-          $"Appointment reference '{command.AppointmentReference}' already exists.");
+          $"Appointment reference '{appointmentReference}' already exists.");
     }
 
     var patient =
@@ -67,57 +70,59 @@ public class CreateAppointmentService
           $"Patient '{command.PatientId}' was not found.");
     }
 
-    var referral =
-        await _referralRepository
-            .GetByIdAsync(
-                command.ReferralId,
-                cancellationToken);
-
-    if (referral is null)
-    {
-      throw new NotFoundException(
-          $"Referral '{command.ReferralId}' was not found.");
-    }
-
-    if (referral.PatientId != patient.Id)
-    {
-      throw new ArgumentException(
-          "The referral does not belong to the specified patient.");
-    }
-
-    if (!referral.CanScheduleAppointment())
-{
-    throw new ConflictException(
-        $"Referral '{referral.Id}' cannot be scheduled while in status '{referral.Status}'.");
-}
-
-    var appointment =
-        new Appointment(
-            command.AppointmentReference,
-            command.PatientId,
-            command.ReferralId,
-            command.AppointmentType,
-            command.ScheduledStart,
-            command.ScheduledEnd,
-            command.Location);
-
-    var hasSchedulingConflict =
-    await _appointmentRepository
-        .HasSchedulingConflictAsync(
-            appointment.PatientId,
-            appointment.ScheduledStart,
-            appointment.ScheduledEnd,
-            cancellationToken: cancellationToken);
-
-    if (hasSchedulingConflict)
-    {
-      throw new ConflictException(
-          "The patient already has an overlapping appointment.");
-    }
+    Appointment appointment = null!;
 
     await _applicationTransaction.ExecuteAsync(
     async ct =>
     {
+        var referral =
+            await _referralRepository
+                .GetByIdAsync(
+                    command.ReferralId,
+                    ct);
+
+        if (referral is null)
+        {
+          throw new NotFoundException(
+              $"Referral '{command.ReferralId}' was not found.");
+        }
+
+        if (referral.PatientId != patient.Id)
+        {
+          throw new ArgumentException(
+              "The referral does not belong to the specified patient.");
+        }
+
+        if (!referral.CanScheduleAppointment())
+        {
+          throw new ConflictException(
+              $"Referral '{referral.Id}' cannot be scheduled while in status '{referral.Status}'.");
+        }
+
+        appointment =
+            new Appointment(
+                appointmentReference,
+                command.PatientId,
+                command.ReferralId,
+                command.AppointmentType,
+                command.ScheduledStart,
+                command.ScheduledEnd,
+                command.Location);
+
+        var hasSchedulingConflict =
+            await _appointmentRepository
+                .HasSchedulingConflictAsync(
+                    appointment.PatientId,
+                    appointment.ScheduledStart,
+                    appointment.ScheduledEnd,
+                    cancellationToken: ct);
+
+        if (hasSchedulingConflict)
+        {
+          throw new ConflictException(
+              "The patient already has an overlapping appointment.");
+        }
+
         await _appointmentRepository.AddAsync(
             appointment,
             ct);
@@ -130,6 +135,7 @@ public class CreateAppointmentService
                 ct);
         }
     },
+    IsolationLevel.Serializable,
     cancellationToken);
 
     _logger.LogInformation(

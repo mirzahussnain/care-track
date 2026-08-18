@@ -2,6 +2,7 @@ using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 namespace CareTrack.Infrastructure.Persistance.Repositories;
 
@@ -83,7 +84,17 @@ public class PatientRepository : IPatientRepository
   public async Task AddAsync(Patient patient, CancellationToken cancellationToken = default)
   {
     await _dbContext.Patients.AddAsync(patient, cancellationToken);
-    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    try
+    {
+      await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+    catch (DbUpdateException exception)
+        when (IsDuplicatePatientReference(exception))
+    {
+      throw new ConflictException(
+          $"A patient with reference '{patient.PatientReference}' already exists.");
+    }
   }
 
   public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -100,5 +111,14 @@ public class PatientRepository : IPatientRepository
           ex);
     }
 
+  }
+  private static bool IsDuplicatePatientReference(
+      DbUpdateException exception)
+  {
+    return exception.InnerException is SqlException sqlException
+        && (sqlException.Number == 2601 || sqlException.Number == 2627)
+        && sqlException.Message.Contains(
+            "IX_Patients_PatientReference",
+            StringComparison.OrdinalIgnoreCase);
   }
 }

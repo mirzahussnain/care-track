@@ -10,7 +10,9 @@ using CareTrack.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-public sealed class ClinicalNotesTests
+namespace CareTrack.IntegrationTests.ClinicalNotes;
+
+public sealed class ClinicalNotePersistenceTests
     : IClassFixture<CareTrackSqlServerWebApplicationFactory>,
       IAsyncLifetime
 {
@@ -20,7 +22,7 @@ public sealed class ClinicalNotesTests
   private readonly HttpClient
       _client;
 
-  public ClinicalNotesTests(
+  public ClinicalNotePersistenceTests(
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;

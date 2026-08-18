@@ -36,6 +36,8 @@ public sealed class CreateReferralService
       CancellationToken cancellationToken =
           default)
   {
+    var referralReference = command.ReferralReference.Trim();
+
     var patient =
         await _patientRepository.GetByIdAsync(
             command.PatientId,
@@ -54,22 +56,22 @@ public sealed class CreateReferralService
     var existingReferral =
         await _referralRepository
             .GetByReferenceAsync(
-                command.ReferralReference,
+                referralReference,
                 cancellationToken);
 
     if (existingReferral is not null)
     {
       _logger.LogWarning(
           "Referral creation rejected because reference {ReferralReference} already exists",
-          command.ReferralReference);
+          referralReference);
 
       throw new ConflictException(
-          $"A referral with reference '{command.ReferralReference}' already exists.");
+          $"A referral with reference '{referralReference}' already exists.");
     }
 
     var referral =
         new Referral(
-            command.ReferralReference,
+            referralReference,
             command.PatientId,
             command.Priority,
             command.Reason);

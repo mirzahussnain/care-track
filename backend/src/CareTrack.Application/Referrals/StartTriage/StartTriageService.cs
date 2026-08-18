@@ -35,7 +35,7 @@ public sealed class StartTriageService
     catch (InvalidOperationException exception)
     {
       _logger.LogWarning(
-     "Referral {ReferralId} was not found during triage trigger",
+     "Referral {ReferralId} could not enter triage because the current state does not allow the transition",
      command.ReferralId);
 
       throw new InvalidStateTransitionException(

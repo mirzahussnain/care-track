@@ -1,9 +1,11 @@
+using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
 
 using CareTrack.Domain.Entities;
 using CareTrack.Domain.Enums;
 
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareTrack.Infrastructure.Persistance.Repositories;
@@ -21,11 +23,6 @@ public sealed class ReferralRepository
   public Task SaveChangesAsync(
     CancellationToken cancellationToken = default)
   {
-    // foreach (var entry in _dbContext.ChangeTracker.Entries())
-    // {
-    //   Console.WriteLine(
-    //       $"{entry.Entity.GetType().Name} - {entry.State}");
-    // }
     return _dbContext.SaveChangesAsync(
         cancellationToken);
   }
@@ -54,8 +51,17 @@ public sealed class ReferralRepository
         referral,
         cancellationToken);
 
-    await _dbContext.SaveChangesAsync(
-        cancellationToken);
+    try
+    {
+      await _dbContext.SaveChangesAsync(
+          cancellationToken);
+    }
+    catch (DbUpdateException exception)
+        when (IsDuplicateReferralReference(exception))
+    {
+      throw new ConflictException(
+          $"A referral with reference '{referral.ReferralReference}' already exists.");
+    }
   }
 
   public Task<Referral?> GetByIdAsync(
@@ -254,4 +260,13 @@ public sealed class ReferralRepository
     };
   }
 
+  private static bool IsDuplicateReferralReference(
+      DbUpdateException exception)
+  {
+    return exception.InnerException is SqlException sqlException
+        && (sqlException.Number == 2601 || sqlException.Number == 2627)
+        && sqlException.Message.Contains(
+            "IX_Referrals_ReferralReference",
+            StringComparison.OrdinalIgnoreCase);
+  }
 }

@@ -200,6 +200,46 @@ public class CreateReferralTests : IClassFixture<CareTrackSqlServerWebApplicatio
   }
 
   [Fact]
+  public async Task CreateReferral_WithWhitespaceNormalizedDuplicateReference_ReturnsConflict()
+  {
+    var patient =
+        await CreatePatientAsync();
+
+    var referralReference =
+        $"REF-{Guid.NewGuid():N}"[..12];
+
+    var firstResponse =
+        await _client.PostAsJsonAsync(
+            "/api/referrals",
+            new
+            {
+              referralReference,
+              patientId = patient.Id,
+              priority = ReferralPriority.Routine,
+              reason = "Initial referral."
+            });
+
+    Assert.Equal(
+        HttpStatusCode.Created,
+        firstResponse.StatusCode);
+
+    var duplicateResponse =
+        await _client.PostAsJsonAsync(
+            "/api/referrals",
+            new
+            {
+              referralReference = $" {referralReference} ",
+              patientId = patient.Id,
+              priority = ReferralPriority.Routine,
+              reason = "Duplicate referral."
+            });
+
+    Assert.Equal(
+        HttpStatusCode.Conflict,
+        duplicateResponse.StatusCode);
+  }
+
+  [Fact]
   public async Task CreateReferral_WithBlankReason_ReturnsBadRequest()
   {
     // Arrange

@@ -71,15 +71,11 @@ public class StartAppointmentService
           ex.Message);
     }
 
-    var referralStarted = false;
 
     if (referral.Status ==
     ReferralStatus.Scheduled)
     {
       referral.StartProgress();
-
-      referralStarted =
-          true;
     }
 
     await _applicationTransaction.ExecuteAsync(
@@ -87,12 +83,6 @@ public class StartAppointmentService
     {
       await _appointmentRepository
           .SaveChangesAsync(ct);
-
-      if (referralStarted)
-      {
-        await _referralRepository
-            .SaveChangesAsync(ct);
-      }
     },
     cancellationToken);
 

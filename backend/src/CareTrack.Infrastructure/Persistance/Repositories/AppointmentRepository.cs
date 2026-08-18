@@ -1,8 +1,10 @@
 using CareTrack.Application.Appointments.SearchAppointments;
+using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
 using CareTrack.Domain.Enums;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareTrack.Infrastructure.Persistance.Repositories;
@@ -266,8 +268,17 @@ command.Page;
         appointment,
         cancellationToken);
 
-    await _dbContext.SaveChangesAsync(
-        cancellationToken);
+    try
+    {
+      await _dbContext.SaveChangesAsync(
+          cancellationToken);
+    }
+    catch (DbUpdateException exception)
+        when (IsDuplicateAppointmentReference(exception))
+    {
+      throw new ConflictException(
+          $"Appointment reference '{appointment.AppointmentReference}' already exists.");
+    }
   }
 
   public Task SaveChangesAsync(
@@ -275,5 +286,14 @@ command.Page;
   {
     return _dbContext.SaveChangesAsync(
         cancellationToken);
+  }
+  private static bool IsDuplicateAppointmentReference(
+      DbUpdateException exception)
+  {
+    return exception.InnerException is SqlException sqlException
+        && (sqlException.Number == 2601 || sqlException.Number == 2627)
+        && sqlException.Message.Contains(
+            "IX_Appointments_AppointmentReference",
+            StringComparison.OrdinalIgnoreCase);
   }
 }

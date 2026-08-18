@@ -99,6 +99,43 @@ public class CreatePatientTests
 
 
   [Fact]
+  public async Task CreatePatient_WithWhitespaceNormalizedDuplicateReference_ReturnsConflict()
+  {
+    var patientReference =
+        $"PAT-{Guid.NewGuid():N}"[..12];
+
+    var firstResponse =
+        await _client.PostAsJsonAsync(
+            "/api/patients",
+            new
+            {
+              patientReference,
+              firstName = "John",
+              lastName = "Smith",
+              dateOfBirth = "1990-05-20"
+            });
+
+    Assert.Equal(
+        HttpStatusCode.Created,
+        firstResponse.StatusCode);
+
+    var duplicateResponse =
+        await _client.PostAsJsonAsync(
+            "/api/patients",
+            new
+            {
+              patientReference = $" {patientReference} ",
+              firstName = "Jane",
+              lastName = "Smith",
+              dateOfBirth = "1991-05-20"
+            });
+
+    Assert.Equal(
+        HttpStatusCode.Conflict,
+        duplicateResponse.StatusCode);
+  }
+
+  [Fact]
   public async Task CreatePatient_WithInValidBody_ReturnsBadRequest()
   {
     var request = new
