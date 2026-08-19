@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Authentication Redirect</title>
+</head>
+
+<body>
+    <p>Completing sign-in...</p>
+
+    <script type="module">
+        import {
+            broadcastResponseToMainFrame
+        } from "@azure/msal-browser/redirect-bridge";
+
+        broadcastResponseToMainFrame();
+    </script>
+</body>
+</html>

@@ -40,6 +40,10 @@ pnpm-debug.log*
 secrets.*
 *.secret
 
+# Authentication/debug artifacts
+*.jwt
+*.token
+
 # Test results / coverage
 TestResults/
 *.trx

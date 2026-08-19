@@ -4,6 +4,7 @@ using CareTrack.Application.Patients.CreatePatient;
 using CareTrack.Application.Patients.GetPatient;
 using CareTrack.Application.Patients.SearchPatients;
 using CareTrack.Application.Patients.UpdatePatient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareTrack.Api.Controllers;
@@ -58,6 +59,7 @@ public class PatientsController : ControllerBase
     return Ok(response);
   }
 
+  [Authorize]
   [HttpGet("{id:guid}")]
   public async Task<ActionResult<PatientResponse>> GetPatient(
     Guid id,
