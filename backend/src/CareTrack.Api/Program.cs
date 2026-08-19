@@ -1,3 +1,4 @@
+using CareTrack.Api.Authorization;
 using CareTrack.Api.ErrorHandling;
 using CareTrack.Application.Appointments.CancelAppointment;
 using CareTrack.Application.Appointments.CheckInAppointment;
@@ -86,7 +87,17 @@ builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+  options.AddPolicy(
+      CareTrackPolicies.ClinicianAccess,
+      policy =>
+      {
+        policy.RequireAuthenticatedUser();
+        policy.RequireScope(CareTrackScopes.AccessAsUser);
+        policy.RequireRole(CareTrackRoles.Clinician);
+      });
+});
 
 var app = builder.Build();
 

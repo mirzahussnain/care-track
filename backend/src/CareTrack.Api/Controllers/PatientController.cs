@@ -1,3 +1,4 @@
+using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.Patients;
 using CareTrack.Api.Mappings;
 using CareTrack.Application.Patients.CreatePatient;
@@ -59,11 +60,11 @@ public class PatientsController : ControllerBase
     return Ok(response);
   }
 
-  [Authorize]
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet("{id:guid}")]
   public async Task<ActionResult<PatientResponse>> GetPatient(
-    Guid id,
-    CancellationToken cancellationToken)
+      Guid id,
+      CancellationToken cancellationToken)
   {
     var patient = await _getPatientService.ExecuteAsync(
         id,
