@@ -3,75 +3,270 @@
 ## Clinical Referral & Workflow Management System
 
 ## 1. Overview
-CareTrack is a portfolio demonstration of an internal clinical referral and workflow management application. It is intended to show a structured referral lifecycle using synthetic data in a controlled learning context.
 
-## 2. Purpose
-The project is designed to demonstrate software engineering planning, architecture, and delivery practices for a referral workflow domain. It is an educational portfolio project and not a production healthcare system.
+CareTrack is an independent portfolio demonstration of a staff-facing clinical referral and workflow management application.
 
-## 3. Project Status
-**Planning / Architecture Stage**
+The backend now implements a structured patient, referral, appointment, and clinical-note workflow using synthetic data only. Microsoft Entra ID is used for authentication, and ASP.NET Core named authorization policies enforce role-appropriate access.
 
-**No application implementation has started yet.**
+CareTrack is not a production healthcare system and is not connected to real NHS systems.
 
-## 4. Proposed Referral Workflow
-Proposed lifecycle:
+## 2. Current Project Status
 
-Patient → Referral Created → Submitted → Awaiting Triage → Accepted → Assigned → Appointment Scheduled → In Progress → Completed
+### Completed
 
-Possible alternative states include:
+- requirements and architecture foundation
+- .NET backend solution and layered architecture
+- SQL Server persistence with EF Core
+- patient management
+- referral workflow
+- appointment scheduling and lifecycle
+- clinical notes
+- concurrency and transactional workflow hardening
+- centralized API exception handling
+- Microsoft Entra bearer authentication
+- role/scope/policy authorization
+- authenticated current-user abstraction
+- deterministic authentication/authorization integration testing
+- route-level security audit and hardening
+
+### Next
+
+**Phase 6 — Angular frontend + MSAL**
+
+Planned next work:
+
+- Angular application
+- MSAL Angular
+- Authorization Code Flow with PKCE
+- authenticated API client
+- role-aware navigation/views
+- frontend forms and workflow UI
+
+## 3. Core Workflow
+
+### Referral
+
+```text
+Draft
+→ Submitted
+→ Awaiting Triage
+→ Accepted
+→ Assigned
+→ Scheduled
+→ In Progress
+→ Completed
+```
+
+Alternative states include:
+
 - More Information Required
 - Rejected
 - Cancelled
 
-## 5. Proposed User Roles
-1. **Coordinator / Administrator**
-   - Future focus: patient/referral administration, assignment, scheduling, queue monitoring.
-2. **Clinician**
-   - Future focus: triage, reviewing referrals, case notes, workflow updates, completion.
-3. **Service Manager**
-   - Future focus: dashboards, monitoring, audit visibility, workload and delay insights.
+### Appointment
 
-## 6. Planned Technology Stack
-The following technologies are **planned for future implementation** and are **not necessarily implemented yet**.
+```text
+Scheduled
+→ Checked In
+→ In Progress
+→ Completed
+```
 
-- **Frontend (planned):** Angular, TypeScript, JavaScript, HTML, CSS, Angular Router, Reactive Forms, NgRx, accessible responsive UI.
-- **Backend (planned):** C#, .NET / ASP.NET Core Web API, REST, OOP, SOLID, Dependency Injection, EF Core, LINQ, OpenAPI/Swagger.
-- **Database (planned):** Microsoft SQL Server, SQL/T-SQL, EF Core migrations.
-- **Authentication (planned):** OAuth 2.0, OpenID Connect, role-based authorization, possible Microsoft Entra ID integration.
-- **Testing (planned):** xUnit, ASP.NET Core integration testing, Angular testing, Playwright E2E.
-- **Infrastructure (planned):** Windows Server, IIS, Azure, GitHub Actions.
-- **Approach (planned):** Agile, user stories, acceptance criteria, technical documentation, architecture diagrams.
+Additional outcomes:
 
-## 7. Planned System Architecture
-A planned layered architecture is documented in `/docs/03-system-architecture.md`:
-- Angular SPA
+- Cancelled
+- Did Not Attend
+
+## 4. Current Roles
+
+### ReferralCoordinator
+
+- patient registration/update
+- referral workflow management
+- assignment/reassignment
+- appointment creation/scheduling
+
+### Clinician
+
+- patient clinical reads
+- appointment clinical workflow
+- clinical notes
+- also permitted by `ReferralManagement` where appropriate
+
+### Administrator
+
+- reserved for future administrative/system capabilities
+- not a universal clinical superuser
+
+### Patient
+
+Patients are domain records in v1 and do not authenticate directly.
+
+A future patient portal would require patient-to-identity mapping and resource-level authorization.
+
+## 5. Technology Stack
+
+### Implemented Backend
+
+- C#
+- .NET 10
 - ASP.NET Core Web API
-- Application and Domain layers
-- Infrastructure with Entity Framework Core
+- Entity Framework Core
+- LINQ
 - Microsoft SQL Server
-- OpenID Connect identity integration
+- Microsoft Entra ID
+- Microsoft.Identity.Web
+- OAuth 2.0 / OpenID Connect concepts
+- xUnit
+- ASP.NET Core integration testing
+- OpenAPI in Development
 
-## 8. Repository Structure
-This repository currently contains **planning documentation and skeleton folders only**.
+### Planned Frontend
+
+- Angular
+- TypeScript
+- MSAL Angular
+- Angular Router
+- Reactive Forms
+- accessible responsive UI
+
+### Planned Delivery
+
+- Playwright
+- GitHub Actions
+- Azure and/or IIS deployment
+
+## 6. Architecture
+
+```mermaid
+flowchart TD
+    SPA[Angular SPA - Phase 6] -->|REST / HTTPS| API[ASP.NET Core Web API]
+    API --> APP[Application]
+    APP --> DOM[Domain]
+
+    API --> INF[Infrastructure / EF Core]
+    INF --> DB[Microsoft SQL Server]
+
+    ENTRA[Microsoft Entra ID] -->|Bearer access token| API
+    SPA -. planned MSAL / PKCE .-> ENTRA
+```
+
+### Dependency Direction
+
+```text
+CareTrack.Api
+  → CareTrack.Application
+  → CareTrack.Infrastructure
+
+CareTrack.Infrastructure
+  → CareTrack.Application
+  → CareTrack.Domain
+
+CareTrack.Application
+  → CareTrack.Domain
+
+CareTrack.Domain
+  → no project dependency
+```
+
+## 7. Authentication & Authorization
+
+The API uses Microsoft Entra ID bearer authentication.
+
+Delegated scope:
+
+```text
+access_as_user
+```
+
+Application roles:
+
+```text
+Clinician
+ReferralCoordinator
+Administrator
+```
+
+Named policies:
+
+```text
+ClinicianAccess
+ReferralManagement
+AdministrativeAccess
+```
+
+A request must be authenticated and satisfy the required scope/role policy.
+
+Clinical-note `CreatedBy` is derived server-side from the authenticated Entra object ID and cannot be overridden by a client-supplied value.
+
+## 8. API Security Model
+
+Examples:
+
+```text
+Patients read/search
+→ ClinicianAccess
+
+Patients create/update
+→ ReferralManagement
+
+Referrals
+→ ReferralManagement
+
+Appointments create
+→ ReferralManagement
+
+Appointments read/workflow
+→ ClinicianAccess
+
+Clinical Notes
+→ ClinicianAccess
+```
+
+`/api/health` is intentionally anonymous.
+
+OpenAPI is exposed only in Development.
+
+## 9. Testing
+
+The backend includes:
+
+- unit tests for domain/application behavior
+- SQL Server-backed integration tests
+- persistence tests
+- workflow tests
+- concurrency and rollback tests
+- deterministic test authentication
+- policy tests
+- 401/403 authorization tests
+- route-to-policy tests
+- Clinical Note identity-spoofing tests
+
+Integration tests keep anonymous clients anonymous and explicitly create authenticated test clients with the minimum required role/scope.
+
+## 10. Repository Structure
 
 ```text
 CareTrack/
 ├── backend/
-├── frontend/
-├── database/
+│   ├── src/
+│   │   ├── CareTrack.Api/
+│   │   ├── CareTrack.Application/
+│   │   ├── CareTrack.Domain/
+│   │   └── CareTrack.Infrastructure/
+│   └── tests/
+│       ├── CareTrack.UnitTests/
+│       └── CareTrack.IntegrationTests/
+├── tools/
+│   └── CareTrack.AuthTestClient/
 ├── docs/
 └── .github/
 ```
 
-## 9. Development Roadmap
-Planned next phases:
-1. Requirements refinement
-2. Architecture and data design validation
-3. Framework initialization
-4. Incremental feature implementation
-5. Testing and deployment setup
+The temporary authentication test client is retained until the Angular/MSAL client is working.
 
-## 10. Documentation
+## 11. Documentation
+
 - `docs/01-requirements.md`
 - `docs/02-user-stories.md`
 - `docs/03-system-architecture.md`
@@ -83,8 +278,19 @@ Planned next phases:
 - `docs/09-security.md`
 - `docs/10-deployment.md`
 
-## 11. Data & Security Notice
-CareTrack is designed for synthetic data only. No real patient data, production credentials, or live healthcare integrations should be used in this portfolio project.
+## 12. Data & Security Notice
 
-## 12. Disclaimer
-**CareTrack is an independent portfolio demonstration using entirely synthetic data. It is not affiliated with, commissioned by, or endorsed by the NHS, University Hospitals Plymouth NHS Trust, or any other healthcare provider.**
+CareTrack is designed for synthetic data only.
+
+Do not use:
+
+- real patient data
+- production credentials
+- real clinical information
+- live healthcare integrations
+
+No credentials, access tokens, secrets, or environment-specific private configuration should be committed to Git.
+
+## 13. Disclaimer
+
+**CareTrack is an independent portfolio demonstration using entirely synthetic data. It is not affiliated with, commissioned by, or endorsed by the NHS, University Hospitals Plymouth NHS Trust, or any other healthcare provider. It does not claim clinical-safety certification, regulatory approval, or production fitness.**

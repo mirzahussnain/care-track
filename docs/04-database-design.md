@@ -1,47 +1,98 @@
-# Proposed Database Design
+# Database Design
 
-This document captures a **proposed** high-level data model for future implementation.
+## Current Status
+Core SQL Server persistence is implemented using Entity Framework Core migrations.
 
-## Planned Entities
-- APP_USER
-- PATIENT
-- SPECIALTY
-- REFERRAL
-- REFERRAL_ASSIGNMENT
-- REFERRAL_STATUS_HISTORY
-- APPOINTMENT
-- CASE_NOTE
-- AUDIT_EVENT
+The original planning model included several speculative entities. The implemented v1 backend intentionally uses a smaller model focused on the referral workflow.
 
-## Proposed High-Level Relationships
-- A patient may have multiple referrals.
-- A specialty may be linked to multiple referrals.
-- A referral may have multiple assignments over time.
-- Assignments link referrals to application users.
-- A referral may have many status history events.
-- A referral may have multiple appointments.
-- A referral may have multiple case notes.
-- A referral may have many audit events.
+## Implemented Core Entities
 
-## Future Data Design Considerations
-- primary keys
-- foreign keys
-- referential integrity
-- indexes
-- concurrency
-- transactions
-- auditability
-- data quality
+### Patient
+Represents a synthetic patient record.
 
-## Proposed CareTrack Data Model
+Key concerns:
+- unique patient identity/reference
+- demographic data
+- optimistic concurrency for updates
+- one-to-many relationship with referrals and appointments
+
+### Referral
+Represents a referral moving through the CareTrack workflow.
+
+Key concerns:
+- referral reference
+- patient relationship
+- priority and reason
+- workflow status
+- triage data
+- assignment data
+- workflow timestamps
+- history retrieval
+
+### Appointment
+Represents a scheduled clinical encounter associated with a patient and referral.
+
+Key concerns:
+- appointment reference
+- patient and referral foreign keys
+- appointment type
+- scheduled start/end
+- location
+- operational status
+- check-in/start/completion/cancellation/DNA timestamps
+
+### ClinicalNote
+Represents a note associated with an appointment.
+
+Key concerns:
+- appointment foreign key
+- content
+- `CreatedBy` derived from authenticated user identity
+- created/updated timestamps
+- no delete endpoint in the current API
+- appointment deletion is restricted when clinical notes exist
+
+## Important Relationships
+
 ```mermaid
 erDiagram
     PATIENT ||--o{ REFERRAL : has
-    SPECIALTY ||--o{ REFERRAL : categorises
-    REFERRAL ||--o{ REFERRAL_ASSIGNMENT : has
-    APP_USER ||--o{ REFERRAL_ASSIGNMENT : performs
-    REFERRAL ||--o{ REFERRAL_STATUS_HISTORY : tracks
+    PATIENT ||--o{ APPOINTMENT : attends
     REFERRAL ||--o{ APPOINTMENT : schedules
-    REFERRAL ||--o{ CASE_NOTE : documents
-    REFERRAL ||--o{ AUDIT_EVENT : audits
+    APPOINTMENT ||--o{ CLINICAL_NOTE : contains
 ```
+
+## Data Integrity Decisions
+- SQL Server foreign keys protect relationships.
+- Appointment deletion is restricted when clinical notes exist.
+- Patient updates use optimistic concurrency.
+- Duplicate references are protected at the application/database boundary.
+- Whitespace-normalized duplicate references are rejected.
+- Appointment scheduling uses transactional overlap protection.
+- Cross-aggregate scheduling changes use an application transaction.
+
+## Appointment Conflict Rule
+The overlap rule is:
+
+```text
+existing.Start < requestedEnd
+AND
+existing.End > requestedStart
+```
+
+This models half-open intervals and allows back-to-back appointments.
+
+Conflict checking is performed for the same patient. Cancelled and Did Not Attend appointments do not block scheduling; Completed appointments still count as historical scheduled occupancy.
+
+## Identity Data
+CareTrack currently does not maintain a local password/user-account table.
+
+Microsoft Entra ID is the identity provider. Where application records need the authenticated user identity, CareTrack stores the stable Entra object ID supplied by the trusted authentication boundary.
+
+## Deferred Data Concepts
+Not currently implemented as first-class v1 entities:
+- local APP_USER credential store
+- Specialty
+- dedicated ReferralAssignment entity
+- dedicated system-wide AuditEvent entity
+- administrative configuration entities

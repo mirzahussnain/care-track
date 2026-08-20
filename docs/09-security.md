@@ -1,25 +1,94 @@
-# Planned Security Considerations
+# Security
 
-CareTrack is a portfolio project intended to use synthetic data only.
+## Current Status
+Core backend security controls are implemented for the current portfolio scope.
 
-## Planned Security Principles
-- synthetic data only
+CareTrack uses synthetic data only and does not claim production healthcare certification or regulatory compliance.
+
+## Implemented Principles
+- Microsoft Entra authentication
+- delegated `access_as_user` API scope
+- explicit CareTrack application roles
+- named authorization policies
 - least privilege
-- authentication
-- authorization
-- secrets management
+- no universal Administrator bypass
+- HTTPS redirection
+- server-derived authenticated ownership
 - input validation
-- HTTPS
-- secure headers
-- auditability
-- dependency management
+- centralized exception handling
+- generic unexpected-error responses
+- SQL Server referential integrity
+- optimistic concurrency
+- transactional scheduling protections
+- deterministic authorization tests
+- no committed secrets
+- limited anonymous API surface
+- development-only OpenAPI exposure
+
+## Authorization Boundary
+Business endpoints require explicit named policies.
+
+Intentionally anonymous:
+- `/api/health`
+
+Development-only:
+- OpenAPI endpoint(s)
+
+The default template `/weatherforecast` endpoint was removed as unnecessary public surface.
+
+## Trusted Identity
+CareTrack uses the authenticated Microsoft Entra object ID as the stable user identifier for server-derived ownership.
+
+The application does not trust:
+- email address as a durable security identifier
+- display name
+- client-supplied `createdBy`
+- arbitrary user IDs in request bodies
+
+## Role Model
+- `Clinician` — clinical reads/workflows and clinical notes
+- `ReferralCoordinator` — referral administration and scheduling
+- `Administrator` — future system administration only
+
+A valid login alone does not grant business access. Policies require both delegated scope and appropriate application role.
+
+## Patient Access Boundary
+Patients are not authenticated actors in v1.
+
+A future patient portal would require:
+- patient-to-Entra identity mapping
+- resource-level ownership checks
+- patient-safe API contracts
+- explicit privacy/consent design
+
+A simple `Patient` role would not be sufficient.
+
+## Identity Administration
+User account lifecycle, passwords, MFA, and app-role assignment remain Microsoft Entra responsibilities.
+
+A future CareTrack admin dashboard could integrate with Microsoft Graph for selected staff-access operations, but such permissions would be introduced only with a defined requirement and threat model.
+
+## Logging
+Security-relevant logging should avoid:
+- clinical note content
+- tokens
+- secrets
+- unnecessary personal data
+
+Unexpected server failures return generic client-facing details.
+
+## Secrets
+Credentials and environment-specific identifiers must remain outside Git.
+
+The temporary development authentication client uses local environment configuration and must not commit secrets or tokens.
+
+## Privacy & Governance Awareness
+The project demonstrates awareness of:
+- UK GDPR principles
+- confidentiality
 - data minimisation
-- appropriate logging
-- no secrets committed to Git
-
-## Privacy and Governance Awareness
-- awareness of UK GDPR principles
-- confidentiality considerations
+- least privilege
 - secure handling of potentially sensitive information
+- auditability
 
-This planning repository contains no real patient data and does not claim certification or regulatory compliance.
+These are portfolio engineering considerations rather than claims of formal compliance.
