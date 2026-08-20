@@ -31,6 +31,7 @@ public class PatientsController : ControllerBase
     _updatePatiientService = updatePatiientService;
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet]
   public async Task<ActionResult<PagedPatientResponse>> GetPatients(
     [FromQuery] string? search,
@@ -75,6 +76,7 @@ public class PatientsController : ControllerBase
     return Ok(response);
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost]
   public async Task<ActionResult<PatientResponse>> CreatePatient(CreatePatientRequest request, CancellationToken cancellationToken)
   {
@@ -91,6 +93,8 @@ public class PatientsController : ControllerBase
     return CreatedAtAction(nameof(GetPatient), new { id = patient.Id }, response);
   }
 
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPut("{id:guid}")]
   public async Task<ActionResult<PatientResponse>> UpdatePatient(Guid id, UpdatePatientRequest request, CancellationToken cancellationToken)
   {

@@ -1,20 +1,20 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 namespace CareTrack.IntegrationTests.Patients;
 
 public class SearchPatientsTests
     : IClassFixture<CareTrackSqlServerWebApplicationFactory>, IAsyncLifetime
 {
-  private readonly HttpClient _client;
   private readonly CareTrackSqlServerWebApplicationFactory _factory;
 
   public SearchPatientsTests(
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
   }
   public async Task InitializeAsync()
   {
@@ -27,6 +27,7 @@ public class SearchPatientsTests
   }
 
   private async Task CreatePatientAsync(
+      HttpClient client,
       string patientReference,
       string firstName,
       string lastName,
@@ -41,7 +42,7 @@ public class SearchPatientsTests
     };
 
     var response =
-        await _client.PostAsJsonAsync(
+        await client.PostAsJsonAsync(
             "/api/patients",
             request);
 
@@ -54,17 +55,31 @@ public class SearchPatientsTests
   [Fact]
   public async Task GetPatients_WithFirstName_Descending_ReturnsCorrectOrder()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var prefix =
         Guid.NewGuid()
             .ToString("N")[..6];
     var sharedLastName = $"Sort{prefix}";
-    await CreatePatientAsync($"PAT-{prefix}-1", "Alice", sharedLastName);
-    await CreatePatientAsync($"PAT-{prefix}-2", "Carol", sharedLastName);
-    await CreatePatientAsync($"PAT-{prefix}-3", "Bob", sharedLastName);
+    await CreatePatientAsync(referralCoordinatorClient, $"PAT-{prefix}-1", "Alice", sharedLastName);
+    await CreatePatientAsync(referralCoordinatorClient, $"PAT-{prefix}-2", "Carol", sharedLastName);
+    await CreatePatientAsync(referralCoordinatorClient, $"PAT-{prefix}-3", "Bob", sharedLastName);
 
     //Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
     $"/api/patients" + $"?search={sharedLastName}" + $"&sortBy=firstName" + $"&sortDirection=desc" + $"&page=1" + $"&pageSize=20");
 
     //Assert
@@ -81,6 +96,20 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task GetPatients_WithPatientReferenceAscending_ReturnsCorrectOrder()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var prefix =
         Guid.NewGuid()
@@ -88,23 +117,23 @@ result.Items.Select(patient => patient.FirstName));
 
     var sharedLastName = $"Reference{prefix}";
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-C",
         "Alice",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-A",
         "Bob",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-B",
         "Carol",
         sharedLastName);
 
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         $"/api/patients" +
         $"?search={sharedLastName}" +
         $"&sortBy=patientReference" +
@@ -132,8 +161,15 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task GetPatients_WithInvalidSortField_ReturnsBadRequest()
   {
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         "/api/patients" +
         "?sortBy=invalidField" +
         "&sortDirection=asc");
@@ -146,8 +182,15 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task GetPatients_WithInvalidSortDirection_ReturnsBadRequest()
   {
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         "/api/patients" +
         "?sortBy=lastName" +
         "&sortDirection=sideways");
@@ -161,6 +204,20 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task GetPatients_WithMixedCaseSortParameters_AppliesNormalizedSorting()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var prefix =
         Guid.NewGuid()
@@ -168,23 +225,23 @@ result.Items.Select(patient => patient.FirstName));
 
     var sharedLastName = $"Normalize{prefix}";
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-1",
         "Alice",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-2",
         "Charlie",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-3",
         "Bob",
         sharedLastName);
 
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         $"/api/patients" +
         $"?search={sharedLastName}" +
         $"&sortBy=FirstName" +
@@ -208,6 +265,20 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task GetPatients_WithSortingAndPagination_ReturnsCorrectPage()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var prefix =
         Guid.NewGuid()
@@ -215,28 +286,28 @@ result.Items.Select(patient => patient.FirstName));
 
     var sharedLastName = $"Paged{prefix}";
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-A",
         "Alice",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-B",
         "Bob",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-C",
         "Carol",
         sharedLastName);
 
-    await CreatePatientAsync(
+    await CreatePatientAsync(referralCoordinatorClient,
         $"PAT-{prefix}-D",
         "David",
         sharedLastName);
 
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         $"/api/patients" +
         $"?search={sharedLastName}" +
         $"&sortBy=firstName" +
@@ -268,6 +339,20 @@ result.Items.Select(patient => patient.FirstName));
   [Fact]
   public async Task SearchPagedPatient_WithQuery_ReturnsMatchingPatients()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var uniqueReference = $"PAT-{Guid.NewGuid():N}"[..12];
 
@@ -279,7 +364,7 @@ result.Items.Select(patient => patient.FirstName));
       dateOfBirth = "1990-05-20"
     };
 
-    var createResponse = await _client.PostAsJsonAsync(
+    var createResponse = await referralCoordinatorClient.PostAsJsonAsync(
         "/api/patients",
         request);
 
@@ -288,7 +373,7 @@ result.Items.Select(patient => patient.FirstName));
         createResponse.StatusCode);
 
     // Act
-    var response = await _client.GetAsync(
+    var response = await clinicianClient.GetAsync(
         "/api/patients?search=Smith&page=1&pageSize=20");
 
     // Assert

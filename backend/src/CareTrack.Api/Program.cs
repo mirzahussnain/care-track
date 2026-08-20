@@ -1,5 +1,6 @@
 using CareTrack.Api.Authorization;
 using CareTrack.Api.ErrorHandling;
+using CareTrack.Api.Identity;
 using CareTrack.Application.Appointments.CancelAppointment;
 using CareTrack.Application.Appointments.CheckInAppointment;
 using CareTrack.Application.Appointments.CompleteAppointment;
@@ -97,7 +98,27 @@ builder.Services.AddAuthorization(options =>
         policy.RequireScope(CareTrackScopes.AccessAsUser);
         policy.RequireRole(CareTrackRoles.Clinician);
       });
+
+  options.AddPolicy(CareTrackPolicies.ReferralManagement,
+  policy =>
+  {
+    policy.RequireAuthenticatedUser();
+    policy.RequireScope(CareTrackScopes.AccessAsUser);
+    policy.RequireRole(CareTrackRoles.ReferralCoordinator, CareTrackRoles.Clinician);
+  });
+
+  options.AddPolicy(CareTrackPolicies.AdministrativeAccess,
+  policy =>
+  {
+    policy.RequireAuthenticatedUser();
+    policy.RequireScope(CareTrackScopes.AccessAsUser);
+    policy.RequireRole(CareTrackRoles.Administrator);
+  });
+
 });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
 var app = builder.Build();
 

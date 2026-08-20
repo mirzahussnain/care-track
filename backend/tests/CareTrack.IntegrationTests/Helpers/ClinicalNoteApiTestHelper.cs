@@ -10,14 +10,12 @@ public static class ClinicalNoteApiTestHelper
       CreateClinicalNoteAsync(
           HttpClient client,
           Guid appointmentId,
-          string content = "Patient reports improving symptoms.",
-          string createdBy = "clinician.demo")
+          string content = "Patient reports improving symptoms.")
   {
     var request =
         new
         {
-          content,
-          createdBy
+          content
         };
 
     var response =

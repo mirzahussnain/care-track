@@ -1,3 +1,4 @@
+using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.Appointments;
 using CareTrack.Application.Appointments.CancelAppointment;
 using CareTrack.Application.Appointments.CheckInAppointment;
@@ -9,6 +10,7 @@ using CareTrack.Application.Appointments.SearchAppointments;
 using CareTrack.Application.Appointments.StartAppointment;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareTrack.Api.Controllers;
@@ -95,6 +97,7 @@ public class AppointmentsController : ControllerBase
         );
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost]
   public async Task<ActionResult<AppointmentResponse>>
       CreateAppointment(
@@ -123,12 +126,12 @@ public class AppointmentsController : ControllerBase
         $"/api/appointments/{response.Id}",
         response);
   }
-
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost("{id:guid}/check-in")]
   public async Task<ActionResult<AppointmentResponse>>
-    CheckIn(
-        Guid id,
-        CancellationToken cancellationToken)
+      CheckIn(
+          Guid id,
+          CancellationToken cancellationToken)
   {
     var appointment =
         await _checkInAppointmentService
@@ -140,6 +143,7 @@ public class AppointmentsController : ControllerBase
         ToResponse(appointment));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost("{id:guid}/start")]
   public async Task<ActionResult<AppointmentResponse>>
     Start(
@@ -156,6 +160,7 @@ public class AppointmentsController : ControllerBase
         ToResponse(appointment));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost("{id:guid}/complete")]
   public async Task<ActionResult<AppointmentResponse>>
     Complete(
@@ -172,6 +177,7 @@ public class AppointmentsController : ControllerBase
         ToResponse(appointment));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost("{id:guid}/cancel")]
   public async Task<ActionResult<AppointmentResponse>>
     Cancel(
@@ -188,6 +194,7 @@ public class AppointmentsController : ControllerBase
         ToResponse(appointment));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost("{id:guid}/did-not-attend")]
   public async Task<ActionResult<AppointmentResponse>>
     MarkDidNotAttend(
@@ -204,6 +211,8 @@ public class AppointmentsController : ControllerBase
         ToResponse(appointment));
   }
 
+
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet("{id:guid}")]
   public async Task<ActionResult<AppointmentResponse>>
     GetById(
@@ -219,11 +228,13 @@ public class AppointmentsController : ControllerBase
         ToResponse(result));
   }
 
+
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet]
   public async Task<ActionResult<PagedResult<AppointmentSearchItem>>>
-    Search(
-        [FromQuery] SearchAppointmentsRequest request,
-        CancellationToken cancellationToken)
+      Search(
+          [FromQuery] SearchAppointmentsRequest request,
+          CancellationToken cancellationToken)
   {
     var query =
         new AppointmentSearchCommand(

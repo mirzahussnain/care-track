@@ -1,9 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.Domain.Enums;
 using CareTrack.IntegrationTests.Contracts.Appointments;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 
 namespace CareTrack.IntegrationTests.Appointments;
 
@@ -12,8 +14,6 @@ public class AppointmentWorkflowTests :
         CareTrackSqlServerWebApplicationFactory>,
     IAsyncLifetime
 {
-  private readonly HttpClient _client;
-
   private readonly
       CareTrackSqlServerWebApplicationFactory
       _factory;
@@ -22,7 +22,6 @@ public class AppointmentWorkflowTests :
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
   }
 
   public async Task InitializeAsync()
@@ -39,28 +38,42 @@ public class AppointmentWorkflowTests :
   public async Task
     AppointmentWorkflow_ScheduledToCompleted_ReturnsExpectedStates()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
     // Check in
     var checkInResponse =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/check-in",
             null);
 
@@ -84,7 +97,7 @@ public class AppointmentWorkflowTests :
 
     // Start
     var startResponse =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/start",
             null);
 
@@ -108,7 +121,7 @@ public class AppointmentWorkflowTests :
 
     // Complete
     var completeResponse =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/complete",
             null);
 
@@ -135,28 +148,42 @@ public class AppointmentWorkflowTests :
   public async Task
     CompleteAppointment_WhenScheduled_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/complete",
             null);
 
@@ -170,28 +197,42 @@ public class AppointmentWorkflowTests :
   public async Task
     CancelAppointment_WhenScheduled_ReturnsCancelled()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/cancel",
             null);
 
@@ -219,28 +260,51 @@ public class AppointmentWorkflowTests :
   public async Task
     CancelAppointment_WhenCheckedIn_ReturnsCancelled()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
-            .CreateCheckedInAppointmentAsync(
-                _client,
+            .CreateAppointmentAsync(
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
+    var checkInResponse =
+        await clinicianClient.PostAsync(
+            $"/api/appointments/{appointment.Id}/check-in",
+            null);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        checkInResponse.StatusCode);
+
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/cancel",
             null);
 
@@ -265,28 +329,60 @@ public class AppointmentWorkflowTests :
   public async Task
     CancelAppointment_WhenInProgress_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
-            .CreateInProgressAppointmentAsync(
-                _client,
+            .CreateAppointmentAsync(
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
+    var checkInResponse =
+        await clinicianClient.PostAsync(
+            $"/api/appointments/{appointment.Id}/check-in",
+            null);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        checkInResponse.StatusCode);
+
+    var startResponse =
+        await clinicianClient.PostAsync(
+            $"/api/appointments/{appointment.Id}/start",
+            null);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        startResponse.StatusCode);
+
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/cancel",
             null);
 
@@ -300,28 +396,42 @@ public class AppointmentWorkflowTests :
   public async Task
     MarkDidNotAttend_WhenScheduled_ReturnsDidNotAttend()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/did-not-attend",
             null);
 
@@ -349,28 +459,51 @@ public class AppointmentWorkflowTests :
   public async Task
     MarkDidNotAttend_WhenCheckedIn_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
-            .CreatePatientAsync(_client);
+            .CreatePatientAsync(referralCoordinatorClient);
 
     var referral =
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
-                _client,
+                referralCoordinatorClient,
                 "Integration Test Team",
                 passedPatientId: patient.Id);
 
     var appointment =
         await AppointmentApiTestHelper
-            .CreateCheckedInAppointmentAsync(
-                _client,
+            .CreateAppointmentAsync(
+                referralCoordinatorClient,
                 patient.Id,
                 referral.Id);
 
+    var checkInResponse =
+        await clinicianClient.PostAsync(
+            $"/api/appointments/{appointment.Id}/check-in",
+            null);
+
+    Assert.Equal(
+        HttpStatusCode.OK,
+        checkInResponse.StatusCode);
+
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/did-not-attend",
             null);
 
@@ -384,9 +517,16 @@ public class AppointmentWorkflowTests :
   public async Task
     CheckInAppointment_WhenAppointmentDoesNotExist_ReturnsNotFound()
   {
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Act
     var response =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{Guid.NewGuid()}/check-in",
             null);
 

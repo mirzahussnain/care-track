@@ -1,6 +1,8 @@
 using System.Net;
+using CareTrack.Api.Authorization;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 
 namespace CareTrack.IntegrationTests.Appointments;
 
@@ -11,16 +13,11 @@ public sealed class AppointmentSchedulingTests
   private readonly CareTrackSqlServerWebApplicationFactory
       _factory;
 
-  private readonly HttpClient
-      _client;
 
   public AppointmentSchedulingTests(
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-
-    _client =
-        factory.CreateClient();
   }
 
   public async Task InitializeAsync()
@@ -37,22 +34,29 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenTimeExactlyMatchesExisting_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -66,7 +70,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -76,7 +80,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart: start,
@@ -92,6 +96,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenRequestedStartsInsideExisting_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Existing:
     // 10:00 - 10:30
     //
@@ -101,18 +112,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -123,7 +134,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -133,7 +144,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -150,6 +161,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenRequestedEndsInsideExisting_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Existing:
     // 10:00 - 10:30
     //
@@ -159,18 +177,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -181,7 +199,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -191,7 +209,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -208,6 +226,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenRequestedContainsExisting_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Existing:
     // 10:00 - 10:30
     //
@@ -217,18 +242,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -239,7 +264,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -249,7 +274,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -266,6 +291,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenRequestedIsInsideExisting_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Existing:
     // 10:00 - 11:00
     //
@@ -275,18 +307,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -297,7 +329,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -307,7 +339,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -324,6 +356,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenStartsExactlyAtExistingEnd_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Existing:
     // 10:00 - 10:30
     //
@@ -333,18 +372,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -355,7 +394,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -365,7 +404,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -382,6 +421,13 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenEndsExactlyAtExistingStart_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Requested:
     // 09:30 - 10:00
     //
@@ -391,18 +437,18 @@ public sealed class AppointmentSchedulingTests
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -413,7 +459,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -423,7 +469,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -440,21 +486,28 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenTimesAreSeparate_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -465,7 +518,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient.Id,
             referral1.Id,
             scheduledStart: start,
@@ -475,7 +528,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart:
@@ -493,27 +546,34 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenDifferentPatientHasSameTime_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Arrange
     var patient1 =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var patient2 =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
        await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient1.Id);
 
     var referral2 =
         await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient2.Id);
 
     var start =
@@ -524,7 +584,7 @@ public sealed class AppointmentSchedulingTests
 
     await AppointmentApiTestHelper
         .CreateAppointmentAsync(
-            _client,
+            referralCoordinatorClient,
             patient1.Id,
             referral1.Id,
             scheduledStart: start,
@@ -535,7 +595,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient2.Id,
                 referral2.Id,
                 scheduledStart: start,
@@ -552,22 +612,36 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenExistingAppointmentIsCancelled_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -579,7 +653,7 @@ public sealed class AppointmentSchedulingTests
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral1.Id,
                 scheduledStart: start,
@@ -587,7 +661,7 @@ public sealed class AppointmentSchedulingTests
                     start.AddMinutes(30));
 
     var cancelResponse =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/cancel",
             null);
 
@@ -599,7 +673,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart: start,
@@ -616,22 +690,36 @@ public sealed class AppointmentSchedulingTests
   public async Task
       CreateAppointment_WhenExistingAppointmentIsDidNotAttend_ReturnsCreated()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
         await PatientApiTestHelper
             .CreatePatientAsync(
-                _client);
+                referralCoordinatorClient);
 
     var referral1 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var referral2 =
          await ReferralApiTestHelper
         .CreateAssignedReferralAsync(
-            _client,
+            referralCoordinatorClient,
             passedPatientId: patient.Id);
 
     var start =
@@ -643,7 +731,7 @@ public sealed class AppointmentSchedulingTests
     var appointment =
         await AppointmentApiTestHelper
             .CreateAppointmentAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral1.Id,
                 scheduledStart: start,
@@ -651,7 +739,7 @@ public sealed class AppointmentSchedulingTests
                     start.AddMinutes(30));
 
     var dnaResponse =
-        await _client.PostAsync(
+        await clinicianClient.PostAsync(
             $"/api/appointments/{appointment.Id}/did-not-attend",
             null);
 
@@ -663,7 +751,7 @@ public sealed class AppointmentSchedulingTests
     var response =
         await AppointmentApiTestHelper
             .SendCreateAppointmentRequestAsync(
-                _client,
+                referralCoordinatorClient,
                 patient.Id,
                 referral2.Id,
                 scheduledStart: start,

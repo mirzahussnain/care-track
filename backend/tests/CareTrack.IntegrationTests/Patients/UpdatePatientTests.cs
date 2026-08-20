@@ -1,19 +1,19 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 
 namespace CareTrack.IntegrationTests.Patients;
 
 public class UpdatePatientTests : IClassFixture<CareTrackSqlServerWebApplicationFactory>, IAsyncLifetime
 {
-  private readonly HttpClient _client;
   private readonly CareTrackSqlServerWebApplicationFactory _factory;
 
   public UpdatePatientTests(CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
   }
   public async Task InitializeAsync()
   {
@@ -27,6 +27,20 @@ public class UpdatePatientTests : IClassFixture<CareTrackSqlServerWebApplication
   [Fact]
   public async Task UpdatePatient_WithValidRequest_PersistsChanges()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     var createRequest = new
     {
       patientReference = $"PAT-{Guid.NewGuid():N}"[..12],
@@ -36,7 +50,7 @@ public class UpdatePatientTests : IClassFixture<CareTrackSqlServerWebApplication
     };
 
     var createResponse =
-        await _client.PostAsJsonAsync(
+        await referralCoordinatorClient.PostAsJsonAsync(
             "/api/patients",
             createRequest);
 
@@ -59,7 +73,7 @@ public class UpdatePatientTests : IClassFixture<CareTrackSqlServerWebApplication
     };
 
     var updateResponse =
-        await _client.PutAsJsonAsync(
+        await referralCoordinatorClient.PutAsJsonAsync(
             $"/api/patients/{created.Id}",
             updateRequest);
 
@@ -68,7 +82,7 @@ public class UpdatePatientTests : IClassFixture<CareTrackSqlServerWebApplication
         updateResponse.StatusCode);
 
     var getResponse =
-        await _client.GetAsync(
+        await clinicianClient.GetAsync(
             $"/api/patients/{created.Id}");
 
     Assert.Equal(

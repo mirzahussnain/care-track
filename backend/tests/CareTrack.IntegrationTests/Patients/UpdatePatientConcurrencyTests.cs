@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 namespace CareTrack.IntegrationTests.Patients;
 
 public class UpdatePatientConcurrencyTests
@@ -12,13 +14,11 @@ public class UpdatePatientConcurrencyTests
 
 {
   private readonly CareTrackSqlServerWebApplicationFactory _factory;
-  private readonly HttpClient _client;
 
   public UpdatePatientConcurrencyTests(
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
   }
 
   public async Task InitializeAsync()
@@ -34,10 +34,17 @@ public class UpdatePatientConcurrencyTests
   [Fact]
   public async Task UpdatePatient_WithCurrentRowVersion_ReturnsOk()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     // Arrange
     var patient =
      await PatientApiTestHelper
-         .CreatePatientAsync(_client);
+         .CreatePatientAsync(referralCoordinatorClient);
 
     var request = new
     {
@@ -56,7 +63,7 @@ public class UpdatePatientConcurrencyTests
 
     // Act
     var response =
-        await _client.PutAsJsonAsync(
+        await referralCoordinatorClient.PutAsJsonAsync(
             $"/api/patients/{patient.Id}",
             request);
 
@@ -84,10 +91,24 @@ public class UpdatePatientConcurrencyTests
   [Fact]
   public async Task UpdatePatient_WithStaleRowVersion_ReturnsConflict()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    using var clinicianClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
+
     // Arrange
     var patient =
      await PatientApiTestHelper
-         .CreatePatientAsync(_client);
+         .CreatePatientAsync(referralCoordinatorClient);
 
     var originalRowVersion =
         patient.RowVersion;
@@ -109,7 +130,7 @@ public class UpdatePatientConcurrencyTests
     };
 
     var firstResponse =
-        await _client.PutAsJsonAsync(
+        await referralCoordinatorClient.PutAsJsonAsync(
             $"/api/patients/{patient.Id}",
             firstUpdate);
 
@@ -135,7 +156,7 @@ public class UpdatePatientConcurrencyTests
 
     // Act
     var staleResponse =
-        await _client.PutAsJsonAsync(
+        await referralCoordinatorClient.PutAsJsonAsync(
             $"/api/patients/{patient.Id}",
             staleUpdate);
 
@@ -153,7 +174,7 @@ public class UpdatePatientConcurrencyTests
         StringComparison.OrdinalIgnoreCase);
 
     var getResponse =
-    await _client.GetAsync(
+    await clinicianClient.GetAsync(
         $"/api/patients/{patient.Id}");
 
     Assert.Equal(
@@ -174,9 +195,16 @@ public class UpdatePatientConcurrencyTests
   [Fact]
   public async Task UpdatePatient_WithInvalidBase64RowVersion_ReturnsBadRequest()
   {
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
     var patient =
     await PatientApiTestHelper
-        .CreatePatientAsync(_client);
+        .CreatePatientAsync(referralCoordinatorClient);
 
     var request = new
     {
@@ -194,7 +222,7 @@ public class UpdatePatientConcurrencyTests
     };
 
     var response =
-        await _client.PutAsJsonAsync(
+        await referralCoordinatorClient.PutAsJsonAsync(
             $"/api/patients/{patient.Id}",
             request);
 

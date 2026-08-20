@@ -1,6 +1,9 @@
 using CareTrack.Infrastructure.Persistance;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -75,6 +78,34 @@ public sealed class CareTrackSqlServerWebApplicationFactory
 
       dbContext.Database.Migrate();
     });
+
+    builder.ConfigureTestServices(services =>
+{
+  services
+      .AddAuthentication(options =>
+      {
+        options.DefaultAuthenticateScheme =
+              TestAuthenticationDefaults
+                  .AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+              TestAuthenticationDefaults
+                  .AuthenticationScheme;
+
+        options.DefaultScheme =
+              TestAuthenticationDefaults
+                  .AuthenticationScheme;
+      })
+      .AddScheme<
+          AuthenticationSchemeOptions,
+          TestAuthenticationHandler>(
+              TestAuthenticationDefaults
+                  .AuthenticationScheme,
+              _ =>
+              {
+              });
+});
+
   }
   public async Task ResetDatabaseAsync()
   {

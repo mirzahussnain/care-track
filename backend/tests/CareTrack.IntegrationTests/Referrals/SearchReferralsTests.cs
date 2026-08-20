@@ -1,10 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.Application.Common.Models;
 using CareTrack.Domain.Enums;
 using CareTrack.IntegrationTests.Contracts.Referrals;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 
 namespace CareTrack.IntegrationTests.Referrals;
 
@@ -16,7 +18,12 @@ public class SearchReferralsTests : IClassFixture<CareTrackSqlServerWebApplicati
   public SearchReferralsTests(CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
+    _client =
+        TestAuthenticatedClient.Create(
+            factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
   }
 
   public async Task InitializeAsync()

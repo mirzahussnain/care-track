@@ -1,12 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
-using CareTrack.Application.ClinicalNotes.CreateClinicalNote;
-using CareTrack.Application.Common.Exceptions;
+using CareTrack.Api.Authorization;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.IntegrationTests.Contracts.ClinicalNotes;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,7 +28,11 @@ public sealed class ClinicalNotePersistenceTests
     _factory = factory;
 
     _client =
-        factory.CreateClient();
+        TestAuthenticatedClient.Create(
+            factory,
+            TestUsers.ClinicianId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.Clinician);
   }
 
   public async Task InitializeAsync()
@@ -64,24 +68,12 @@ public sealed class ClinicalNotePersistenceTests
                 patient.Id,
                 referral.Id);
 
-    using var scope =
-        _factory.Services.CreateScope();
-
-    var service =
-        scope.ServiceProvider
-            .GetRequiredService<
-                CreateClinicalNoteService>();
-
-    var command =
-        new CreateClinicalNoteCommand(
-            appointment.Id,
-            "Patient reports improving symptoms.",
-            "clinician.demo");
-
     // Act
     var result =
-        await service.ExecuteAsync(
-            command);
+        await ClinicalNoteApiTestHelper
+            .CreateClinicalNoteAsync(
+                _client,
+                appointment.Id);
 
     // Assert
     using var verifyScope =
@@ -110,7 +102,7 @@ public sealed class ClinicalNotePersistenceTests
         persisted.Content);
 
     Assert.Equal(
-        "clinician.demo",
+        TestUsers.ClinicianId,
         persisted.CreatedBy);
 
     Assert.Null(
@@ -119,28 +111,14 @@ public sealed class ClinicalNotePersistenceTests
   [Fact]
   public async Task CreateClinicalNote_WhenAppointmentDoesNotExist_DoesNotPersistNote()
   {
-    using var scope =
-        _factory.Services
-            .CreateScope();
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{Guid.NewGuid()}/clinical-notes",
+            new { content = "Clinical note" });
 
-    var service =
-        scope.ServiceProvider
-            .GetRequiredService<
-                CreateClinicalNoteService>();
-
-    var command =
-        new CreateClinicalNoteCommand(
-            Guid.NewGuid(),
-            "Clinical note",
-            "clinician.demo");
-
-    var action =
-        () => service.ExecuteAsync(
-            command);
-
-    await Assert.ThrowsAsync<
-        NotFoundException>(
-        action);
+    Assert.Equal(
+        HttpStatusCode.NotFound,
+        response.StatusCode);
 
     using var verifyScope =
         _factory.Services
@@ -208,33 +186,25 @@ public sealed class ClinicalNotePersistenceTests
                     start.AddHours(1)
                         .AddMinutes(30));
 
-    using var createScope =
-        _factory.Services.CreateScope();
-
-    var service =
-        createScope.ServiceProvider
-            .GetRequiredService<
-                CreateClinicalNoteService>();
-
     var note1 =
-        await service.ExecuteAsync(
-            new CreateClinicalNoteCommand(
+        await ClinicalNoteApiTestHelper
+            .CreateClinicalNoteAsync(
+                _client,
                 appointment1.Id,
-                "First note",
-                "clinician.demo"));
+                "First note");
 
     var note2 =
-        await service.ExecuteAsync(
-            new CreateClinicalNoteCommand(
+        await ClinicalNoteApiTestHelper
+            .CreateClinicalNoteAsync(
+                _client,
                 appointment1.Id,
-                "Second note",
-                "clinician.demo"));
+                "Second note");
 
-    await service.ExecuteAsync(
-        new CreateClinicalNoteCommand(
+    await ClinicalNoteApiTestHelper
+        .CreateClinicalNoteAsync(
+            _client,
             appointment2.Id,
-            "Different appointment note",
-            "clinician.demo"));
+            "Different appointment note");
 
     // Act
     using var readScope =
@@ -298,20 +268,12 @@ public sealed class ClinicalNotePersistenceTests
                 patient.Id,
                 referral.Id);
 
-    using var createScope =
-        _factory.Services.CreateScope();
-
-    var createService =
-        createScope.ServiceProvider
-            .GetRequiredService<
-                CreateClinicalNoteService>();
-
     var created =
-        await createService.ExecuteAsync(
-            new CreateClinicalNoteCommand(
+        await ClinicalNoteApiTestHelper
+            .CreateClinicalNoteAsync(
+                _client,
                 appointment.Id,
-                "Original content",
-                "clinician.demo"));
+                "Original content");
 
     // Act
     using var updateScope =
@@ -359,7 +321,7 @@ public sealed class ClinicalNotePersistenceTests
         persisted.UpdatedAt);
 
     Assert.Equal(
-        "clinician.demo",
+        TestUsers.ClinicianId,
         persisted.CreatedBy);
   }
 
@@ -386,20 +348,11 @@ public sealed class ClinicalNotePersistenceTests
                 patient.Id,
                 referral.Id);
 
-    using (var createScope =
-        _factory.Services.CreateScope())
-    {
-      var service =
-          createScope.ServiceProvider
-              .GetRequiredService<
-                  CreateClinicalNoteService>();
-
-      await service.ExecuteAsync(
-          new CreateClinicalNoteCommand(
-              appointment.Id,
-              "Clinical note",
-              "clinician.demo"));
-    }
+    await ClinicalNoteApiTestHelper
+        .CreateClinicalNoteAsync(
+            _client,
+            appointment.Id,
+            "Clinical note");
 
     // Act
     using var deleteScope =
@@ -453,10 +406,7 @@ public sealed class ClinicalNotePersistenceTests
         new
         {
           content =
-                "Patient reports reduced pain.",
-
-          createdBy =
-                "clinician.demo"
+                "Patient reports reduced pain."
         };
 
     // Act
@@ -486,7 +436,7 @@ public sealed class ClinicalNotePersistenceTests
         result.Content);
 
     Assert.Equal(
-        "clinician.demo",
+        TestUsers.ClinicianId,
         result.CreatedBy);
 
     Assert.Null(
@@ -494,16 +444,138 @@ public sealed class ClinicalNotePersistenceTests
   }
 
   [Fact]
+  public async Task CreateClinicalNote_UsesAuthenticatedUserAsCreatedBy()
+  {
+    var appointmentId =
+        await CreateClinicalNoteAppointmentAsync();
+
+    var result =
+        await ClinicalNoteApiTestHelper
+            .CreateClinicalNoteAsync(
+                _client,
+                appointmentId);
+
+    Assert.Equal(
+        TestUsers.ClinicianId,
+        result.CreatedBy);
+
+    using var scope =
+        _factory.Services.CreateScope();
+
+    var db =
+        scope.ServiceProvider
+            .GetRequiredService<
+                CareTrackDbContext>();
+
+    var persisted =
+        await db.ClinicalNotes
+            .AsNoTracking()
+            .SingleAsync(
+                note => note.Id == result.Id);
+
+    Assert.Equal(
+        TestUsers.ClinicianId,
+        persisted.CreatedBy);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_ClientSuppliedCreatedByCannotOverrideAuthenticatedUser()
+  {
+    var appointmentId =
+        await CreateClinicalNoteAppointmentAsync();
+
+    var response =
+        await _client.PostAsJsonAsync(
+            $"/api/appointments/{appointmentId}/clinical-notes",
+            new
+            {
+              content = "Patient reports improving symptoms.",
+              createdBy = "FAKE-USER"
+            });
+
+    Assert.Equal(
+        HttpStatusCode.Created,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<ClinicalNoteResponse>();
+
+    Assert.NotNull(
+        result);
+
+    Assert.Equal(
+        TestUsers.ClinicianId,
+        result.CreatedBy);
+
+    using var scope =
+        _factory.Services.CreateScope();
+
+    var db =
+        scope.ServiceProvider
+            .GetRequiredService<
+                CareTrackDbContext>();
+
+    var persisted =
+        await db.ClinicalNotes
+            .AsNoTracking()
+            .SingleAsync(
+                note => note.Id == result.Id);
+
+    Assert.Equal(
+        TestUsers.ClinicianId,
+        persisted.CreatedBy);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WhenUnauthenticated_ReturnsUnauthorized()
+  {
+    var appointmentId =
+        await CreateClinicalNoteAppointmentAsync();
+
+    using var unauthenticatedClient =
+        _factory.CreateClient();
+
+    var response =
+        await unauthenticatedClient.PostAsJsonAsync(
+            $"/api/appointments/{appointmentId}/clinical-notes",
+            new { content = "Patient reports improving symptoms." });
+
+    Assert.Equal(
+        HttpStatusCode.Unauthorized,
+        response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CreateClinicalNote_WithReferralCoordinatorRole_ReturnsForbidden()
+  {
+    var appointmentId =
+        await CreateClinicalNoteAppointmentAsync();
+
+    using var referralCoordinatorClient =
+        TestAuthenticatedClient.Create(
+            _factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
+
+    var response =
+        await referralCoordinatorClient.PostAsJsonAsync(
+            $"/api/appointments/{appointmentId}/clinical-notes",
+            new { content = "Patient reports improving symptoms." });
+
+    Assert.Equal(
+        HttpStatusCode.Forbidden,
+        response.StatusCode);
+  }
+  [Fact]
   public async Task CreateClinicalNote_WhenAppointmentDoesNotExist_ReturnsNotFound()
   {
     var request =
         new
         {
           content =
-                "Clinical note",
-
-          createdBy =
-                "clinician.demo"
+                "Clinical note"
         };
 
     var response =
@@ -538,8 +610,7 @@ public sealed class ClinicalNotePersistenceTests
     var request =
         new
         {
-          content = "   ",
-          createdBy = "clinician.demo"
+          content = "   "
         };
 
     var response =
@@ -575,10 +646,7 @@ public sealed class ClinicalNotePersistenceTests
         new
         {
           content =
-                new string('a', 5001),
-
-          createdBy =
-                "clinician.demo"
+                new string('a', 5001)
         };
 
     var response =
@@ -591,44 +659,6 @@ public sealed class ClinicalNotePersistenceTests
         response.StatusCode);
   }
 
-  [Fact]
-  public async Task CreateClinicalNote_WhenCreatedByIsBlank_ReturnsBadRequest()
-  {
-    var patient =
-        await PatientApiTestHelper.CreatePatientAsync(
-            _client);
-
-    var referral =
-        await ReferralApiTestHelper.CreateAssignedReferralAsync(
-            _client,
-            "Integration Test Team",
-            passedPatientId: patient.Id);
-
-    var appointment =
-        await AppointmentApiTestHelper.CreateAppointmentAsync(
-            _client,
-            patient.Id,
-            referral.Id);
-
-    var request =
-        new
-        {
-          content =
-                "Patient improving.",
-
-          createdBy =
-                "   "
-        };
-
-    var response =
-        await _client.PostAsJsonAsync(
-            $"/api/appointments/{appointment.Id}/clinical-notes",
-            request);
-
-    Assert.Equal(
-        HttpStatusCode.BadRequest,
-        response.StatusCode);
-  }
 
   [Fact]
   public async Task GetClinicalNoteById_WhenNoteExists_ReturnsOk()
@@ -857,8 +887,7 @@ public sealed class ClinicalNotePersistenceTests
         await ClinicalNoteApiTestHelper.CreateClinicalNoteAsync(
             _client,
             appointment.Id,
-            "Original note",
-            "clinician.demo");
+            "Original note");
 
     var request =
         new
@@ -888,7 +917,7 @@ public sealed class ClinicalNotePersistenceTests
         result.Content);
 
     Assert.Equal(
-        "clinician.demo",
+        TestUsers.ClinicianId,
         result.CreatedBy);
 
     Assert.NotNull(
@@ -1056,4 +1085,27 @@ public sealed class ClinicalNotePersistenceTests
   }
 
 
+  private async Task<Guid> CreateClinicalNoteAppointmentAsync()
+  {
+    var patient =
+        await PatientApiTestHelper
+            .CreatePatientAsync(
+                _client);
+
+    var referral =
+        await ReferralApiTestHelper
+            .CreateAssignedReferralAsync(
+                _client,
+                "Integration Test Team",
+                passedPatientId: patient.Id);
+
+    var appointment =
+        await AppointmentApiTestHelper
+            .CreateAppointmentAsync(
+                _client,
+                patient.Id,
+                referral.Id);
+
+    return appointment.Id;
+  }
 }

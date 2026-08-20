@@ -1,3 +1,4 @@
+using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.Referrals;
 using CareTrack.Api.Mappings;
 using CareTrack.Application.Referrals.AcceptReferral;
@@ -14,6 +15,7 @@ using CareTrack.Application.Referrals.ResubmitReferral;
 using CareTrack.Application.Referrals.SearchReferrals;
 using CareTrack.Application.Referrals.StartTriage;
 using CareTrack.Application.Referrals.SubmitReferral;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareTrack.Api.Controllers;
@@ -81,6 +83,7 @@ public sealed class ReferralsController
     _completeReferralService = completeReferralService;
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost]
   public async Task<ActionResult<ReferralResponse>>
       CreateReferral(
@@ -103,6 +106,8 @@ public sealed class ReferralsController
         $"/api/referrals/{referral.Id}",
         referral.ToResponse());
   }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/submit")]
   public async Task<ActionResult<ReferralResponse>>
     SubmitReferral(
@@ -117,6 +122,8 @@ public sealed class ReferralsController
     return Ok(
         referral.ToResponse());
   }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/start-triage")]
   public async Task<ActionResult<ReferralResponse>>
   StartTriage(
@@ -132,6 +139,7 @@ public sealed class ReferralsController
         referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/accept")]
   public async Task<ActionResult<ReferralResponse>> AcceptReferral(Guid id, CancellationToken cancellationToken)
   {
@@ -143,6 +151,7 @@ public sealed class ReferralsController
    referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/request-more-information")]
   public async Task<ActionResult<ReferralResponse>> RequestMoreInformation(Guid id, CancellationToken cancellationToken)
   {
@@ -153,6 +162,8 @@ public sealed class ReferralsController
     return Ok(
    referral.ToResponse());
   }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/reject")]
   public async Task<ActionResult<ReferralResponse>> RejectReferral(Guid id, CancellationToken cancellationToken)
   {
@@ -163,6 +174,8 @@ public sealed class ReferralsController
     return Ok(
    referral.ToResponse());
   }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/resubmit")]
   public async Task<ActionResult<ReferralResponse>> ResubmitReferral(Guid id, CancellationToken cancellationToken)
   {
@@ -174,6 +187,7 @@ public sealed class ReferralsController
    referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/triage-assessment")]
   public async Task<ActionResult<ReferralResponse>>
     RecordTriageAssessment(
@@ -193,6 +207,7 @@ public sealed class ReferralsController
         referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/assign")]
   public async Task<ActionResult<ReferralResponse>>
     AssignReferral(
@@ -211,6 +226,7 @@ public sealed class ReferralsController
         referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/reassign")]
   public async Task<ActionResult<ReferralResponse>>
     ReassignReferral(
@@ -229,6 +245,7 @@ public sealed class ReferralsController
         referral.ToResponse());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpPost("{id:guid}/complete")]
   public async Task<IActionResult> Complete(
     Guid id,
@@ -243,6 +260,7 @@ public sealed class ReferralsController
 
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpGet("{id:guid}/history")]
   public async Task<
     ActionResult<IReadOnlyList<ReferralHistoryResponse>>>
@@ -263,6 +281,7 @@ public sealed class ReferralsController
             .ToList());
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpGet]
   public async Task<
     ActionResult<
@@ -301,6 +320,7 @@ public sealed class ReferralsController
             result.TotalPages));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
   [HttpGet("{id:guid}")]
   public async Task<ActionResult<ReferralResponse>>
     GetReferralById(

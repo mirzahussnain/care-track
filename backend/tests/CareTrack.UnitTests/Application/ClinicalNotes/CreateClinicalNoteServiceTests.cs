@@ -13,6 +13,7 @@ public class CreateClinicalNoteServiceTests
   public async Task ExecuteAsync_WithExistingAppointment_CreatesClinicalNote()
   {
     // Arrange
+    var currentUser = new FakeCurrentUser("clinician-123");
     var appointmentRepository =
         new FakeAppointmentRepository();
 
@@ -44,13 +45,13 @@ public class CreateClinicalNoteServiceTests
         new CreateClinicalNoteService(
             clinicalNoteRepository,
             appointmentRepository,
-            logger);
+            currentUser,
+    logger);
 
     var command =
         new CreateClinicalNoteCommand(
             appointment.Id,
-            "Patient reports improvement.",
-            "clinician.demo");
+            "Patient reports improvement.");
 
     // Act
     var result =
@@ -78,6 +79,7 @@ public class CreateClinicalNoteServiceTests
   public async Task ExecuteAsync_WhenAppointmentDoesNotExist_ThrowsNotFoundException()
   {
     // Arrange
+    var currentUser = new FakeCurrentUser("clinician-123");
     var appointmentRepository =
         new FakeAppointmentRepository();
 
@@ -92,13 +94,13 @@ public class CreateClinicalNoteServiceTests
         new CreateClinicalNoteService(
             clinicalNoteRepository,
             appointmentRepository,
+            currentUser,
             logger);
 
     var command =
         new CreateClinicalNoteCommand(
             Guid.NewGuid(),
-            "Clinical note",
-            "clinician.demo");
+            "Clinical note");
 
     // Act
     var action =
@@ -112,6 +114,64 @@ public class CreateClinicalNoteServiceTests
 
     Assert.Empty(
         clinicalNoteRepository.Notes);
+  }
+
+  [Fact]
+  public async Task ExecuteAsync_UsesAuthenticatedCurrentUserAsCreatedBy()
+  {
+    // Arrange
+    var currentUser =
+        new FakeCurrentUser("entra-user-123");
+
+    var appointmentRepository =
+      new FakeAppointmentRepository();
+
+    var clinicalNoteRepository =
+        new FakeClinicalNoteRepository();
+
+    var logger =
+        NullLogger<CreateClinicalNoteService>
+            .Instance;
+
+    var start =
+       DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            start,
+            start.AddMinutes(30),
+            "Birmingham Clinic");
+
+    await appointmentRepository
+       .AddAsync(
+           appointment);
+
+    var service =
+       new CreateClinicalNoteService(
+           clinicalNoteRepository,
+           appointmentRepository,
+           currentUser,
+           logger);
+
+    var command =
+        new CreateClinicalNoteCommand(
+            appointment.Id,
+            "Patient reports improvement.");
+
+    // Act
+    var result =
+        await service.ExecuteAsync(
+           command,
+            CancellationToken.None);
+
+    // Assert
+    Assert.Equal(
+        "entra-user-123",
+        result.CreatedBy);
   }
 
 }

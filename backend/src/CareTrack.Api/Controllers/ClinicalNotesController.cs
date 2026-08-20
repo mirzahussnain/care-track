@@ -1,9 +1,11 @@
+using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.ClinicalNotes;
 using CareTrack.Application.ClinicalNotes.Common;
 using CareTrack.Application.ClinicalNotes.CreateClinicalNote;
 using CareTrack.Application.ClinicalNotes.GetClinicalNoteById;
 using CareTrack.Application.ClinicalNotes.GetClinicalNotesByAppointment;
 using CareTrack.Application.ClinicalNotes.UpdateClinicalNote;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CareTrack.Api.Controllers;
@@ -42,20 +44,19 @@ public sealed class ClinicalNotesController
     _updateClinicalNoteService =
         updateClinicalNoteService;
   }
-
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPost(
-    "/api/appointments/{appointmentId:guid}/clinical-notes")]
+      "/api/appointments/{appointmentId:guid}/clinical-notes")]
   public async Task<ActionResult<ClinicalNoteResponse>>
-    Create(
-        Guid appointmentId,
-        [FromBody] CreateClinicalNoteRequest request,
-        CancellationToken cancellationToken)
+      Create(
+          Guid appointmentId,
+          [FromBody] CreateClinicalNoteRequest request,
+          CancellationToken cancellationToken)
   {
     var command =
         new CreateClinicalNoteCommand(
             appointmentId,
-            request.Content,
-            request.CreatedBy);
+            request.Content);
 
     var result =
         await _createClinicalNoteService.ExecuteAsync(
@@ -71,6 +72,7 @@ public sealed class ClinicalNotesController
         response);
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet(
     "/api/clinical-notes/{id:guid}")]
   public async Task<ActionResult<ClinicalNoteResponse>>
@@ -87,6 +89,7 @@ public sealed class ClinicalNotesController
         ToResponse(result));
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet(
     "/api/appointments/{appointmentId:guid}/clinical-notes")]
   public async Task<
@@ -110,6 +113,7 @@ public sealed class ClinicalNotesController
         response);
   }
 
+  [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpPut(
     "/api/clinical-notes/{id:guid}")]
   public async Task<ActionResult<ClinicalNoteResponse>>

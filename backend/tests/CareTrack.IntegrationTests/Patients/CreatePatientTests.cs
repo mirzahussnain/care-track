@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.IntegrationTests.Contracts.Patients;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 namespace CareTrack.IntegrationTests.Patients;
 
 public class CreatePatientTests
@@ -16,7 +18,12 @@ public class CreatePatientTests
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
+    _client =
+        TestAuthenticatedClient.Create(
+            factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
   }
   public async Task InitializeAsync()
   {

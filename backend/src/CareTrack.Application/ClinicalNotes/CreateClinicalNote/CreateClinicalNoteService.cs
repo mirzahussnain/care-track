@@ -15,12 +15,14 @@ public sealed class CreateClinicalNoteService
   private readonly IAppointmentRepository
       _appointmentRepository;
 
+  private readonly ICurrentUser _currentUser;
   private readonly ILogger<CreateClinicalNoteService>
       _logger;
 
   public CreateClinicalNoteService(
       IClinicalNoteRepository clinicalNoteRepository,
       IAppointmentRepository appointmentRepository,
+      ICurrentUser currentUser,
       ILogger<CreateClinicalNoteService> logger)
   {
     _clinicalNoteRepository =
@@ -28,6 +30,9 @@ public sealed class CreateClinicalNoteService
 
     _appointmentRepository =
         appointmentRepository;
+
+    _currentUser =
+        currentUser;
 
     _logger =
         logger;
@@ -42,7 +47,7 @@ public sealed class CreateClinicalNoteService
         new ClinicalNote(
             command.AppointmentId,
             command.Content,
-            command.CreatedBy);
+            _currentUser.UserId);
 
     var appointment =
         await _appointmentRepository

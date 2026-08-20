@@ -1,6 +1,7 @@
 
 using System.Net;
 using System.Net.Http.Json;
+using CareTrack.Api.Authorization;
 using CareTrack.Application.Appointments.SearchAppointments;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using CareTrack.IntegrationTests.Contracts.Appointments;
 using CareTrack.IntegrationTests.Helpers;
 using CareTrack.IntegrationTests.Infrastructure;
+using CareTrack.IntegrationTests.Infrastructure.Authentication;
 
 namespace CareTrack.IntegrationTests.Appointments;
 
@@ -33,7 +35,12 @@ public class CreateAppointmentTests :
       CareTrackSqlServerWebApplicationFactory factory)
   {
     _factory = factory;
-    _client = factory.CreateClient();
+    _client =
+        TestAuthenticatedClient.Create(
+            factory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
   }
 
   public async Task InitializeAsync()
@@ -436,10 +443,18 @@ public class CreateAppointmentTests :
                     }));
 
     using var firstClient =
-        concurrentFactory.CreateClient();
+        TestAuthenticatedClient.Create(
+            concurrentFactory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
 
     using var secondClient =
-        concurrentFactory.CreateClient();
+        TestAuthenticatedClient.Create(
+            concurrentFactory,
+            TestUsers.ReferralCoordinatorId,
+            CareTrackScopes.AccessAsUser,
+            CareTrackRoles.ReferralCoordinator);
 
     var patient =
         await PatientApiTestHelper
