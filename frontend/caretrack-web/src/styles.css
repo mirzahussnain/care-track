@@ -1,6 +1,108 @@
-@import "./styles/_reset.css";
+@import './styles/_reset.css';
 
-html,
+@import 'tailwindcss';
+@import "@phosphor-icons/web/regular";
+@import "@phosphor-icons/web/bold";
+
+:root {
+  color-scheme: light;
+
+  --ct-bg: #f2f6f9;
+  --ct-surface: #ffffff;
+  --ct-surface-subtle: #f8fafc;
+  --ct-surface-muted: #edf3f7;
+  --ct-surface-elevated: #ffffff;
+
+  --ct-text: #172432;
+  --ct-text-secondary: #475569;
+  --ct-text-muted: #5e6e82;
+  --ct-text-inverse: #ffffff;
+
+  --ct-border: #d8e1e9;
+  --ct-border-strong: #b9c7d3;
+
+  --ct-primary: #285f8f;
+  --ct-primary-hover: #214f78;
+  --ct-primary-strong: #183a59;
+  --ct-primary-soft: #eaf2f8;
+  --ct-focus: #2f73b3;
+
+  --ct-success: #246b4f;
+  --ct-success-strong: #174a36;
+  --ct-success-soft: #e7f3ec;
+  --ct-success-border: #b8dcc6;
+
+  --ct-warning: #8a5a12;
+  --ct-warning-strong: #67400a;
+  --ct-warning-soft: #fff3db;
+  --ct-warning-border: #e8cf98;
+
+  --ct-danger: #b33a3a;
+  --ct-danger-strong: #842a2a;
+  --ct-danger-soft: #fbeaea;
+  --ct-danger-border: #e8b6b6;
+
+  --ct-info: #286987;
+  --ct-info-strong: #194b63;
+  --ct-info-soft: #e8f2f6;
+  --ct-info-border: #b8d4df;
+
+  --ct-neutral: #52616f;
+  --ct-neutral-strong: #354352;
+  --ct-neutral-soft: #eef2f5;
+  --ct-neutral-border: #cbd4dc;
+
+  --ct-radius-xs: 4px;
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 8px;
+  --ct-radius-lg: 12px;
+  --ct-radius-xl: 16px;
+  --ct-radius-full: 9999px;
+
+  --ct-duration-fast: 140ms;
+  --ct-duration-base: 180ms;
+  --ct-duration-panel: 240ms;
+  --ct-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ct-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+html {
+  min-height: 100vh;
+  background: var(--ct-bg);
+}
+
 body {
   min-height: 100vh;
+  background: var(--ct-bg);
+  color: var(--ct-text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ct-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
