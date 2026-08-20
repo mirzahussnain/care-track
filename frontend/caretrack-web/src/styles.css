@@ -1,0 +1,6 @@
+@import "./styles/_reset.css";
+
+html,
+body {
+  min-height: 100vh;
+}
