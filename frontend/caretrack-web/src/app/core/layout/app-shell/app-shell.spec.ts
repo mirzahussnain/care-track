@@ -48,4 +48,64 @@ describe('AppShell', () => {
       component.sidebarCollapsed()
     ).toBe(true);
   });
+
+  it('opens and closes mobile navigation', () => {
+  expect(
+    component.mobileNavigationOpen()
+  ).toBe(false);
+
+  component.openMobileNavigation();
+
+  expect(
+    component.mobileNavigationOpen()
+  ).toBe(true);
+
+  component.closeMobileNavigation();
+
+  expect(
+    component.mobileNavigationOpen()
+  ).toBe(false);
+});
+
+it('closes mobile navigation on Escape', () => {
+  component.openMobileNavigation();
+
+  component.onEscape();
+
+  expect(
+    component.mobileNavigationOpen()
+  ).toBe(false);
+});
+
+it('renders the mobile navigation drawer when opened', () => {
+  component.openMobileNavigation();
+
+  fixture.detectChanges();
+
+  const element =
+    fixture.nativeElement as HTMLElement;
+
+  expect(
+    element.querySelector(
+      '[role="dialog"]'
+    )
+  ).not.toBeNull();
+});
+
+it('removes the mobile navigation drawer when closed', () => {
+  component.openMobileNavigation();
+  fixture.detectChanges();
+
+  component.closeMobileNavigation();
+  fixture.detectChanges();
+
+  const element =
+    fixture.nativeElement as HTMLElement;
+
+  expect(
+    element.querySelector(
+      '[role="dialog"]'
+    )
+  ).toBeNull();
+});
 });

@@ -1,18 +1,53 @@
 <header
   class="
-    flex min-h-16 items-center
+    flex min-h-16 items-center gap-3
     border-b border-ct-border
     bg-ct-surface
-    px-8
+    px-4
+    md:px-6
+    lg:px-8
   "
 >
+  <button
+    type="button"
+    class="
+      grid size-11 shrink-0 place-items-center
+      rounded-ct-md
+      text-ct-text-secondary
+      transition-colors
+      duration-150
+      ease-ct-standard
+      hover:bg-ct-surface-muted
+      hover:text-ct-text
+      md:hidden
+    "
+    aria-label="Open navigation"
+    (click)="mobileMenuOpen.emit()"
+  >
+    <i
+      class="ph ph-list text-xl"
+      aria-hidden="true"
+    ></i>
+  </button>
+
   <div class="min-w-0">
-    <span class="block text-sm font-semibold text-ct-text">
+    <span
+      class="
+        block truncate
+        text-sm font-semibold
+        text-ct-text
+      "
+    >
       {{ areaLabel() }}
     </span>
 
-    <span class="block text-xs text-ct-text-muted">
-      CareTrack workspace
+    <span
+      class="
+        block truncate
+        text-xs text-ct-text-muted
+      "
+    >
+      CareTrack Workspace
     </span>
   </div>
 </header>

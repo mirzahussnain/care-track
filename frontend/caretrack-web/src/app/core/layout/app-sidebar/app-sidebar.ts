@@ -10,6 +10,9 @@ import type { ShellNavigationItem } from '../shell-navigation';
 })
 export class AppSidebar {
   readonly navigation = input.required<readonly ShellNavigationItem[]>();
+  readonly showBrand = input(true);
+  readonly showCollapseControl = input(true);
   readonly collapsed=input(false);
   readonly collapseToggle=output<void>();
+  readonly navigationSelected = output<void>();
 }

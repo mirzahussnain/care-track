@@ -38,4 +38,20 @@ describe('AppTopbar', () => {
       'Dashboard'
     );
   });
+
+  it('emits a mobile menu request', () => {
+  const emitSpy = vi.spyOn(
+    component.mobileMenuOpen,
+    'emit'
+  );
+
+  const button =
+    fixture.nativeElement.querySelector(
+      'button'
+    ) as HTMLButtonElement;
+
+  button.click();
+
+  expect(emitSpy).toHaveBeenCalledOnce();
+});
 });

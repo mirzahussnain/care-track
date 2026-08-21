@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-topbar',
@@ -8,4 +8,5 @@ import { Component, input } from '@angular/core';
 })
 export class AppTopbar {
     readonly areaLabel=input.required<string>();
+    readonly mobileMenuOpen = output<void>();
 }

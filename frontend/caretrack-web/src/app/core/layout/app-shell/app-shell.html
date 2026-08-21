@@ -19,26 +19,127 @@
 </a>
 
 <div
-  class="grid min-h-screen bg-ct-bg transition-[grid-template-columns] duration-[var(--ct-duration-panel)] ease-ct-standard"
-  [class.grid-cols-[240px_minmax(0,1fr)]]="!sidebarCollapsed()"
-  [class.grid-cols-[72px_minmax(0,1fr)]]="sidebarCollapsed()"
+  class="grid min-h-screen bg-ct-bg transition-[grid-template-columns] duration-[var(--ct-duration-panel)] ease-ct-standard grid-cols-1 md:grid-cols-[72px_minmax(0,1fr)]"
+[class.lg:grid-cols-[240px_minmax(0,1fr)]]="!sidebarCollapsed()"
+  [class.lg:grid-cols-[72px_minmax(0,1fr)]]="sidebarCollapsed()"
 >
+<div class="hidden md:block">
   <app-sidebar
     [navigation]="navigation"
     [collapsed]="sidebarCollapsed()"
+     [showBrand]="true"
+      [showCollapseControl]="true"
     (collapseToggle)="toggleSidebar()"
+    (navigationSelected)="closeMobileNavigation()"
   />
+</div>
+@if (mobileNavigationOpen()) {
+  <div
+    class="
+      fixed inset-0 z-40
+      bg-black/35
+      md:hidden
+    "
+    aria-hidden="true"
+    (click)="closeMobileNavigation()"
+  ></div>
 
+  <aside
+    class="
+      fixed inset-y-0 left-0 z-50
+      w-[304px]
+      max-w-[calc(100vw-48px)]
+      border-r border-ct-border
+      bg-ct-primary-strong
+      text-ct-text-inverse
+      md:hidden
+    "
+    role="dialog"
+    aria-modal="true"
+    aria-label="Primary navigation"
+  >
+    <div
+      class="
+        flex min-h-16 items-center
+        justify-between
+        border-b border-white/10
+        px-4
+      "
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="
+            grid size-8 shrink-0 place-items-center
+            rounded-ct-md
+            border border-white/30
+            text-xs font-bold
+          "
+          aria-hidden="true"
+        >
+          CT
+        </div>
+
+        <div>
+          <strong class="block text-sm font-semibold">
+            CareTrack
+          </strong>
+
+          <span class="block text-xs text-white/70">
+            Clinical operations
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="
+          grid size-11 place-items-center
+          rounded-ct-md
+          text-white/75
+          transition-colors
+          duration-150
+          ease-ct-standard
+          hover:bg-white/10
+          hover:text-white
+        "
+        aria-label="Close navigation"
+        (click)="closeMobileNavigation()"
+      >
+        <i
+          class="ph ph-x text-xl"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </div>
+
+    <div class="pt-2">
+      <app-sidebar
+        [navigation]="navigation"
+        [collapsed]="false"
+        [showBrand]="false"
+        [showCollapseControl]="false"
+        (navigationSelected)="closeMobileNavigation()"
+      />
+    </div>
+  </aside>
+}
   <div class="min-h-screen min-w-0">
     <app-topbar 
     [areaLabel]="areaLabel()"
+    (mobileMenuOpen)="openMobileNavigation()"
     />
 
-    <main
-      id="main-content"
-      tabindex="-1"
-      class="min-w-0 px-8 pb-10 pt-6"
-    >
+   <main
+  id="main-content"
+  tabindex="-1"
+  class="
+    min-w-0
+    px-4 pb-8 pt-5
+    md:px-6
+    lg:px-8 lg:pb-10 lg:pt-6
+    2xl:px-10
+  "
+>
       <router-outlet />
     </main>
   </div>

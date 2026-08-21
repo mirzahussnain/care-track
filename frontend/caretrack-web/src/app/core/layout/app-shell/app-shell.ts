@@ -1,4 +1,4 @@
-import { Component,signal,inject } from '@angular/core';
+import { Component,signal,inject,HostListener} from '@angular/core';
 import { RouterOutlet,ActivatedRoute,NavigationEnd,Router } from '@angular/router';
 import { AppSidebar } from '../app-sidebar/app-sidebar';
 import { AppTopbar } from '../app-topbar/app-topbar';
@@ -16,9 +16,12 @@ import { filter,map } from 'rxjs';
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.css',
 })
+
+
 export class AppShell {
   readonly navigation = SHELL_NAVIGATION;
    readonly sidebarCollapsed = signal(false);
+   readonly mobileNavigationOpen = signal(false);
    private readonly router=inject(Router);
    private readonly activatedRoute=inject(ActivatedRoute);
 
@@ -42,6 +45,14 @@ export class AppShell {
     );
   }
 
+  openMobileNavigation(): void {
+  this.mobileNavigationOpen.set(true);
+}
+
+closeMobileNavigation(): void {
+  this.mobileNavigationOpen.set(false);
+}
+
     private getActiveAreaLabel(): string {
     let route = this.activatedRoute;
 
@@ -52,4 +63,11 @@ export class AppShell {
     return route.snapshot?.data?.['areaLabel']
       ?? 'CareTrack';
   }
+
+  @HostListener('document:keydown.escape')
+onEscape(): void {
+  if (this.mobileNavigationOpen()) {
+    this.closeMobileNavigation();
+  }
+}
 }
