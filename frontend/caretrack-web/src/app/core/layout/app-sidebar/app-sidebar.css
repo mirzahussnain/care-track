@@ -1,0 +1,9 @@
+.is-active {
+  background: var(--ct-surface);
+  color: var(--ct-primary-strong);
+  font-weight: 600;
+}
+
+.is-active .active-marker {
+  display: block;
+}

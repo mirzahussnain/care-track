@@ -1,0 +1,45 @@
+<a
+  href="#main-content"
+  class="
+    fixed left-2 top-2 z-50
+    -translate-y-[150%]
+    rounded-ct-md
+    bg-ct-surface
+    px-3.5 py-2.5
+    font-semibold
+    text-ct-primary-strong
+    no-underline
+    transition-transform
+    duration-150
+    ease-ct-standard
+    focus:translate-y-0
+  "
+>
+  Skip to main content
+</a>
+
+<div
+  class="grid min-h-screen bg-ct-bg transition-[grid-template-columns] duration-[var(--ct-duration-panel)] ease-ct-standard"
+  [class.grid-cols-[240px_minmax(0,1fr)]]="!sidebarCollapsed()"
+  [class.grid-cols-[72px_minmax(0,1fr)]]="sidebarCollapsed()"
+>
+  <app-sidebar
+    [navigation]="navigation"
+    [collapsed]="sidebarCollapsed()"
+    (collapseToggle)="toggleSidebar()"
+  />
+
+  <div class="min-h-screen min-w-0">
+    <app-topbar 
+    [areaLabel]="areaLabel()"
+    />
+
+    <main
+      id="main-content"
+      tabindex="-1"
+      class="min-w-0 px-8 pb-10 pt-6"
+    >
+      <router-outlet />
+    </main>
+  </div>
+</div>

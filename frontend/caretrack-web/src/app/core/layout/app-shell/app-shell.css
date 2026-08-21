@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--ct-bg);
+}
+
+.app-shell__workspace {
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.app-shell__content {
+  min-width: 0;
+  padding: 24px 32px 40px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 8px;
+  left: 8px;
+  padding: 10px 14px;
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  color: var(--ct-primary-strong);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform var(--ct-duration-fast) var(--ct-ease-standard);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
