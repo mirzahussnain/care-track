@@ -7,26 +7,31 @@
 :root {
   color-scheme: light;
 
+  /* Canvas and surfaces */
   --ct-bg: #f2f6f9;
   --ct-surface: #ffffff;
   --ct-surface-subtle: #f8fafc;
   --ct-surface-muted: #edf3f7;
   --ct-surface-elevated: #ffffff;
 
+  /* Text */
   --ct-text: #172432;
   --ct-text-secondary: #475569;
   --ct-text-muted: #5e6e82;
   --ct-text-inverse: #ffffff;
 
+  /* Structure */
   --ct-border: #d8e1e9;
   --ct-border-strong: #b9c7d3;
 
+  /* Brand and interaction */
   --ct-primary: #285f8f;
   --ct-primary-hover: #214f78;
   --ct-primary-strong: #183a59;
   --ct-primary-soft: #eaf2f8;
   --ct-focus: #2f73b3;
 
+  /* Semantic tones */
   --ct-success: #246b4f;
   --ct-success-strong: #174a36;
   --ct-success-soft: #e7f3ec;
@@ -52,6 +57,7 @@
   --ct-neutral-soft: #eef2f5;
   --ct-neutral-border: #cbd4dc;
 
+  /* Radius */
   --ct-radius-xs: 4px;
   --ct-radius-sm: 6px;
   --ct-radius-md: 8px;
@@ -59,11 +65,79 @@
   --ct-radius-xl: 16px;
   --ct-radius-full: 9999px;
 
+  /* Motion */
   --ct-duration-fast: 140ms;
   --ct-duration-base: 180ms;
   --ct-duration-panel: 240ms;
   --ct-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ct-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/*
+ * Tailwind v4 semantic theme bridge.
+ *
+ * `inline` keeps the --ct-* variables as the single source of truth while
+ * generating utilities such as bg-ct-bg, text-ct-text, border-ct-border,
+ * rounded-ct-md, and ease-ct-standard.
+ */
+@theme inline {
+  /* Colors */
+  --color-ct-bg: var(--ct-bg);
+  --color-ct-surface: var(--ct-surface);
+  --color-ct-surface-subtle: var(--ct-surface-subtle);
+  --color-ct-surface-muted: var(--ct-surface-muted);
+  --color-ct-surface-elevated: var(--ct-surface-elevated);
+
+  --color-ct-text: var(--ct-text);
+  --color-ct-text-secondary: var(--ct-text-secondary);
+  --color-ct-text-muted: var(--ct-text-muted);
+  --color-ct-text-inverse: var(--ct-text-inverse);
+
+  --color-ct-border: var(--ct-border);
+  --color-ct-border-strong: var(--ct-border-strong);
+
+  --color-ct-primary: var(--ct-primary);
+  --color-ct-primary-hover: var(--ct-primary-hover);
+  --color-ct-primary-strong: var(--ct-primary-strong);
+  --color-ct-primary-soft: var(--ct-primary-soft);
+  --color-ct-focus: var(--ct-focus);
+
+  --color-ct-success: var(--ct-success);
+  --color-ct-success-strong: var(--ct-success-strong);
+  --color-ct-success-soft: var(--ct-success-soft);
+  --color-ct-success-border: var(--ct-success-border);
+
+  --color-ct-warning: var(--ct-warning);
+  --color-ct-warning-strong: var(--ct-warning-strong);
+  --color-ct-warning-soft: var(--ct-warning-soft);
+  --color-ct-warning-border: var(--ct-warning-border);
+
+  --color-ct-danger: var(--ct-danger);
+  --color-ct-danger-strong: var(--ct-danger-strong);
+  --color-ct-danger-soft: var(--ct-danger-soft);
+  --color-ct-danger-border: var(--ct-danger-border);
+
+  --color-ct-info: var(--ct-info);
+  --color-ct-info-strong: var(--ct-info-strong);
+  --color-ct-info-soft: var(--ct-info-soft);
+  --color-ct-info-border: var(--ct-info-border);
+
+  --color-ct-neutral: var(--ct-neutral);
+  --color-ct-neutral-strong: var(--ct-neutral-strong);
+  --color-ct-neutral-soft: var(--ct-neutral-soft);
+  --color-ct-neutral-border: var(--ct-neutral-border);
+
+  /* Radius */
+  --radius-ct-xs: var(--ct-radius-xs);
+  --radius-ct-sm: var(--ct-radius-sm);
+  --radius-ct-md: var(--ct-radius-md);
+  --radius-ct-lg: var(--ct-radius-lg);
+  --radius-ct-xl: var(--ct-radius-xl);
+  --radius-ct-full: var(--ct-radius-full);
+
+  /* Easing */
+  --ease-ct-standard: var(--ct-ease-standard);
+  --ease-ct-exit: var(--ct-ease-exit);
 }
 
 html {
@@ -84,6 +158,13 @@ body {
     'Segoe UI',
     sans-serif;
   line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 :focus-visible {

@@ -1,11 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-    {
-        path: '',
-        loadComponent: () => import('./features/dashboard/pages/dashboard-page').then((m) => m.DashboardPage)
-    },
-     {
+   {
     path: 'design-lab',
     loadComponent: () =>
       import(
@@ -13,7 +9,30 @@ export const routes: Routes = [
       ).then((m) => m.DesignLabPage),
   },
   {
+    path: '',
+    loadComponent: () =>
+      import('./core/layout/app-shell/app-shell')
+        .then((m) => m.AppShell),
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import(
+            './features/dashboard/pages/dashboard-page'
+          ).then((m) => m.DashboardPage),
+        data:{
+            areaLabel:'Dashboard',
+        },
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard',
+      },
+    ],
+  },
+  {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'dashboard',
   },
 ];
