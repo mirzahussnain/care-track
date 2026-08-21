@@ -1,0 +1,78 @@
+<article class="eo-frame" aria-labelledby="editorial-operations-title">
+  <div class="eo-label"><span>B</span> Editorial Operations</div>
+
+  <div class="eo-app">
+    <aside class="eo-rail">
+      <a class="eo-brand" href="#editorial-operations" aria-label="CareTrack home"><span>CT</span>CareTrack<small>Clinical operations</small></a>
+      <nav aria-label="Editorial Operations primary navigation">
+        <a href="#editorial-operations"><i class="ph ph-house" aria-hidden="true"></i><span>Dashboard</span></a>
+        <a href="#editorial-operations"><i class="ph ph-user" aria-hidden="true"></i><span>Patients</span></a>
+        <a class="active" href="#editorial-operations" aria-current="page"><i class="ph-bold ph-git-pull-request" aria-hidden="true"></i><span>Referrals</span></a>
+        <a href="#editorial-operations"><i class="ph ph-calendar-blank" aria-hidden="true"></i><span>Appointments</span></a>
+      </nav>
+      <p class="eo-user"><span>RP</span><strong>Rina Patel</strong><small>Referral coordinator</small></p>
+    </aside>
+
+    <div class="eo-main">
+      <header class="eo-page-header">
+        <p>Thursday, 20 August <span>Referral coordination workspace</span></p>
+        <h2 id="editorial-operations-title">Today’s care <br />operations</h2>
+        <div class="eo-actions">
+          <button class="secondary" type="button"><i class="ph ph-calendar-blank" aria-hidden="true"></i>View schedule</button>
+          <button class="primary" type="button">Review next referral<i class="ph ph-arrow-up-right" aria-hidden="true"></i></button>
+        </div>
+      </header>
+
+      <section class="eo-patient" aria-labelledby="eo-patient-name">
+        <div class="eo-patient-title"><span>Active patient</span><h3 id="eo-patient-name">Amara Okafor</h3></div>
+        <dl>
+          <div><dt>Patient reference</dt><dd>CT-20481</dd></div>
+          <div><dt>Date of birth</dt><dd>14 February 1986 · 40 years</dd></div>
+          <div><dt>Referral</dt><dd>Respiratory medicine</dd></div>
+          <div><dt>Referred by</dt><dd>Riverside Medical Centre</dd></div>
+        </dl>
+        <span class="eo-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span>
+      </section>
+
+      <div class="eo-content">
+        <section class="eo-referrals" aria-labelledby="eo-referral-title">
+          <header class="eo-section-title">
+            <div><p>Referral workload</p><h3 id="eo-referral-title">Work requiring attention</h3></div>
+            <span>37 referrals in view</span>
+          </header>
+
+          <dl class="eo-metrics">
+            <div><dd>12</dd><dt>Awaiting triage</dt></div>
+            <div><dd>4</dd><dt>Need assignment</dt></div>
+            <div class="urgent"><dd>3</dd><dt><i class="ph-fill ph-warning" aria-hidden="true"></i>Overdue</dt></div>
+            <div><dd>18</dd><dt>Accepted this week</dt></div>
+          </dl>
+
+          <div class="eo-ledger" role="table" aria-label="Referral status examples">
+            <div class="eo-ledger-head" role="row"><span role="columnheader">Status</span><span role="columnheader">Patient and referral</span><span role="columnheader">Updated</span></div>
+            <div role="row"><span role="cell" class="eo-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span><p role="cell"><strong>Amara Okafor</strong><small>Respiratory medicine · received 09:12</small></p><time role="cell" datetime="2026-08-20T09:12">Today</time></div>
+            <div role="row"><span role="cell" class="eo-status success"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Accepted</span><p role="cell"><strong>Leon Evans</strong><small>Cardiology · reviewed by Dr Shah</small></p><time role="cell" datetime="2026-08-19">Yesterday</time></div>
+          </div>
+        </section>
+
+        <aside class="eo-appointments" aria-labelledby="eo-appointment-title">
+          <header class="eo-section-title">
+            <div><p>Appointment summary</p><h3 id="eo-appointment-title">Today’s flow</h3></div>
+            <time datetime="2026-08-20T10:18">10:18</time>
+          </header>
+          <dl class="eo-appointment-list">
+            <div><dt>Scheduled today</dt><dd>8</dd></div>
+            <div><dt>Checked in</dt><dd>2</dd></div>
+            <div><dt>In progress</dt><dd>1</dd></div>
+            <div><dt>Next appointment</dt><dd>10:30</dd></div>
+          </dl>
+          <div class="eo-flow" aria-label="Appointment status examples">
+            <span class="eo-status neutral"><i class="ph-fill ph-calendar-check" aria-hidden="true"></i>Scheduled</span>
+            <span class="eo-status info"><i class="ph-fill ph-sign-in" aria-hidden="true"></i>Checked in</span>
+            <span class="eo-status progress"><i class="ph-fill ph-stethoscope" aria-hidden="true"></i>In progress</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</article>
