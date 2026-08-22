@@ -1,38 +1,201 @@
+<main class="lab-page">
+  <div class="lab-content">
+    <ct-page-header
+      title="CareTrack design system"
+      description="A compact verification gallery for shared clinical operations primitives."
+    >
+      <ct-button>Primary action</ct-button>
+    </ct-page-header>
 
-<div class="mb-8 flex flex-wrap gap-2">
-  <button
-    type="button"
-    class="rounded-lg border px-4 py-2 text-sm"
-    (click)="selectDirection('quiet')"
-  >
-    Quiet Clinical
-  </button>
+    <section class="lab-gallery" aria-labelledby="component-gallery-title">
+      <h2 id="component-gallery-title">Component gallery</h2>
 
-  <button
-    type="button"
-    class="rounded-lg border px-4 py-2 text-sm"
-    (click)="selectDirection('editorial')"
-  >
-    Editorial Operations
-  </button>
+      <div class="lab-sample">
+        <h3>Buttons</h3>
+        <div class="lab-row">
+          <ct-button>Primary</ct-button>
+          <ct-button variant="secondary">Secondary</ct-button>
+          <ct-button variant="ghost">Ghost</ct-button>
+          <ct-button variant="danger">Danger</ct-button>
+        </div>
 
-  <button
-    type="button"
-    class="rounded-lg border px-4 py-2 text-sm"
-    (click)="selectDirection('structured')"
-  >
-    Structured Modern
-  </button>
-</div>
+        <div class="lab-row">
+          <ct-icon-button ariaLabel="Edit">
+            <i class="ph ph-pencil-simple" aria-hidden="true"></i>
+          </ct-icon-button>
+          <ct-icon-button ariaLabel="Close" variant="ghost">
+            <i class="ph ph-x" aria-hidden="true"></i>
+          </ct-icon-button>
+          <ct-icon-button ariaLabel="Delete" variant="danger">
+            <i class="ph ph-trash" aria-hidden="true"></i>
+          </ct-icon-button>
+        </div>
+      </div>
 
-@if (activeDirection() === 'quiet') {
-  <app-quiet-clinical />
-}
+      <div class="lab-sample">
+        <h3>Status chips</h3>
+        <div class="lab-row">
+          <ct-status-chip>Neutral</ct-status-chip>
+          <ct-status-chip tone="info">Information</ct-status-chip>
+          <ct-status-chip tone="success">Completed</ct-status-chip>
+          <ct-status-chip tone="warning">Needs attention</ct-status-chip>
+          <ct-status-chip tone="danger">Blocked</ct-status-chip>
+        </div>
+      </div>
 
-@if (activeDirection() === 'editorial') {
-  <app-editorial-operations />
-}
+      <div class="lab-sample">
+        <h3>Surfaces</h3>
+        <div class="lab-surface-grid">
+          <ct-surface>
+            <h4>Default</h4>
+            <p>Primary grouped information.</p>
+          </ct-surface>
+          <ct-surface variant="subtle" padding="sm">
+            <h4>Subtle</h4>
+            <p>Secondary supporting context.</p>
+          </ct-surface>
+          <ct-surface variant="elevated" padding="lg">
+            <h4>Elevated</h4>
+            <p>Restrained raised content.</p>
+          </ct-surface>
+        </div>
+      </div>
 
-@if (activeDirection() === 'structured') {
-  <app-structured-modern />
-}
+      <div class="lab-sample">
+        <h3>Empty state</h3>
+        <ct-empty-state
+          title="No matching records"
+          description="Try adjusting the current filters."
+          icon="ph-folder-open"
+        >
+          <ct-button variant="secondary">Clear filters</ct-button>
+        </ct-empty-state>
+      </div>
+
+      <div class="lab-sample">
+        <h3>Skeletons</h3>
+        <div class="lab-skeletons">
+          <div class="lab-text-skeletons">
+            <ct-skeleton />
+            <ct-skeleton class="lab-skeleton-short" />
+          </div>
+          <ct-skeleton variant="block" />
+          <ct-skeleton class="lab-skeleton-circle" variant="circle" />
+        </div>
+      </div>
+
+      <div class="lab-sample">
+        <h3>Form fields</h3>
+        <div class="lab-form-grid">
+          <ct-form-field label="Reference number" forId="lab-reference">
+            <input
+              class="lab-input"
+              id="lab-reference"
+              type="text"
+              autocomplete="off"
+            />
+          </ct-form-field>
+
+          <ct-form-field
+            label="Search scope"
+            forId="lab-scope"
+            hint="Use a short, recognisable term."
+            [required]="true"
+          >
+            <input
+              class="lab-input"
+              id="lab-scope"
+              type="text"
+              aria-describedby="lab-scope-hint"
+              required
+            />
+          </ct-form-field>
+
+          <ct-form-field
+            label="Example error"
+            forId="lab-error"
+            error="Review this value before continuing."
+          >
+            <input
+              class="lab-input lab-input--error"
+              id="lab-error"
+              type="text"
+              aria-describedby="lab-error-error"
+              aria-invalid="true"
+            />
+          </ct-form-field>
+        </div>
+      </div>
+
+      <div class="lab-sample">
+        <h3>Data toolbar</h3>
+        <ct-data-toolbar>
+          <ct-form-field
+            ctToolbarPrimary
+            label="Filter examples"
+            forId="lab-filter"
+          >
+            <input
+              class="lab-input"
+              id="lab-filter"
+              type="search"
+              autocomplete="off"
+            />
+          </ct-form-field>
+          <div ctToolbarActions class="lab-row">
+            <ct-button variant="ghost">Reset</ct-button>
+            <ct-button variant="secondary">Apply</ct-button>
+          </div>
+        </ct-data-toolbar>
+      </div>
+    </section>
+
+    <section class="lab-directions" aria-labelledby="visual-directions-title">
+      <div class="lab-directions__header">
+        <div>
+          <h2 id="visual-directions-title">Visual directions</h2>
+          <p>Existing isolated explorations remain available for comparison.</p>
+        </div>
+
+        <div class="lab-direction-controls">
+          <button
+            type="button"
+            data-direction="quiet"
+            [attr.aria-pressed]="activeDirection() === 'quiet'"
+            (click)="selectDirection('quiet')"
+          >
+            Quiet Clinical
+          </button>
+          <button
+            type="button"
+            data-direction="editorial"
+            [attr.aria-pressed]="activeDirection() === 'editorial'"
+            (click)="selectDirection('editorial')"
+          >
+            Editorial Operations
+          </button>
+          <button
+            type="button"
+            data-direction="structured"
+            [attr.aria-pressed]="activeDirection() === 'structured'"
+            (click)="selectDirection('structured')"
+          >
+            Structured Modern
+          </button>
+        </div>
+      </div>
+
+      @if (activeDirection() === 'quiet') {
+        <app-quiet-clinical />
+      }
+
+      @if (activeDirection() === 'editorial') {
+        <app-editorial-operations />
+      }
+
+      @if (activeDirection() === 'structured') {
+        <app-structured-modern />
+      }
+    </section>
+  </div>
+</main>

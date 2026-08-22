@@ -1,0 +1,18 @@
+<div class="ct-empty-state flex flex-col items-center text-center">
+  @if (icon(); as iconClass) {
+    <i
+      [class]="'ph ' + iconClass + ' ct-empty-state__icon'"
+      aria-hidden="true"
+    ></i>
+  }
+
+  <p class="ct-empty-state__title">{{ title() }}</p>
+
+  @if (description(); as descriptionText) {
+    <p class="ct-empty-state__description">{{ descriptionText }}</p>
+  }
+
+  <div class="ct-empty-state__actions">
+    <ng-content />
+  </div>
+</div>

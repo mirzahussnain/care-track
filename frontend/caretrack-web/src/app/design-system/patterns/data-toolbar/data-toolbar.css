@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.ct-data-toolbar {
+  border-block: 1px solid var(--ct-border);
+  background: var(--ct-surface-subtle);
+  padding: 0.75rem;
+}
+
+.ct-data-toolbar__primary:empty,
+.ct-data-toolbar__actions:empty {
+  display: none;
+}

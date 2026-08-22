@@ -1,0 +1,12 @@
+<div
+  class="ct-surface"
+  [class.ct-surface--default]="variant() === 'default'"
+  [class.ct-surface--subtle]="variant() === 'subtle'"
+  [class.ct-surface--elevated]="variant() === 'elevated'"
+  [class.ct-surface--padding-none]="padding() === 'none'"
+  [class.ct-surface--padding-sm]="padding() === 'sm'"
+  [class.ct-surface--padding-md]="padding() === 'md'"
+  [class.ct-surface--padding-lg]="padding() === 'lg'"
+>
+  <ng-content />
+</div>

@@ -1,0 +1,41 @@
+<button
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+
+  class="
+    ct-button
+    inline-flex items-center justify-center
+    gap-2
+    font-medium
+    whitespace-nowrap
+    transition-colors
+    duration-[var(--ct-duration-fast)]
+    ease-ct-standard
+    focus-visible:outline-none
+    disabled:pointer-events-none
+    disabled:opacity-50
+  "
+
+  [class.ct-button--primary]="variant() === 'primary'"
+  [class.ct-button--secondary]="variant() === 'secondary'"
+  [class.ct-button--ghost]="variant() === 'ghost'"
+  [class.ct-button--danger]="variant() === 'danger'"
+
+  [class.ct-button--sm]="size() === 'sm'"
+  [class.ct-button--md]="size() === 'md'"
+  [class.ct-button--lg]="size() === 'lg'"
+>
+  @if (loading()) {
+    <i
+      class="ph ph-circle-notch animate-spin text-base"
+      aria-hidden="true"
+    ></i>
+
+    <span class="sr-only">
+      Loading
+    </span>
+  }
+
+  <ng-content />
+</button>

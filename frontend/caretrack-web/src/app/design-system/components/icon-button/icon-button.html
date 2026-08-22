@@ -1,0 +1,29 @@
+<button
+  [type]="type()"
+  [disabled]="disabled()"
+  [attr.aria-label]="ariaLabel()"
+  class="
+    ct-icon-button
+    inline-grid shrink-0 place-items-center
+    transition-colors
+    duration-[var(--ct-duration-fast)]
+    ease-ct-standard
+    focus-visible:outline-none
+    disabled:pointer-events-none
+    disabled:opacity-50
+  "
+  [class.ct-icon-button--default]="
+    variant() === 'default'
+  "
+  [class.ct-icon-button--ghost]="
+    variant() === 'ghost'
+  "
+  [class.ct-icon-button--danger]="
+    variant() === 'danger'
+  "
+  [class.ct-icon-button--sm]="size() === 'sm'"
+  [class.ct-icon-button--md]="size() === 'md'"
+  [class.ct-icon-button--lg]="size() === 'lg'"
+>
+  <ng-content />
+</button>

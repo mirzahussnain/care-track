@@ -3,6 +3,18 @@ import { EditorialOperationsComponent } from '../../components/editorial-operati
 import { QuietClinicalComponent } from '../../components/quiet-clinical/quiet-clinical';
 import { StructuredModernComponent } from '../../components/structured-modern/structured-modern';
 
+import {
+  Button,
+  DataToolbar,
+  EmptyState,
+  FormField,
+  IconButton,
+  PageHeader,
+  Skeleton,
+  StatusChip,
+  Surface,
+} from '../../../../design-system';
+
 type DesignDirection =
   | 'quiet'
   | 'editorial'
@@ -15,6 +27,15 @@ type DesignDirection =
     QuietClinicalComponent,
     EditorialOperationsComponent,
     StructuredModernComponent,
+    Button,
+    DataToolbar,
+    EmptyState,
+    FormField,
+    IconButton,
+    PageHeader,
+    Skeleton,
+    StatusChip,
+    Surface,
   ],
   templateUrl: './design-lab-page.html',
   styleUrl: './design-lab-page.css',

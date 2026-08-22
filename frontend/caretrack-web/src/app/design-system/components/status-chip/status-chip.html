@@ -1,0 +1,11 @@
+<span
+  class="ct-status-chip inline-flex items-center gap-1.5 whitespace-nowrap font-medium"
+  [class.ct-status-chip--neutral]="tone() === 'neutral'"
+  [class.ct-status-chip--info]="tone() === 'info'"
+  [class.ct-status-chip--success]="tone() === 'success'"
+  [class.ct-status-chip--warning]="tone() === 'warning'"
+  [class.ct-status-chip--danger]="tone() === 'danger'"
+>
+  <span class="ct-status-chip__dot" aria-hidden="true"></span>
+  <ng-content />
+</span>

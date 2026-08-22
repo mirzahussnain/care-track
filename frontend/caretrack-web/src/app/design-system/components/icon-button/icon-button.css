@@ -1,0 +1,52 @@
+.ct-icon-button {
+  border-radius: var(--ct-radius-md);
+}
+
+.ct-icon-button--sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+}
+
+.ct-icon-button--md {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.125rem;
+}
+
+.ct-icon-button--lg {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.25rem;
+}
+
+.ct-icon-button--default {
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface);
+  color: var(--ct-text-secondary);
+}
+
+.ct-icon-button--default:hover:not(:disabled) {
+  background: var(--ct-surface-muted);
+  color: var(--ct-text);
+}
+
+.ct-icon-button--ghost {
+  background: transparent;
+  color: var(--ct-text-secondary);
+}
+
+.ct-icon-button--ghost:hover:not(:disabled) {
+  background: var(--ct-surface-muted);
+  color: var(--ct-text);
+}
+
+.ct-icon-button--danger {
+  background: var(--ct-danger-soft);
+  color: var(--ct-danger-strong);
+}
+
+.ct-icon-button--danger:hover:not(:disabled) {
+  background: var(--ct-danger);
+  color: var(--ct-text-inverse);
+}

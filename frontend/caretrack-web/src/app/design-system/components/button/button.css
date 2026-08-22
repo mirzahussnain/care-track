@@ -1,0 +1,59 @@
+.ct-button {
+  border-radius: var(--ct-radius-md);
+}
+
+.ct-button--sm {
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.ct-button--md {
+  min-height: 2.5rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+}
+
+.ct-button--lg {
+  min-height: 2.75rem;
+  padding-inline: 1.125rem;
+  font-size: 0.9375rem;
+}
+
+.ct-button--primary {
+  background: var(--ct-primary);
+  color: var(--ct-text-inverse);
+}
+
+.ct-button--primary:hover:not(:disabled) {
+  background: var(--ct-primary-hover);
+}
+
+.ct-button--secondary {
+  border: 1px solid var(--ct-border);
+  background: var(--ct-surface);
+  color: var(--ct-text);
+}
+
+.ct-button--secondary:hover:not(:disabled) {
+  background: var(--ct-surface-muted);
+}
+
+.ct-button--ghost {
+  background: transparent;
+  color: var(--ct-text-secondary);
+}
+
+.ct-button--ghost:hover:not(:disabled) {
+  background: var(--ct-surface-muted);
+  color: var(--ct-text);
+}
+
+.ct-button--danger {
+  background: var(--ct-danger);
+  color: var(--ct-text-inverse);
+}
+
+.ct-button--danger:hover:not(:disabled) {
+  background: var(--ct-danger-strong);
+}

@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.ct-skeleton {
+  display: block;
+  width: 100%;
+  background: var(--ct-surface-muted);
+  animation: ct-skeleton-pulse 1.6s var(--ct-ease-standard) infinite;
+}
+
+.ct-skeleton--text {
+  height: 0.75rem;
+  border-radius: var(--ct-radius-sm);
+}
+
+.ct-skeleton--block {
+  min-height: 4rem;
+  border-radius: var(--ct-radius-md);
+}
+
+.ct-skeleton--circle {
+  height: 100%;
+  min-height: 2.5rem;
+  aspect-ratio: 1;
+  border-radius: var(--ct-radius-full);
+}
+
+@keyframes ct-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-skeleton {
+    animation: none;
+  }
+}

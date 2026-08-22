@@ -57,6 +57,9 @@
   --ct-neutral-soft: #eef2f5;
   --ct-neutral-border: #cbd4dc;
 
+  /* Elevation */
+  --ct-shadow-xs: 0 1px 3px rgb(23 36 50 / 10%);
+
   /* Radius */
   --ct-radius-xs: 4px;
   --ct-radius-sm: 6px;

@@ -1,0 +1,50 @@
+:host {
+  display: inline-flex;
+}
+
+.ct-status-chip {
+  min-height: 1.5rem;
+  border: 1px solid;
+  border-radius: var(--ct-radius-full);
+  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.ct-status-chip__dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: none;
+  border-radius: var(--ct-radius-full);
+  background: currentColor;
+}
+
+.ct-status-chip--neutral {
+  border-color: var(--ct-neutral-border);
+  background: var(--ct-neutral-soft);
+  color: var(--ct-neutral-strong);
+}
+
+.ct-status-chip--info {
+  border-color: var(--ct-info-border);
+  background: var(--ct-info-soft);
+  color: var(--ct-info-strong);
+}
+
+.ct-status-chip--success {
+  border-color: var(--ct-success-border);
+  background: var(--ct-success-soft);
+  color: var(--ct-success-strong);
+}
+
+.ct-status-chip--warning {
+  border-color: var(--ct-warning-border);
+  background: var(--ct-warning-soft);
+  color: var(--ct-warning-strong);
+}
+
+.ct-status-chip--danger {
+  border-color: var(--ct-danger-border);
+  background: var(--ct-danger-soft);
+  color: var(--ct-danger-strong);
+}

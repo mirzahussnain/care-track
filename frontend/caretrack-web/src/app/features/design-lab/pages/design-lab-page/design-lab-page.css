@@ -3,94 +3,180 @@
 }
 
 .lab-page {
-  background: #e9ece8;
-  padding: 3rem clamp(1rem, 3vw, 3rem) 6rem;
-  color: #17201d;
+  min-height: 100vh;
+  background: var(--ct-bg);
+  padding: 2rem clamp(1rem, 3vw, 3rem) 4rem;
+  color: var(--ct-text);
 }
 
-.lab-intro {
+.lab-content {
   width: min(100%, 96rem);
-  margin: 0 auto 3rem;
+  margin-inline: auto;
 }
 
-.lab-kicker {
-  margin: 0 0 0.5rem;
-  color: #4f625c;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.lab-gallery,
+.lab-directions {
+  margin-top: 2rem;
 }
 
-h1 {
-  max-width: 44rem;
+.lab-gallery {
+  overflow: hidden;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+  background: var(--ct-surface);
+}
+
+.lab-gallery > h2,
+.lab-sample {
+  padding: 1rem 1.25rem;
+}
+
+.lab-gallery > h2 {
   margin: 0;
-  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  border-bottom: 1px solid var(--ct-border);
+  background: var(--ct-surface-subtle);
+  font-size: 1.125rem;
+}
+
+.lab-sample + .lab-sample {
+  border-top: 1px solid var(--ct-border);
+}
+
+.lab-sample h3,
+.lab-surface-grid h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
   font-weight: 650;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
 }
 
-.lab-description {
-  max-width: 43rem;
-  margin: 0.85rem 0 0;
-  color: #56615d;
-  font-size: 0.9375rem;
-  line-height: 1.6;
+.lab-surface-grid h4 {
+  margin-bottom: 0.25rem;
 }
 
-nav {
+.lab-surface-grid p {
+  margin: 0;
+  color: var(--ct-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.lab-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.5rem 1rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-nav a {
-  color: #35443f;
+.lab-row + .lab-row {
+  margin-top: 0.75rem;
+}
+
+.lab-surface-grid,
+.lab-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.lab-skeletons {
+  display: grid;
+  grid-template-columns: minmax(12rem, 2fr) minmax(10rem, 1fr) 3rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lab-text-skeletons {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lab-skeleton-short {
+  width: 62%;
+}
+
+.lab-skeleton-circle {
+  width: 3rem;
+  height: 3rem;
+}
+
+.lab-input {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid var(--ct-border-strong);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  padding-inline: 0.75rem;
+  color: var(--ct-text);
+}
+
+.lab-input--error {
+  border-color: var(--ct-danger);
+}
+
+.lab-directions__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lab-directions h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.lab-directions p {
+  margin: 0.25rem 0 0;
+  color: var(--ct-text-secondary);
+  font-size: 0.875rem;
+}
+
+.lab-direction-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lab-direction-controls button {
+  min-height: 2.25rem;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  padding-inline: 0.75rem;
+  color: var(--ct-text-secondary);
   font-size: 0.8125rem;
-  font-weight: 650;
-  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-nav a span {
-  margin-right: 0.25rem;
-  color: #6c7c76;
+.lab-direction-controls button:hover {
+  background: var(--ct-surface-muted);
+  color: var(--ct-text);
 }
 
-nav a:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
+.lab-direction-controls button[aria-pressed='true'] {
+  border-color: var(--ct-primary);
+  background: var(--ct-primary-soft);
+  color: var(--ct-primary-strong);
 }
 
-nav a:focus-visible {
-  border-radius: 0.25rem;
-  outline: 3px solid #397b6e;
-  outline-offset: 0.25rem;
-}
-
-.lab-stack {
-  width: min(100%, 96rem);
-  margin: 0 auto;
-  gap: 4rem;
-}
-
-.lab-stack > * {
-  scroll-margin-top: 1.5rem;
-}
-
-@media (max-width: 64rem) {
-  nav {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 40rem) {
+@media (max-width: 48rem) {
   .lab-page {
     padding-inline: 0.75rem;
   }
 
-  .lab-stack {
-    gap: 2rem;
+  .lab-surface-grid,
+  .lab-form-grid,
+  .lab-skeletons {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-skeleton-circle {
+    justify-self: start;
+  }
+
+  .lab-directions__header {
+    align-items: start;
+    flex-direction: column;
   }
 }

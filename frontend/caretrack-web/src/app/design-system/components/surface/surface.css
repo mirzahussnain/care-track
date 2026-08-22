@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.ct-surface {
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+}
+
+.ct-surface--default { background: var(--ct-surface); }
+.ct-surface--subtle { background: var(--ct-surface-subtle); }
+
+.ct-surface--elevated {
+  border-color: var(--ct-border-strong);
+  background: var(--ct-surface-elevated);
+  box-shadow: var(--ct-shadow-xs);
+}
+
+.ct-surface--padding-none { padding: 0; }
+.ct-surface--padding-sm { padding: 0.75rem; }
+.ct-surface--padding-md { padding: 1rem; }
+.ct-surface--padding-lg { padding: 1.5rem; }

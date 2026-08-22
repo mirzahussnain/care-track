@@ -1,0 +1,21 @@
+<div class="ct-form-field">
+  <label class="ct-form-field__label" [for]="forId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="ct-form-field__required" aria-hidden="true">*</span>
+      <span class="sr-only">(required)</span>
+    }
+  </label>
+
+  <div class="ct-form-field__control">
+    <ng-content />
+  </div>
+
+  @if (hint(); as hintText) {
+    <p class="ct-form-field__hint" [id]="forId() + '-hint'">{{ hintText }}</p>
+  }
+
+  @if (error(); as errorText) {
+    <p class="ct-form-field__error" [id]="forId() + '-error'">{{ errorText }}</p>
+  }
+</div>
