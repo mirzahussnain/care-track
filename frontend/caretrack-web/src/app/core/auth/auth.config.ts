@@ -55,11 +55,10 @@ export function msalGuardConfigurationFactory():
 export function msalInterceptorConfigurationFactory():
   MsalInterceptorConfiguration {
 
-  const protectedResourceMap =
-    new Map<string, string[]>();
+  const protectedResourceMap =new Map<string, string[]>();
 
   protectedResourceMap.set(
-    environment.apiBaseUrl,
+    `${environment.apiBaseUrl}/*`,
     [
       environment.auth.apiScope,
     ]
