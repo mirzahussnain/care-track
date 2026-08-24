@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -47,6 +48,16 @@ public sealed class TestAuthenticationHandler
                     "oid",
                     userId)
         };
+
+    AddOptionalClaim(
+        TestAuthenticationDefaults.NameHeader,
+        "name",
+        claims);
+
+    AddOptionalClaim(
+        TestAuthenticationDefaults.UsernameHeader,
+        "preferred_username",
+        claims);
 
     if (Request.Headers.TryGetValue(
             TestAuthenticationDefaults.ScopeHeader,
@@ -104,5 +115,31 @@ public sealed class TestAuthenticationHandler
     return Task.FromResult(
         AuthenticateResult.Success(
             ticket));
+  }
+
+  private void AddOptionalClaim(
+      string headerName,
+      string claimType,
+      ICollection<Claim> claims)
+  {
+    if (!Request.Headers.TryGetValue(
+            headerName,
+            out var values))
+    {
+      return;
+    }
+
+    var value =
+        values.ToString();
+
+    if (string.IsNullOrWhiteSpace(value))
+    {
+      return;
+    }
+
+    claims.Add(
+        new Claim(
+            claimType,
+            value));
   }
 }

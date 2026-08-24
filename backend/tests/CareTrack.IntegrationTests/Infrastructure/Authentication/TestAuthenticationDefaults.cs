@@ -13,4 +13,10 @@ public static class TestAuthenticationDefaults
 
   public const string RolesHeader =
       "X-Test-Roles";
+
+  public const string NameHeader =
+      "X-Test-Name";
+
+  public const string UsernameHeader =
+      "X-Test-Username";
 }

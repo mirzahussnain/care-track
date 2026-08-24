@@ -39,7 +39,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-
+const string FrontendCorsPolicy = "Frontend";
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -115,11 +115,30 @@ builder.Services.AddAuthorization(options =>
     policy.RequireRole(CareTrackRoles.Administrator);
   });
 
+  options.AddPolicy(
+    CareTrackPolicies.ApiAccess,
+    policy =>
+    {
+      policy.RequireAuthenticatedUser();
+      policy.RequireScope(CareTrackScopes.AccessAsUser);
+    }
+
+  );
+
 });
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
-
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy(FrontendCorsPolicy, policy =>
+  {
+    policy
+          .WithOrigins("http://localhost:4200")
+          .AllowAnyHeader()
+          .AllowAnyMethod();
+  });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -130,6 +149,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
