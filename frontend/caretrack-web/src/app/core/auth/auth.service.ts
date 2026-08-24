@@ -16,33 +16,43 @@ import {
 import {
   environment,
 } from '../../../environments/environment';
+import { AuthenticatedUser, CareTrackRole } from './auth.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly msalService =
-    inject(MsalService);
+  private readonly msalService =inject(MsalService);
 
-  private readonly accountState =
-    signal<AccountInfo | null>(
-      this.msalService.instance.getActiveAccount()
+  private readonly userState = signal<AuthenticatedUser | null>(null);
+  readonly currentUser = this.userState.asReadonly();
+    readonly isAuthenticated =computed(
+      () => this.currentUser() !== null
     );
 
-  readonly account =
-    this.accountState.asReadonly();
-
-  readonly isAuthenticated =
-    computed(
-      () => this.account() !== null
+  readonly roles = computed(
+      () => this.currentUser()?.roles ?? []
     );
 
-  refreshAccount(): void {
-    this.accountState.set(
-      this.msalService.instance.getActiveAccount()
+  constructor() {
+    this.refreshUser();
+  }
+
+   refreshUser(): void {
+    const account =
+      this.msalService.instance
+        .getActiveAccount();
+
+    this.userState.set(
+      account
+        ? this.mapAccount(account)
+        : null
     );
   }
 
+  hasRole(role: CareTrackRole): boolean {
+    return this.roles().includes(role);
+  }
   signOut(): void {
     this.msalService.logoutRedirect({
       account:
@@ -52,5 +62,40 @@ export class AuthService {
       postLogoutRedirectUri:
         `${environment.auth.redirectUri}/auth/sign-in`,
     });
+  }
+
+   private mapAccount(
+    account: AccountInfo
+  ): AuthenticatedUser {
+
+    const claims =
+      account.idTokenClaims as
+        | Record<string, unknown>
+        | undefined;
+
+    const roles =
+      Array.isArray(claims?.['roles'])
+        ? claims['roles']
+            .filter(
+              (
+                role
+              ): role is string =>
+                typeof role === 'string'
+            )
+        : [];
+
+    return {
+      id:
+        account.localAccountId,
+
+      name:
+        account.name
+        ?? account.username,
+
+      username:
+        account.username,
+
+      roles,
+    };
   }
 }

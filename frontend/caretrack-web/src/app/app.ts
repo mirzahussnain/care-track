@@ -18,6 +18,7 @@ import {
 import {
   takeUntilDestroyed,
 } from '@angular/core/rxjs-interop';
+import { AuthService } from './core/auth/auth.service';
 
 @Component({
   imports: [RouterOutlet],
@@ -30,6 +31,7 @@ import {
 export class App {
   protected readonly title = signal('caretrack-web');
   private readonly router=inject(Router);
+  private readonly authService=inject(AuthService);
    private readonly msalService =
     inject(MsalService);
 
@@ -54,6 +56,8 @@ export class App {
           }
 
           this.msalService.instance.setActiveAccount(result.account);
+          this.msalService.instance.setActiveAccount(result.account);
+          this.authService.refreshUser();
 
           void this.router.navigate(['/dashboard']);
         },
@@ -84,8 +88,8 @@ export class App {
             .getAllAccounts();
 
         if (accounts.length === 1) {
-          this.msalService.instance
-            .setActiveAccount(accounts[0]);
+          this.msalService.instance.setActiveAccount(accounts[0]);
+          this.authService.refreshUser();
         }
       });
   }
