@@ -1,6 +1,15 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+    {
+  path: 'auth/sign-in',
+  loadComponent: () =>
+    import(
+      './core/auth/pages/sign-in-page/sign-in-page'
+    ).then(
+      module => module.SignInPage
+    ),
+},
    {
     path: 'design-lab',
     loadComponent: () =>
