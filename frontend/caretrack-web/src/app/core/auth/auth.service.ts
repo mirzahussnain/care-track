@@ -6,10 +6,6 @@ import {
 } from '@angular/core';
 
 import {
-  AccountInfo,
-} from '@azure/msal-browser';
-
-import {
   MsalService,
 } from '@azure/msal-angular';
 
@@ -17,12 +13,14 @@ import {
   environment,
 } from '../../../environments/environment';
 import { AuthenticatedUser, CareTrackRole } from './auth.models';
+import { CurrentUserApiService } from './current-user-api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly msalService =inject(MsalService);
+   private readonly currentUserApi =inject(CurrentUserApiService);
 
   private readonly userState = signal<AuthenticatedUser | null>(null);
   readonly currentUser = this.userState.asReadonly();
@@ -30,30 +28,44 @@ export class AuthService {
       () => this.currentUser() !== null
     );
 
-  readonly roles = computed(
-      () => this.currentUser()?.roles ?? []
-    );
 
-  constructor() {
-    this.refreshUser();
+  readonly roles= computed(()=>this.currentUser()?.roles??[]);
+
+  loadCurrentUser(): void {
+    const account =this.msalService.instance.getActiveAccount();
+
+    if (!account) {
+      this.userState.set(null);
+      return;
+    }
+
+    this.currentUserApi
+      .getCurrentUser()
+      .subscribe({
+        next: user => {
+          this.userState.set(user);
+        },
+
+        error: () => {
+          this.userState.set(null);
+        },
+      });
   }
 
-   refreshUser(): void {
-    const account =
-      this.msalService.instance
-        .getActiveAccount();
-
-    this.userState.set(
-      account
-        ? this.mapAccount(account)
-        : null
-    );
+    clearCurrentUser(): void {
+    this.userState.set(null);
+  }
+  
+  
+   hasRole(
+    role: CareTrackRole
+  ): boolean {
+    return this.roles()
+      .includes(role);
   }
 
-  hasRole(role: CareTrackRole): boolean {
-    return this.roles().includes(role);
-  }
   signOut(): void {
+    this.clearCurrentUser();
     this.msalService.logoutRedirect({
       account:
         this.msalService.instance
@@ -62,40 +74,5 @@ export class AuthService {
       postLogoutRedirectUri:
         `${environment.auth.redirectUri}/auth/sign-in`,
     });
-  }
-
-   private mapAccount(
-    account: AccountInfo
-  ): AuthenticatedUser {
-
-    const claims =
-      account.idTokenClaims as
-        | Record<string, unknown>
-        | undefined;
-
-    const roles =
-      Array.isArray(claims?.['roles'])
-        ? claims['roles']
-            .filter(
-              (
-                role
-              ): role is string =>
-                typeof role === 'string'
-            )
-        : [];
-
-    return {
-      id:
-        account.localAccountId,
-
-      name:
-        account.name
-        ?? account.username,
-
-      username:
-        account.username,
-
-      roles,
-    };
   }
 }

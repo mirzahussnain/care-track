@@ -11,17 +11,36 @@ import {
 } from '@azure/msal-angular';
 
 import {
+  of,
+  throwError,
+} from 'rxjs';
+
+import {
+  environment,
+} from '../../../environments/environment';
+
+import {
   AuthService,
 } from './auth.service';
 
 import {
   CARETRACK_ROLES,
+  AuthenticatedUser,
 } from './auth.models';
-import { environment } from '../../../environments/environment';
+
+import {
+  CurrentUserApiService,
+} from './current-user-api.service';
 
 describe('AuthService', () => {
-  const getActiveAccount = vi.fn();
-  const logoutRedirect = vi.fn();
+  const getActiveAccount =
+    vi.fn();
+
+  const logoutRedirect =
+    vi.fn();
+
+  const getCurrentUser =
+    vi.fn();
 
   const msalServiceMock = {
     instance: {
@@ -31,33 +50,69 @@ describe('AuthService', () => {
     logoutRedirect,
   };
 
-  const clinicianAccount: AccountInfo = {
-    homeAccountId: 'home-account-1',
-    environment: 'login.microsoftonline.com',
-    tenantId: 'tenant-1',
-    username: 'clinician@example.com',
-    localAccountId: 'user-1',
-    name: 'Test Clinician',
+  const currentUserApiMock = {
+    getCurrentUser,
+  };
 
-    idTokenClaims: {
+  const clinicianAccount:
+    AccountInfo = {
+      homeAccountId:
+        'home-account-1',
+
+      environment:
+        'login.microsoftonline.com',
+
+      tenantId:
+        'tenant-1',
+
+      username:
+        'clinician@example.com',
+
+      localAccountId:
+        'user-1',
+
+      name:
+        'Test Clinician',
+    };
+
+  const clinicianUser:
+    AuthenticatedUser = {
+      id: 'user-1',
+
+      name:
+        'Test Clinician',
+
+      username:
+        'clinician@example.com',
+
       roles: [
         'Clinician',
       ],
-    },
-  };
+    };
 
   beforeEach(() => {
     getActiveAccount.mockReset();
     logoutRedirect.mockReset();
+    getCurrentUser.mockReset();
 
-    getActiveAccount.mockReturnValue(null);
+    getActiveAccount
+      .mockReturnValue(null);
 
     TestBed.configureTestingModule({
       providers: [
         AuthService,
+
         {
           provide: MsalService,
           useValue: msalServiceMock,
+        },
+
+        {
+          provide:
+            CurrentUserApiService,
+
+          useValue:
+            currentUserApiMock,
         },
       ],
     });
@@ -67,16 +122,18 @@ describe('AuthService', () => {
     const service =
       TestBed.inject(AuthService);
 
-    expect(service).toBeTruthy();
+    expect(service)
+      .toBeTruthy();
   });
 
-  it('is unauthenticated when there is no active account', () => {
-    getActiveAccount.mockReturnValue(null);
+  it('is unauthenticated when there is no active MSAL account', () => {
+    getActiveAccount
+      .mockReturnValue(null);
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.currentUser()
@@ -89,55 +146,75 @@ describe('AuthService', () => {
     expect(
       service.roles()
     ).toEqual([]);
+
+    expect(
+      getCurrentUser
+    ).not.toHaveBeenCalled();
   });
 
-  it('maps the active MSAL account into CareTrack user state', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('loads the current CareTrack user from the API when an active account exists', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
+
+    expect(
+      getCurrentUser
+    ).toHaveBeenCalledOnce();
 
     expect(
       service.currentUser()
-    ).toEqual({
-      id: 'user-1',
-      name: 'Test Clinician',
-      username:
-        'clinician@example.com',
-      roles: [
-        'Clinician',
-      ],
-    });
+    ).toEqual(
+      clinicianUser
+    );
   });
 
-  it('marks the user as authenticated when an active account exists', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('marks the user as authenticated after the current-user API succeeds', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.isAuthenticated()
     ).toBe(true);
   });
 
-  it('extracts roles from the account claims', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('uses roles returned by the current-user API', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.roles()
@@ -146,15 +223,21 @@ describe('AuthService', () => {
     ]);
   });
 
-  it('returns true when the user has the requested role', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('returns true when the current user has the requested role', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.hasRole(
@@ -163,15 +246,21 @@ describe('AuthService', () => {
     ).toBe(true);
   });
 
-  it('returns false when the user does not have the requested role', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('returns false when the current user does not have the requested role', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.hasRole(
@@ -180,131 +269,182 @@ describe('AuthService', () => {
     ).toBe(false);
   });
 
-  it('uses username as the display name when account name is unavailable', () => {
-    const accountWithoutName:
-      AccountInfo = {
-        ...clinicianAccount,
-        name: undefined,
+  it('supports multiple roles returned by the API', () => {
+    const multiRoleUser:
+      AuthenticatedUser = {
+        ...clinicianUser,
+
+        roles: [
+          'Clinician',
+          'ReferralCoordinator',
+        ],
       };
 
-    getActiveAccount.mockReturnValue(
-      accountWithoutName
-    );
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(multiRoleUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
-
-    expect(
-      service.currentUser()?.name
-    ).toBe(
-      'clinician@example.com'
-    );
-  });
-
-  it('ignores non-string role values', () => {
-    const accountWithMixedRoles =
-      {
-        ...clinicianAccount,
-
-        idTokenClaims: {
-          roles: [
-            'Clinician',
-            123,
-            null,
-            'Administrator',
-          ],
-        },
-      } as AccountInfo;
-
-    getActiveAccount.mockReturnValue(
-      accountWithMixedRoles
-    );
-
-    const service =
-      TestBed.inject(AuthService);
-
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.roles()
     ).toEqual([
       'Clinician',
-      'Administrator',
+      'ReferralCoordinator',
     ]);
+
+    expect(
+      service.hasRole(
+        CARETRACK_ROLES
+          .referralCoordinator
+      )
+    ).toBe(true);
   });
 
-  it('uses an empty role list when the roles claim is absent', () => {
-    const accountWithoutRoles:
-      AccountInfo = {
-        ...clinicianAccount,
-
-        idTokenClaims: {},
+  it('supports a user with no application roles', () => {
+    const userWithoutRoles:
+      AuthenticatedUser = {
+        ...clinicianUser,
+        roles: [],
       };
 
-    getActiveAccount.mockReturnValue(
-      accountWithoutRoles
-    );
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(userWithoutRoles)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
+
+    expect(
+      service.isAuthenticated()
+    ).toBe(true);
 
     expect(
       service.roles()
     ).toEqual([]);
   });
 
-  it('updates user state when refreshUser is called after the active account changes', () => {
-    getActiveAccount.mockReturnValue(
-      null
-    );
+  it('clears user state when loading the current user fails', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
+
+    expect(
+      service.isAuthenticated()
+    ).toBe(true);
+
+    getCurrentUser
+      .mockReturnValue(
+        throwError(
+          () =>
+            new Error(
+              'Current user request failed'
+            )
+        )
+      );
+
+    service.loadCurrentUser();
+
+    expect(
+      service.currentUser()
+    ).toBeNull();
 
     expect(
       service.isAuthenticated()
     ).toBe(false);
 
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
-
-    service.refreshUser();
-
     expect(
-      service.isAuthenticated()
-    ).toBe(true);
-
-    expect(
-      service.currentUser()?.id
-    ).toBe('user-1');
+      service.roles()
+    ).toEqual([]);
   });
 
-  it('clears user state when the active account is removed', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('clears user state when the active MSAL account is removed', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
-    service.refreshUser();
+    service.loadCurrentUser();
 
     expect(
       service.isAuthenticated()
     ).toBe(true);
 
-    getActiveAccount.mockReturnValue(
-      null
-    );
+    getActiveAccount
+      .mockReturnValue(null);
 
-    service.refreshUser();
+    service.loadCurrentUser();
+
+    expect(
+      service.currentUser()
+    ).toBeNull();
+
+    expect(
+      service.isAuthenticated()
+    ).toBe(false);
+
+    expect(
+      getCurrentUser
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('clearCurrentUser clears the current application user', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
+
+    const service =
+      TestBed.inject(AuthService);
+
+    service.loadCurrentUser();
+
+    expect(
+      service.isAuthenticated()
+    ).toBe(true);
+
+    service.clearCurrentUser();
 
     expect(
       service.currentUser()
@@ -315,15 +455,31 @@ describe('AuthService', () => {
     ).toBe(false);
   });
 
-  it('calls logoutRedirect with the active account', () => {
-    getActiveAccount.mockReturnValue(
-      clinicianAccount
-    );
+  it('clears user state and calls logoutRedirect with the active account', () => {
+    getActiveAccount
+      .mockReturnValue(
+        clinicianAccount
+      );
+
+    getCurrentUser
+      .mockReturnValue(
+        of(clinicianUser)
+      );
 
     const service =
       TestBed.inject(AuthService);
 
+    service.loadCurrentUser();
+
+    expect(
+      service.isAuthenticated()
+    ).toBe(true);
+
     service.signOut();
+
+    expect(
+      service.currentUser()
+    ).toBeNull();
 
     expect(
       logoutRedirect
@@ -332,16 +488,17 @@ describe('AuthService', () => {
     expect(
       logoutRedirect
     ).toHaveBeenCalledWith({
-      account: clinicianAccount,
+      account:
+        clinicianAccount,
+
       postLogoutRedirectUri:
-      `${environment.auth.redirectUri}/auth/sign-in`,
+        `${environment.auth.redirectUri}/auth/sign-in`,
     });
   });
 
   it('allows logout when there is no active account', () => {
-    getActiveAccount.mockReturnValue(
-      null
-    );
+    getActiveAccount
+      .mockReturnValue(null);
 
     const service =
       TestBed.inject(AuthService);
@@ -352,8 +509,9 @@ describe('AuthService', () => {
       logoutRedirect
     ).toHaveBeenCalledWith({
       account: undefined,
+
       postLogoutRedirectUri:
-      `${environment.auth.redirectUri}/auth/sign-in`,
+        `${environment.auth.redirectUri}/auth/sign-in`,
     });
   });
 });

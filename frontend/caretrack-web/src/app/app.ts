@@ -57,7 +57,7 @@ export class App {
 
           this.msalService.instance.setActiveAccount(result.account);
           this.msalService.instance.setActiveAccount(result.account);
-          this.authService.refreshUser();
+          this.authService.loadCurrentUser();
 
           void this.router.navigate(['/dashboard']);
         },
@@ -89,7 +89,7 @@ export class App {
 
         if (accounts.length === 1) {
           this.msalService.instance.setActiveAccount(accounts[0]);
-          this.authService.refreshUser();
+          this.authService.loadCurrentUser();
         }
       });
   }
