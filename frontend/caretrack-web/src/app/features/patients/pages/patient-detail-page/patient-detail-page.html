@@ -1,0 +1,92 @@
+<div class="patient-detail">
+  <a routerLink="/patients" class="patient-detail__back"
+    ><i class="ph ph-arrow-left" aria-hidden="true"></i>Back to patients</a
+  >
+  <ct-page-header
+    title="Patient details"
+    description="Review the registered patient identity and record information."
+  >
+    @if (patient()) {
+      <a
+        *ctHasRole="clinicianRole"
+        [routerLink]="['/patients', patientId, 'edit']"
+        class="patient-detail__edit-link"
+        ><i class="ph ph-pencil-simple" aria-hidden="true"></i>Edit patient</a
+      >
+    }
+  </ct-page-header>
+
+  @if (loading()) {
+    <div class="patient-detail__loading" role="status" aria-label="Loading patient">
+      <span class="sr-only">Loading patient</span>
+      <ct-skeleton variant="block" />
+      <ct-surface
+        ><div class="patient-detail__skeleton-details">
+          <ct-skeleton /><ct-skeleton /><ct-skeleton /></div
+      ></ct-surface>
+    </div>
+  } @else if (error() === 'not-found') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient not found"
+        description="This patient record does not exist or is no longer available."
+        icon="ph-user-minus"
+        ><a routerLink="/patients" class="patient-detail__secondary-link"
+          >Return to patients</a
+        ></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (error() === 'forbidden') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient details are not available for your role"
+        description="Only clinicians can view existing patient records. You can still register a new patient if your role permits it."
+        icon="ph-lock-key"
+        ><a
+          *ctHasRole="patientManagers"
+          routerLink="/patients/new"
+          class="patient-detail__secondary-link"
+          >Register patient</a
+        ></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (error() === 'generic') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient details could not be loaded"
+        description="There was a problem loading this patient record."
+        icon="ph-warning-circle"
+        ><ct-button variant="secondary" (click)="retry()">Try again</ct-button></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (patient(); as currentPatient) {
+    <ct-patient-identity-banner
+      [fullName]="currentPatient.fullName"
+      [patientReference]="currentPatient.patientReference"
+      [dateOfBirth]="currentPatient.dateOfBirth"
+    />
+    <ct-surface>
+      <section aria-labelledby="record-information-title">
+        <h2 id="record-information-title">Record information</h2>
+        <dl class="patient-detail__record-grid">
+          <div>
+            <dt>First name</dt>
+            <dd>{{ currentPatient.firstName }}</dd>
+          </div>
+          <div>
+            <dt>Last name</dt>
+            <dd>{{ currentPatient.lastName }}</dd>
+          </div>
+          <div>
+            <dt>Patient reference</dt>
+            <dd>{{ currentPatient.patientReference }}</dd>
+          </div>
+          <div>
+            <dt>Registered</dt>
+            <dd>{{ currentPatient.createdAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC</dd>
+          </div>
+        </dl>
+      </section>
+    </ct-surface>
+  }
+</div>

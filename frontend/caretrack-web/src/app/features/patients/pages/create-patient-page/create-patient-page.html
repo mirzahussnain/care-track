@@ -1,0 +1,154 @@
+<div class="patient-form-page">
+  <a routerLink="/patients" class="patient-form-page__back"
+    ><i class="ph ph-arrow-left" aria-hidden="true"></i>Back to patients</a
+  >
+  <ct-page-header
+    title="Register patient"
+    description="Add a patient identity record for referral and care workflows."
+  />
+
+  @if (createdPatient(); as patient) {
+    <ct-surface>
+      <div class="patient-form-page__success" role="status">
+        <div class="patient-form-page__success-heading">
+          <i class="ph ph-check-circle" aria-hidden="true"></i>
+          <div>
+            <h2>Patient registered</h2>
+            <p>The patient record was created successfully.</p>
+          </div>
+        </div>
+        <ct-patient-identity-banner
+          [fullName]="patient.fullName"
+          [patientReference]="patient.patientReference"
+          [dateOfBirth]="patient.dateOfBirth"
+        />
+        <ct-button (click)="registerAnother()"
+          ><i class="ph ph-user-plus" aria-hidden="true"></i>Register another</ct-button
+        >
+      </div>
+    </ct-surface>
+  } @else {
+    <ct-surface>
+      <form class="patient-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="patient-form__intro">
+          <h2>Patient identity</h2>
+          <p>Enter the supported identity fields exactly as they should appear in CareTrack.</p>
+        </div>
+
+        @if (error()) {
+          <div class="patient-form__alert" role="alert">
+            <i class="ph ph-warning-circle" aria-hidden="true"></i>
+            <p>
+              @switch (error()) {
+                @case ('duplicate') {
+                  A patient with this reference already exists.
+                }
+                @case ('validation') {
+                  The patient could not be registered. Review the fields and try again.
+                }
+                @case ('forbidden') {
+                  Your role does not permit patient registration.
+                }
+                @default {
+                  The patient could not be registered. Try again.
+                }
+              }
+            </p>
+          </div>
+        }
+
+        <div class="patient-form__grid">
+          <ct-form-field
+            label="Patient reference"
+            forId="patient-reference"
+            [required]="true"
+            hint="Maximum 20 characters."
+            [error]="errorFor(form.controls.patientReference, 'Patient reference', 20)"
+          >
+            <input
+              id="patient-reference"
+              type="text"
+              formControlName="patientReference"
+              maxlength="20"
+              autocomplete="off"
+              [attr.aria-invalid]="
+                form.controls.patientReference.invalid &&
+                (form.controls.patientReference.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.patientReference, 'Patient reference', 20)
+                  ? 'patient-reference-error'
+                  : 'patient-reference-hint'
+              "
+            />
+          </ct-form-field>
+          <ct-form-field
+            label="Date of birth"
+            forId="date-of-birth"
+            [required]="true"
+            [error]="errorFor(form.controls.dateOfBirth, 'Date of birth')"
+          >
+            <input
+              id="date-of-birth"
+              type="date"
+              formControlName="dateOfBirth"
+              [max]="maxDateOfBirth"
+              [attr.aria-invalid]="
+                form.controls.dateOfBirth.invalid &&
+                (form.controls.dateOfBirth.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.dateOfBirth, 'Date of birth') ? 'date-of-birth-error' : null
+              "
+            />
+          </ct-form-field>
+          <ct-form-field
+            label="First name"
+            forId="first-name"
+            [required]="true"
+            [error]="errorFor(form.controls.firstName, 'First name', 100)"
+          >
+            <input
+              id="first-name"
+              type="text"
+              formControlName="firstName"
+              maxlength="100"
+              autocomplete="given-name"
+              [attr.aria-invalid]="
+                form.controls.firstName.invalid && (form.controls.firstName.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.firstName, 'First name', 100) ? 'first-name-error' : null
+              "
+            />
+          </ct-form-field>
+          <ct-form-field
+            label="Last name"
+            forId="last-name"
+            [required]="true"
+            [error]="errorFor(form.controls.lastName, 'Last name', 100)"
+          >
+            <input
+              id="last-name"
+              type="text"
+              formControlName="lastName"
+              maxlength="100"
+              autocomplete="family-name"
+              [attr.aria-invalid]="
+                form.controls.lastName.invalid && (form.controls.lastName.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.lastName, 'Last name', 100) ? 'last-name-error' : null
+              "
+            />
+          </ct-form-field>
+        </div>
+
+        <div class="patient-form__actions">
+          <a routerLink="/patients" class="patient-form__cancel">Cancel</a>
+          <ct-button type="submit" [loading]="submitting()">Register patient</ct-button>
+        </div>
+      </form>
+    </ct-surface>
+  }
+</div>

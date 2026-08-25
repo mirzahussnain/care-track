@@ -1,0 +1,138 @@
+<div class="patients-page">
+  <ct-page-header title="Patients" description="Find and review registered patient records.">
+    <a *ctHasRole="patientManagers" routerLink="/patients/new" class="patients-page__primary-link">
+      <i class="ph ph-user-plus" aria-hidden="true"></i>Register patient
+    </a>
+  </ct-page-header>
+
+  <ct-surface padding="none">
+    <ct-data-toolbar>
+      <form
+        ctToolbarPrimary
+        class="patients-page__search"
+        [formGroup]="searchForm"
+        (ngSubmit)="submitSearch()"
+        role="search"
+      >
+        <label for="patient-search">Search patients</label>
+        <div class="patients-page__search-control">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          <input
+            id="patient-search"
+            type="search"
+            [formControl]="searchControl"
+            placeholder="Name or patient reference"
+          />
+        </div>
+        <ct-button type="submit" variant="secondary">Search</ct-button>
+        @if (appliedSearch()) {
+          <ct-button type="button" variant="ghost" (click)="clearSearch()">Clear</ct-button>
+        }
+      </form>
+
+      <div
+        ctToolbarActions
+        class="patients-page__sorting"
+        [formGroup]="sortForm"
+        role="group"
+        aria-label="Patient sorting"
+      >
+        <ct-form-field label="Sort by" forId="patient-sort-by">
+          <select id="patient-sort-by" formControlName="sortBy">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Direction" forId="patient-sort-direction">
+          <select id="patient-sort-direction" formControlName="sortDirection">
+            @for (option of sortDirectionOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </ct-form-field>
+      </div>
+    </ct-data-toolbar>
+
+    @if (loading()) {
+      <div class="patients-page__loading" role="status" aria-label="Loading patients">
+        <span class="sr-only">Loading patients</span>
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="patients-page__skeleton-row">
+            <ct-skeleton /><ct-skeleton /><ct-skeleton />
+          </div>
+        }
+      </div>
+    } @else if (error() === 'forbidden') {
+      <ct-empty-state
+        title="Patient browsing is not available for your role"
+        description="You can still register a new patient, but only clinicians can browse and view existing patient records."
+        icon="ph-lock-key"
+      />
+    } @else if (error() === 'generic') {
+      <ct-empty-state
+        title="Patients could not be loaded"
+        description="There was a problem loading patient records. Try again."
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" (click)="retry()">Try again</ct-button>
+      </ct-empty-state>
+    } @else if (result(); as patients) {
+      @if (patients.totalCount === 0) {
+        <ct-empty-state
+          [title]="
+            appliedSearch() ? 'No patients matched your search' : 'No patients are registered'
+          "
+          [description]="
+            appliedSearch()
+              ? 'Try a different name or patient reference.'
+              : 'Registered patients will appear here.'
+          "
+          icon="ph-users"
+        >
+          @if (appliedSearch()) {
+            <ct-button variant="secondary" (click)="clearSearch()">Clear search</ct-button>
+          }
+        </ct-empty-state>
+      } @else {
+        <div class="patients-page__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Patient</th>
+                <th scope="col">Reference</th>
+                <th scope="col">Date of birth</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (patient of patients.items; track patient.id) {
+                <tr>
+                  <td>
+                    <strong>{{ patient.fullName }}</strong>
+                  </td>
+                  <td>{{ patient.patientReference }}</td>
+                  <td>{{ patient.dateOfBirth + 'T00:00:00Z' | date: 'dd MMM yyyy' : 'UTC' }}</td>
+                  <td>
+                    <a [routerLink]="['/patients', patient.id]"
+                      >View patient<span class="sr-only"> {{ patient.fullName }}</span></a
+                    >
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ct-pagination
+          [page]="patients.page"
+          [pageSize]="patients.pageSize"
+          [totalCount]="patients.totalCount"
+          [totalPages]="patients.totalPages"
+          ariaLabel="Patient results pagination"
+          (pageChange)="changePage($event)"
+        />
+      }
+    }
+  </ct-surface>
+</div>

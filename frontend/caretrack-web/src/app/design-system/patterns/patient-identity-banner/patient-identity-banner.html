@@ -1,0 +1,19 @@
+<section class="ct-patient-identity" aria-label="Patient identity">
+  <div class="ct-patient-identity__marker" aria-hidden="true">
+    <i class="ph ph-user"></i>
+  </div>
+  <div class="ct-patient-identity__content">
+    <p class="ct-patient-identity__eyebrow">Patient</p>
+    <p class="ct-patient-identity__name">{{ fullName() }}</p>
+    <dl class="ct-patient-identity__details">
+      <div>
+        <dt>Reference</dt>
+        <dd>{{ patientReference() }}</dd>
+      </div>
+      <div>
+        <dt>Date of birth</dt>
+        <dd>{{ dateOfBirth() + 'T00:00:00Z' | date: 'dd MMM yyyy' : 'UTC' }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>

@@ -1,0 +1,191 @@
+<div class="edit-patient-page">
+  <a [routerLink]="['/patients', patientId]" class="edit-patient-page__back"
+    ><i class="ph ph-arrow-left" aria-hidden="true"></i>Return to patient</a
+  >
+  <ct-page-header
+    title="Edit patient"
+    description="Update the supported patient identity fields."
+  />
+
+  @if (loading()) {
+    <div class="edit-patient-page__loading" role="status" aria-label="Loading patient for editing">
+      <span class="sr-only">Loading patient for editing</span
+      ><ct-skeleton variant="block" /><ct-surface
+        ><ct-skeleton /><ct-skeleton /><ct-skeleton
+      /></ct-surface>
+    </div>
+  } @else if (loadError() === 'not-found') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient not found"
+        description="This patient record cannot be edited because it does not exist or is no longer available."
+        icon="ph-user-minus"
+        ><a routerLink="/patients" class="edit-patient-page__secondary-link"
+          >Return to patients</a
+        ></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (loadError() === 'forbidden') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient editing is not available for your role"
+        description="Only clinicians can load an existing patient record and initiate editing."
+        icon="ph-lock-key"
+        ><a
+          *ctHasRole="patientManagers"
+          routerLink="/patients/new"
+          class="edit-patient-page__secondary-link"
+          >Register patient</a
+        ></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (loadError() === 'generic') {
+    <ct-surface
+      ><ct-empty-state
+        title="Patient could not be loaded"
+        description="There was a problem loading the patient record for editing."
+        icon="ph-warning-circle"
+        ><ct-button variant="secondary" (click)="retryInitialLoad()"
+          >Try again</ct-button
+        ></ct-empty-state
+      ></ct-surface
+    >
+  } @else if (patient(); as currentPatient) {
+    <ct-patient-identity-banner
+      [fullName]="currentPatient.fullName"
+      [patientReference]="currentPatient.patientReference"
+      [dateOfBirth]="currentPatient.dateOfBirth"
+    />
+    <ct-surface>
+      <form class="patient-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="patient-form__intro">
+          <h2>Editable identity</h2>
+          <p>The patient reference cannot be changed.</p>
+        </div>
+
+        @if (conflict()) {
+          <div class="patient-form__conflict" role="alert">
+            <div>
+              <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
+              <div>
+                <h3>This patient record has changed</h3>
+                <p>
+                  Another user updated the patient after you opened it. Your unsaved values are
+                  preserved and have not been overwritten.
+                </p>
+              </div>
+            </div>
+            <p class="patient-form__reload-warning">
+              Reloading the latest record will replace all unsaved edits shown in this form.
+            </p>
+            @if (reloadError()) {
+              <p class="patient-form__reload-error">
+                The latest record could not be loaded. Your unsaved edits are still preserved.
+              </p>
+            }
+            <div class="patient-form__conflict-actions">
+              <ct-button
+                type="button"
+                variant="secondary"
+                [loading]="reloading()"
+                (click)="reloadLatest()"
+                >Reload latest record</ct-button
+              >
+              <a [routerLink]="['/patients', patientId]" class="patient-form__cancel"
+                >Return to patient</a
+              >
+            </div>
+          </div>
+        } @else if (submitError()) {
+          <div class="patient-form__alert" role="alert">
+            <i class="ph ph-warning-circle" aria-hidden="true"></i>
+            <p>
+              @switch (submitError()) {
+                @case ('validation') {
+                  The patient could not be updated. Review the fields and try again.
+                }
+                @case ('forbidden') {
+                  Your role does not permit this patient update.
+                }
+                @case ('not-found') {
+                  This patient record is no longer available.
+                }
+                @default {
+                  The patient could not be updated. Try again.
+                }
+              }
+            </p>
+          </div>
+        }
+
+        <div class="patient-form__grid">
+          <ct-form-field
+            label="First name"
+            forId="edit-first-name"
+            [required]="true"
+            [error]="errorFor(form.controls.firstName, 'First name', 100)"
+            ><input
+              id="edit-first-name"
+              type="text"
+              formControlName="firstName"
+              maxlength="100"
+              autocomplete="given-name"
+              [attr.aria-invalid]="
+                form.controls.firstName.invalid && (form.controls.firstName.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.firstName, 'First name', 100)
+                  ? 'edit-first-name-error'
+                  : null
+              "
+          /></ct-form-field>
+          <ct-form-field
+            label="Last name"
+            forId="edit-last-name"
+            [required]="true"
+            [error]="errorFor(form.controls.lastName, 'Last name', 100)"
+            ><input
+              id="edit-last-name"
+              type="text"
+              formControlName="lastName"
+              maxlength="100"
+              autocomplete="family-name"
+              [attr.aria-invalid]="
+                form.controls.lastName.invalid && (form.controls.lastName.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.lastName, 'Last name', 100) ? 'edit-last-name-error' : null
+              "
+          /></ct-form-field>
+          <ct-form-field
+            label="Date of birth"
+            forId="edit-date-of-birth"
+            [required]="true"
+            [error]="errorFor(form.controls.dateOfBirth, 'Date of birth')"
+            ><input
+              id="edit-date-of-birth"
+              type="date"
+              formControlName="dateOfBirth"
+              [max]="maxDateOfBirth"
+              [attr.aria-invalid]="
+                form.controls.dateOfBirth.invalid &&
+                (form.controls.dateOfBirth.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.dateOfBirth, 'Date of birth')
+                  ? 'edit-date-of-birth-error'
+                  : null
+              "
+          /></ct-form-field>
+        </div>
+
+        <div class="patient-form__actions">
+          <a [routerLink]="['/patients', patientId]" class="patient-form__cancel">Cancel</a
+          ><ct-button type="submit" [loading]="submitting()" [disabled]="conflict()"
+            >Save changes</ct-button
+          >
+        </div>
+      </form>
+    </ct-surface>
+  }
+</div>

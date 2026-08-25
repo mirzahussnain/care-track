@@ -1,0 +1,146 @@
+:host {
+  display: block;
+}
+.edit-patient-page {
+  display: grid;
+  max-width: 56rem;
+  gap: 1.25rem;
+}
+.edit-patient-page__back {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--ct-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.edit-patient-page__secondary-link {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  padding-inline: 1rem;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  color: var(--ct-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.edit-patient-page__loading {
+  display: grid;
+  gap: 1rem;
+}
+.edit-patient-page__loading > ct-skeleton {
+  min-height: 7rem;
+}
+.patient-form {
+  display: grid;
+  gap: 1.5rem;
+}
+.patient-form__intro h2 {
+  margin: 0;
+  color: var(--ct-text);
+  font-size: 1rem;
+  font-weight: 650;
+}
+.patient-form__intro p {
+  margin: 0.25rem 0 0;
+  color: var(--ct-text-secondary);
+  font-size: 0.875rem;
+}
+.patient-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+.patient-form input {
+  width: 100%;
+  min-height: 2.625rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ct-border-strong);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  color: var(--ct-text);
+}
+.patient-form input[aria-invalid='true'] {
+  border-color: var(--ct-danger);
+}
+.patient-form__alert,
+.patient-form__conflict {
+  padding: 0.875rem;
+  border-radius: var(--ct-radius-md);
+}
+.patient-form__alert {
+  display: flex;
+  gap: 0.625rem;
+  border: 1px solid var(--ct-danger-border);
+  background: var(--ct-danger-soft);
+  color: var(--ct-danger-strong);
+}
+.patient-form__alert p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.patient-form__conflict {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid var(--ct-warning-border);
+  background: var(--ct-warning-soft);
+  color: var(--ct-warning-strong);
+}
+.patient-form__conflict > div:first-child {
+  display: flex;
+  gap: 0.625rem;
+}
+.patient-form__conflict h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.patient-form__conflict p {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+}
+.patient-form__reload-warning {
+  font-weight: 700;
+}
+.patient-form__reload-error {
+  color: var(--ct-danger-strong);
+  font-weight: 600;
+}
+.patient-form__conflict-actions,
+.patient-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.patient-form__actions {
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ct-border);
+}
+.patient-form__cancel {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  padding-inline: 1rem;
+  border-radius: var(--ct-radius-md);
+  color: var(--ct-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+ct-empty-state {
+  display: block;
+  padding: 2rem 1rem;
+}
+@media (max-width: 639px) {
+  .patient-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
