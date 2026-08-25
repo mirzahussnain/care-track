@@ -1,128 +1,392 @@
-import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import {
+  Component,
+  signal,
+} from '@angular/core';
 
-import { AppSidebar } from './app-sidebar';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
+
+import {
+  provideRouter,
+} from '@angular/router';
+
+import {
+  AppSidebar,
+} from './app-sidebar';
+
+import {
+  AuthService,
+} from '../../auth/auth.service';
+
+import {
+  CARETRACK_ROLES,
+  CareTrackRole,
+} from '../../auth/auth.models';
+
+import type {
+  ShellNavigationItem,
+} from '../shell-navigation';
 
 @Component({
   template: '',
 })
 class TestDashboardPage {}
+
 describe('AppSidebar', () => {
   let component: AppSidebar;
-  let fixture: ComponentFixture<AppSidebar>;
+  let fixture:
+    ComponentFixture<AppSidebar>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AppSidebar],
-      providers: [provideRouter([
-           {
-      path: 'dashboard',
-      component: TestDashboardPage,
-    },
-      ])],
-    }).compileComponents();
+  const rolesSignal =
+    signal<readonly string[]>([]);
 
-    fixture = TestBed.createComponent(AppSidebar);
+  const authServiceMock = {
+    roles:
+      rolesSignal.asReadonly(),
 
-    fixture.componentRef.setInput('navigation', [
+    hasRole: (
+      role: CareTrackRole
+    ) =>
+      rolesSignal()
+        .includes(role),
+  };
+
+  const navigation:
+    readonly ShellNavigationItem[] = [
       {
         label: 'Dashboard',
         route: '/dashboard',
         icon: 'ph-squares-four',
         exact: true,
       },
-    ]);
 
-    component = fixture.componentInstance;
+      {
+        label: 'Patients',
+        route: '/patients',
+        icon: 'ph-users',
+        exact: false,
+        roles: [
+          CARETRACK_ROLES.clinician,
+          CARETRACK_ROLES.referralCoordinator,
+        ],
+      },
+
+      {
+        label: 'Referrals',
+        route: '/referrals',
+        icon: 'ph-files',
+        exact: false,
+        roles: [
+          CARETRACK_ROLES.clinician,
+          CARETRACK_ROLES.referralCoordinator,
+        ],
+      },
+
+      {
+        label: 'Appointments',
+        route: '/appointments',
+        icon: 'ph-calendar-dots',
+        exact: false,
+        roles: [
+          CARETRACK_ROLES.clinician,
+          CARETRACK_ROLES.referralCoordinator,
+        ],
+      },
+
+      {
+        label: 'Clinical Notes',
+        route: '/clinical-notes',
+        icon: 'ph-note',
+        exact: false,
+        roles: [
+          CARETRACK_ROLES.clinician,
+        ],
+      },
+    ];
+
+  beforeEach(async () => {
+    rolesSignal.set([]);
+
+    await TestBed
+      .configureTestingModule({
+        imports: [
+          AppSidebar,
+        ],
+
+        providers: [
+          provideRouter([
+            {
+              path: 'dashboard',
+              component:
+                TestDashboardPage,
+            },
+          ]),
+
+          {
+            provide: AuthService,
+            useValue:
+              authServiceMock,
+          },
+        ],
+      })
+      .compileComponents();
+
+    fixture =
+      TestBed.createComponent(
+        AppSidebar
+      );
+
+    fixture.componentRef
+      .setInput(
+        'navigation',
+        navigation
+      );
+
+    component =
+      fixture.componentInstance;
 
     fixture.detectChanges();
   });
 
   it('creates', () => {
-    expect(component).toBeTruthy();
+    expect(component)
+      .toBeTruthy();
   });
 
-  it('renders the provided navigation item', () => {
+  it('renders navigation items without role requirements', () => {
     const element =
       fixture.nativeElement as HTMLElement;
 
-    expect(element.textContent).toContain('Dashboard');
+    expect(
+      element.textContent
+    ).toContain(
+      'Dashboard'
+    );
+  });
+
+  it('shows all clinical navigation items for a clinician', () => {
+    rolesSignal.set([
+      CARETRACK_ROLES
+        .clinician,
+    ]);
+
+    fixture.detectChanges();
+
+    const element =
+      fixture.nativeElement as HTMLElement;
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Dashboard'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Patients'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Referrals'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Appointments'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Clinical Notes'
+    );
+  });
+
+  it('hides clinical notes for a referral coordinator', () => {
+    rolesSignal.set([
+      CARETRACK_ROLES
+        .referralCoordinator,
+    ]);
+
+    fixture.detectChanges();
+
+    const element =
+      fixture.nativeElement as HTMLElement;
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Dashboard'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Patients'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Referrals'
+    );
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Appointments'
+    );
+
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Clinical Notes'
+    );
+  });
+
+  it('shows only unrestricted navigation for an administrator-only user', () => {
+    rolesSignal.set([
+      CARETRACK_ROLES
+        .administrator,
+    ]);
+
+    fixture.detectChanges();
+
+    const element =
+      fixture.nativeElement as HTMLElement;
+
+    expect(
+      element.textContent
+    ).toContain(
+      'Dashboard'
+    );
+
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Patients'
+    );
+
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Referrals'
+    );
+
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Appointments'
+    );
+
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Clinical Notes'
+    );
   });
 
   it('emits a collapse request when the toggle is clicked', () => {
-  const emitSpy = vi.spyOn(
-    component.collapseToggle,
-    'emit'
-  );
+    const emitSpy =
+      vi.spyOn(
+        component.collapseToggle,
+        'emit'
+      );
 
-  const button =
-    fixture.nativeElement.querySelector(
-      'button'
-    ) as HTMLButtonElement;
+    const button =
+      fixture.nativeElement
+        .querySelector(
+          'button'
+        ) as HTMLButtonElement;
 
-  button.click();
+    button.click();
 
-  expect(emitSpy).toHaveBeenCalledOnce();
-});
+    expect(
+      emitSpy
+    ).toHaveBeenCalledOnce();
+  });
 
-it('emits navigationSelected when a nav item is clicked', async () => {
-  const emitSpy = vi.spyOn(
-    component.navigationSelected,
-    'emit'
-  );
+  it('emits navigationSelected when a nav item is clicked', async () => {
+    const emitSpy =
+      vi.spyOn(
+        component
+          .navigationSelected,
+        'emit'
+      );
 
-  const link =
-    fixture.nativeElement.querySelector(
-      'a'
-    ) as HTMLAnchorElement;
+    const link =
+      fixture.nativeElement
+        .querySelector(
+          'a'
+        ) as HTMLAnchorElement;
 
-  link.click();
+    link.click();
 
-  await fixture.whenStable();
+    await fixture.whenStable();
 
-  expect(emitSpy).toHaveBeenCalledOnce();
-});
+    expect(
+      emitSpy
+    ).toHaveBeenCalledOnce();
+  });
 
-it('shows branding by default', () => {
-  const element =
-    fixture.nativeElement as HTMLElement;
+  it('shows branding by default', () => {
+    const element =
+      fixture.nativeElement as HTMLElement;
 
-  expect(element.textContent).toContain('CareTrack');
-  expect(element.textContent).toContain(
-    'Clinical operations'
-  );
-});
+    expect(
+      element.textContent
+    ).toContain(
+      'CareTrack'
+    );
 
-it('hides branding when showBrand is false', () => {
-  fixture.componentRef.setInput(
-    'showBrand',
-    false
-  );
+    expect(
+      element.textContent
+    ).toContain(
+      'Clinical operations'
+    );
+  });
 
-  fixture.detectChanges();
+  it('hides branding when showBrand is false', () => {
+    fixture.componentRef
+      .setInput(
+        'showBrand',
+        false
+      );
 
-  const element =
-    fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
 
-  expect(element.textContent).not.toContain(
-    'Clinical operations'
-  );
-});
+    const element =
+      fixture.nativeElement as HTMLElement;
 
-it('hides the collapse control when requested', () => {
-  fixture.componentRef.setInput(
-    'showCollapseControl',
-    false
-  );
+    expect(
+      element.textContent
+    ).not.toContain(
+      'Clinical operations'
+    );
+  });
 
-  fixture.detectChanges();
+  it('hides the collapse control when requested', () => {
+    fixture.componentRef
+      .setInput(
+        'showCollapseControl',
+        false
+      );
 
-const button =
-  fixture.nativeElement.querySelector(
-    'button[aria-controls="primary-navigation"]'
-  );
-  expect(button).toBeNull();
-});
+    fixture.detectChanges();
 
+    const button =
+      fixture.nativeElement
+        .querySelector(
+          'button[aria-controls="primary-navigation"]'
+        );
+
+    expect(button)
+      .toBeNull();
+  });
 });

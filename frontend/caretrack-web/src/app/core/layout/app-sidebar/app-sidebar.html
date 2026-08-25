@@ -82,7 +82,7 @@
     aria-label="Primary navigation"
   >
     <ul class="grid list-none gap-1 p-0">
-      @for (item of navigation(); track item.route) {
+      @for (item of visibleNavigation(); track item.route) {
         <li>
           <a
             [routerLink]="item.route"

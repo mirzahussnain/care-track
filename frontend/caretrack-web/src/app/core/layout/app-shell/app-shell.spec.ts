@@ -7,17 +7,49 @@ import {
   provideRouter,
 } from '@angular/router';
 
+import {
+  signal,
+} from '@angular/core';
+
+import {
+  AuthService,
+} from '../../auth/auth.service';
+
+import {
+  CARETRACK_ROLES,
+  CareTrackRole,
+} from '../../auth/auth.models';
+
 import { AppShell } from './app-shell';
 
 describe('AppShell', () => {
   let component: AppShell;
   let fixture: ComponentFixture<AppShell>;
+  const rolesSignal =
+  signal<readonly string[]>([
+    CARETRACK_ROLES.clinician,
+  ]);
+
+const authServiceMock = {
+  roles:
+    rolesSignal.asReadonly(),
+
+  hasRole: (
+    role: CareTrackRole
+  ) =>
+    rolesSignal()
+      .includes(role),
+};
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppShell],
       providers: [
         provideRouter([]),
+        {
+  provide: AuthService,
+  useValue: authServiceMock,
+},
       ],
     }).compileComponents();
 
