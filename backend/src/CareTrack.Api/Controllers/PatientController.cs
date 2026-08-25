@@ -61,6 +61,49 @@ public class PatientsController : ControllerBase
     return Ok(response);
   }
 
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
+  [HttpGet("referral-lookup")]
+  public async Task<ActionResult<PagedReferralPatientSummaryResponse>>
+      SearchReferralPatients(
+          [FromQuery] string? search,
+          [FromQuery] int page = 1,
+          [FromQuery] int pageSize = 20,
+          CancellationToken cancellationToken = default)
+  {
+    var result = await _searchPatientsService.ExecuteAsync(
+        new PatientSearchQuery(
+            search,
+            page,
+            pageSize,
+            "lastName",
+            "asc"),
+        cancellationToken);
+
+    return Ok(
+        new PagedReferralPatientSummaryResponse(
+            result.Items
+                .Select(patient => patient.ToReferralSummaryResponse())
+                .ToList(),
+            result.Page,
+            result.PageSize,
+            result.TotalCount,
+            result.TotalPages));
+  }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
+  [HttpGet("{id:guid}/referral-summary")]
+  public async Task<ActionResult<ReferralPatientSummaryResponse>>
+      GetReferralPatientSummary(
+          Guid id,
+          CancellationToken cancellationToken)
+  {
+    var patient = await _getPatientService.ExecuteAsync(
+        id,
+        cancellationToken);
+
+    return Ok(patient.ToReferralSummaryResponse());
+  }
+
   [Authorize(Policy = CareTrackPolicies.ClinicianAccess)]
   [HttpGet("{id:guid}")]
   public async Task<ActionResult<PatientResponse>> GetPatient(

@@ -32,6 +32,7 @@ using CareTrack.Application.Referrals.ResubmitReferral;
 using CareTrack.Application.Referrals.SearchReferrals;
 using CareTrack.Application.Referrals.StartTriage;
 using CareTrack.Application.Referrals.SubmitReferral;
+using CareTrack.Infrastructure.Configuration;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.Infrastructure.Persistance.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,6 +55,14 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IClinicalNoteRepository, ClinicalNoteRepository>();
+var referralAssignmentTargets = builder.Configuration
+    .GetSection("ReferralAssignment:Targets")
+    .GetChildren()
+    .Select(section => section.Value ?? string.Empty)
+    .ToArray();
+builder.Services.AddSingleton<IReferralAssignmentTargetDirectory>(
+    new ConfiguredReferralAssignmentTargetDirectory(
+        referralAssignmentTargets));
 builder.Services.AddScoped<CreatePatientService>();
 builder.Services.AddScoped<GetPatientService>();
 builder.Services.AddScoped<SearchPatientsService>();

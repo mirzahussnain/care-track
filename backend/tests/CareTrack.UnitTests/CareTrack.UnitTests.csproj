@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CareTrack.Domain\CareTrack.Domain.csproj" />
     <ProjectReference Include="..\..\src\CareTrack.Application\CareTrack.Application.csproj" />
+    <ProjectReference Include="..\..\src\CareTrack.Infrastructure\CareTrack.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

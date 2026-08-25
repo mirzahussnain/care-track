@@ -27,6 +27,7 @@ public class AssignReferralServiceTests
     var service =
         new AssignReferralService(
             repository,
+            new FakeReferralAssignmentTargetDirectory(),
             NullLogger<AssignReferralService>.Instance);
 
     var result =
@@ -60,6 +61,7 @@ public class AssignReferralServiceTests
     var service =
         new AssignReferralService(
             repository,
+            new FakeReferralAssignmentTargetDirectory(),
             NullLogger<AssignReferralService>.Instance);
 
     await Assert.ThrowsAsync<NotFoundException>(
@@ -92,6 +94,7 @@ public class AssignReferralServiceTests
     var service =
         new AssignReferralService(
             repository,
+            new FakeReferralAssignmentTargetDirectory(),
             NullLogger<AssignReferralService>.Instance);
 
     await Assert.ThrowsAsync<
@@ -106,5 +109,61 @@ public class AssignReferralServiceTests
         repository.SaveChangesCallCount);
   }
 
+  [Fact]
+  public async Task ExecuteAsync_WithDifferentCase_StoresCanonicalTarget()
+  {
+    var repository =
+        new FakeReferralRepository();
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    await repository.AddAsync(referral);
+
+    var service =
+        new AssignReferralService(
+            repository,
+            new FakeReferralAssignmentTargetDirectory(),
+            NullLogger<AssignReferralService>.Instance);
+
+    var result =
+        await service.ExecuteAsync(
+            new AssignReferralCommand(
+                referral.Id,
+                "  cardiology team a  "));
+
+    Assert.Equal(
+        "Cardiology Team A",
+        result.AssignedTo);
+  }
+
+  [Fact]
+  public async Task ExecuteAsync_WithUnavailableTarget_ThrowsArgumentException()
+  {
+    var repository =
+        new FakeReferralRepository();
+    var referral =
+        ReferralTestHelpers.CreateAcceptedReferral();
+
+    await repository.AddAsync(referral);
+
+    var service =
+        new AssignReferralService(
+            repository,
+            new FakeReferralAssignmentTargetDirectory(),
+            NullLogger<AssignReferralService>.Instance);
+
+    await Assert.ThrowsAsync<ArgumentException>(
+        () => service.ExecuteAsync(
+            new AssignReferralCommand(
+                referral.Id,
+                "Unknown Team")));
+
+    Assert.Equal(
+        ReferralStatus.Accepted,
+        referral.Status);
+    Assert.Equal(
+        0,
+        repository.SaveChangesCallCount);
+  }
 
 }

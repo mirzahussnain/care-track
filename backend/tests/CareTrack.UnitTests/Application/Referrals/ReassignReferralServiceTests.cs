@@ -24,6 +24,7 @@ public class ReassignReferralServiceTests
 
     var service = new ReassignReferralService(
         repository,
+        new FakeReferralAssignmentTargetDirectory(),
         NullLogger<ReassignReferralService>.Instance);
 
     var command = new ReassignReferralCommand(
@@ -60,6 +61,7 @@ public class ReassignReferralServiceTests
 
     var service = new ReassignReferralService(
         repository,
+        new FakeReferralAssignmentTargetDirectory(),
         NullLogger<ReassignReferralService>.Instance);
 
     var command = new ReassignReferralCommand(
@@ -88,6 +90,7 @@ public class ReassignReferralServiceTests
 
     var service = new ReassignReferralService(
         repository,
+        new FakeReferralAssignmentTargetDirectory(),
         NullLogger<ReassignReferralService>.Instance);
 
     var command = new ReassignReferralCommand(
@@ -126,6 +129,7 @@ public class ReassignReferralServiceTests
 
     var service = new ReassignReferralService(
         repository,
+        new FakeReferralAssignmentTargetDirectory(),
         NullLogger<ReassignReferralService>.Instance);
 
     var command = new ReassignReferralCommand(
@@ -152,6 +156,48 @@ public class ReassignReferralServiceTests
     Assert.Equal(
         0,
         repository.SaveChangesCallCount);
+  }
+
+  [Fact]
+  public async Task ExecuteAsync_WithDifferentCase_StoresCanonicalTarget()
+  {
+    var repository = new FakeReferralRepository();
+    var referral = CreateAssignedReferral();
+    await repository.AddAsync(referral);
+    var service = new ReassignReferralService(
+        repository,
+        new FakeReferralAssignmentTargetDirectory(),
+        NullLogger<ReassignReferralService>.Instance);
+
+    var result = await service.ExecuteAsync(
+        new ReassignReferralCommand(
+            referral.Id,
+            "  cardiology team b  "));
+
+    Assert.Equal("Cardiology Team B", result.AssignedTo);
+    Assert.Equal(1, repository.SaveChangesCallCount);
+  }
+
+  [Fact]
+  public async Task ExecuteAsync_WithUnavailableTarget_ThrowsArgumentException()
+  {
+    var repository = new FakeReferralRepository();
+    var referral = CreateAssignedReferral();
+    var originalAssignedTo = referral.AssignedTo;
+    await repository.AddAsync(referral);
+    var service = new ReassignReferralService(
+        repository,
+        new FakeReferralAssignmentTargetDirectory(),
+        NullLogger<ReassignReferralService>.Instance);
+
+    await Assert.ThrowsAsync<ArgumentException>(
+        () => service.ExecuteAsync(
+            new ReassignReferralCommand(
+                referral.Id,
+                "Unknown Team")));
+
+    Assert.Equal(originalAssignedTo, referral.AssignedTo);
+    Assert.Equal(0, repository.SaveChangesCallCount);
   }
 
   private static Referral CreateAcceptedReferral()

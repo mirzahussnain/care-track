@@ -1,6 +1,7 @@
 using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.Referrals;
 using CareTrack.Api.Mappings;
+using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Referrals.AcceptReferral;
 using CareTrack.Application.Referrals.AssignReferral;
 using CareTrack.Application.Referrals.CompleteReferral;
@@ -50,6 +51,7 @@ public sealed class ReferralsController
 
   private readonly GetReferralByIdService _getReferralByIdService;
   private readonly SearchReferralsService _searchReferralsService;
+  private readonly IReferralAssignmentTargetDirectory _assignmentTargetDirectory;
 
   public ReferralsController(
       CreateReferralService createReferralService,
@@ -65,7 +67,8 @@ public sealed class ReferralsController
       GetReferralHistoryService getReferralHistoryService,
       GetReferralByIdService getReferralByIdService,
       SearchReferralsService searchReferralsService,
-      CompleteReferralService completeReferralService)
+      CompleteReferralService completeReferralService,
+      IReferralAssignmentTargetDirectory assignmentTargetDirectory)
   {
     _createReferralService = createReferralService;
     _submitReferralService = submitReferralService;
@@ -81,6 +84,16 @@ public sealed class ReferralsController
     _getReferralByIdService = getReferralByIdService;
     _searchReferralsService = searchReferralsService;
     _completeReferralService = completeReferralService;
+    _assignmentTargetDirectory = assignmentTargetDirectory;
+  }
+
+  [Authorize(Policy = CareTrackPolicies.ReferralManagement)]
+  [HttpGet("assignment-targets")]
+  public ActionResult<ReferralAssignmentTargetsResponse> GetAssignmentTargets()
+  {
+    return Ok(
+        new ReferralAssignmentTargetsResponse(
+            _assignmentTargetDirectory.Targets));
   }
 
   [Authorize(Policy = CareTrackPolicies.ReferralManagement)]

@@ -9,13 +9,18 @@ public sealed class AssignReferralService
 {
   private readonly IReferralRepository _referralRepository;
 
+  private readonly IReferralAssignmentTargetDirectory _assignmentTargetDirectory;
+
   private readonly ILogger<AssignReferralService> _logger;
 
   public AssignReferralService(
       IReferralRepository referralRepository,
+      IReferralAssignmentTargetDirectory assignmentTargetDirectory,
       ILogger<AssignReferralService> logger)
   {
     _referralRepository = referralRepository;
+
+    _assignmentTargetDirectory = assignmentTargetDirectory;
 
     _logger = logger;
   }
@@ -41,7 +46,10 @@ public sealed class AssignReferralService
 
     try
     {
-      referral.Assign(command.AssignedTo);
+      var canonicalName = _assignmentTargetDirectory
+          .ResolveCanonicalName(command.AssignedTo);
+
+      referral.Assign(canonicalName);
     }
     catch (InvalidOperationException exception)
     {

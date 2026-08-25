@@ -19,4 +19,14 @@ public static class PatientMappings
         Convert.ToBase64String(
             patient.RowVersion));
   }
+
+  public static ReferralPatientSummaryResponse ToReferralSummaryResponse(
+      this Patient patient)
+  {
+    return new ReferralPatientSummaryResponse(
+        patient.Id,
+        patient.PatientReference,
+        patient.FullName,
+        patient.DateOfBirth);
+  }
 }
