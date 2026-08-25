@@ -1,5 +1,15 @@
-import { Component, signal,ChangeDetectionStrategy,DestroyRef,inject } from '@angular/core';
-import { RouterOutlet,Router } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
+
+import {
+  Router,
+  RouterOutlet,
+} from '@angular/router';
 
 import {
   MsalBroadcastService,
@@ -7,12 +17,12 @@ import {
 } from '@azure/msal-angular';
 
 import {
+  AccountInfo,
   InteractionStatus,
 } from '@azure/msal-browser';
 
 import {
   filter,
-  tap,
 } from 'rxjs/operators';
 
 import {
@@ -30,9 +40,11 @@ import { AuthService } from './core/auth/auth.service';
 })
 export class App {
   protected readonly title = signal('caretrack-web');
-  private readonly router=inject(Router);
-  private readonly authService=inject(AuthService);
-   private readonly msalService =
+
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  private readonly msalService =
     inject(MsalService);
 
   private readonly msalBroadcastService =
@@ -40,6 +52,9 @@ export class App {
 
   private readonly destroyRef =
     inject(DestroyRef);
+
+  private lifecycleAccountId: string | null = null;
+  private navigatedRedirectAccountId: string | null = null;
 
   constructor() {
     this.msalService
@@ -50,20 +65,25 @@ export class App {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next:result=>{
-          if(!result?.account){
+        next: result => {
+          if (!result?.account) {
             return;
           }
 
-          this.msalService.instance.setActiveAccount(result.account);
-          this.msalService.instance.setActiveAccount(result.account);
-          this.authService.loadCurrentUser();
+          this.activateAccount(result.account);
+          this.loadForAccount(result.account);
 
-          void this.router.navigate(['/dashboard']);
+          if (
+            this.navigatedRedirectAccountId !==
+            result.account.homeAccountId
+          ) {
+            this.navigatedRedirectAccountId =
+              result.account.homeAccountId;
+
+            void this.router.navigate(['/dashboard']);
+          }
         },
-        error:error=>{
-          console.error('Authenticate redirect failed',error);
-        }
+        error: () => undefined,
       });
 
     this.msalBroadcastService.inProgress$
@@ -76,21 +96,51 @@ export class App {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => {
-        if (
+        let account =
           this.msalService.instance
-            .getActiveAccount()
-        ) {
+            .getActiveAccount();
+
+        if (!account) {
+          const accounts =
+            this.msalService.instance
+              .getAllAccounts();
+
+          if (accounts.length === 1) {
+            account = accounts[0];
+            this.activateAccount(account);
+          }
+        }
+
+        if (account) {
+          this.loadForAccount(account);
           return;
         }
 
-        const accounts =
-          this.msalService.instance
-            .getAllAccounts();
-
-        if (accounts.length === 1) {
-          this.msalService.instance.setActiveAccount(accounts[0]);
-          this.authService.loadCurrentUser();
+        if (this.lifecycleAccountId !== null) {
+          this.lifecycleAccountId = null;
+          this.authService.clearCurrentUser();
         }
       });
+  }
+
+  private activateAccount(account: AccountInfo): void {
+    if (
+      this.msalService.instance
+        .getActiveAccount()
+        ?.homeAccountId === account.homeAccountId
+    ) {
+      return;
+    }
+
+    this.msalService.instance.setActiveAccount(account);
+  }
+
+  private loadForAccount(account: AccountInfo): void {
+    if (this.lifecycleAccountId === account.homeAccountId) {
+      return;
+    }
+
+    this.lifecycleAccountId = account.homeAccountId;
+    this.authService.loadCurrentUser();
   }
 }

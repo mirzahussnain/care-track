@@ -5,6 +5,12 @@ export interface AuthenticatedUser {
   readonly roles: readonly string[];
 }
 
+export type AuthLoadStatus =
+  | 'idle'
+  | 'loading'
+  | 'ready'
+  | 'error';
+
 export const CARETRACK_ROLES = {
   clinician: 'Clinician',
   referralCoordinator: 'ReferralCoordinator',
