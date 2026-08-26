@@ -1,12 +1,533 @@
-<section aria-labelledby="dashboard-title">
-  <p class="text-sm font-medium text-ct-primary">
-    CareTrack
-  </p>
+<div class="dashboard-page">
+  <ct-page-header title="Dashboard" [description]="dashboardDescription()">
+    @if (operationalAudience()) {
+      <ct-button
+        variant="secondary"
+        [loading]="batchLoading()"
+        [disabled]="batchLoading()"
+        (click)="refresh()"
+      >
+        <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
+        Refresh dashboard
+      </ct-button>
+    }
+  </ct-page-header>
+  @switch (audience()) {
+    @case ('loading') {
+      <section aria-labelledby="dashboard-loading-title">
+        <h2 id="dashboard-loading-title" class="sr-only">Loading dashboard access</h2>
+        <div class="dashboard-page__summary-grid" role="status" aria-label="Loading dashboard">
+          @for (card of [1, 2, 3, 4]; track card) {
+            <ct-surface padding="md">
+              <div class="dashboard-page__summary-skeleton">
+                <ct-skeleton />
+                <ct-skeleton variant="block" />
+              </div>
+            </ct-surface>
+          }
+        </div>
+      </section>
+    }
+    @case ('auth-error') {
+      <ct-surface padding="lg">
+        <ct-empty-state
+          title="Dashboard access could not be confirmed"
+          description="CareTrack could not load your current workspace access. Sign in again or try later."
+          icon="ph-warning-circle"
+        />
+      </ct-surface>
+    }
+    @case ('administrator') {
+      <ct-surface padding="lg">
+        <ct-empty-state
+          title="Administrator workspace"
+          description="Clinical workload is not available to the Administrator role. Administrative tools are not yet part of this workspace."
+          icon="ph-shield-check"
+        />
+      </ct-surface>
+    }
+    @case ('unsupported') {
+      <ct-surface padding="lg">
+        <ct-empty-state
+          title="No operational workspace is available"
+          description="Your current CareTrack role does not provide access to clinical workload."
+          icon="ph-lock-key"
+        />
+      </ct-surface>
+    }
+    @default {
+      <section class="dashboard-page__section" aria-labelledby="operational-summary-title">
+        <div class="dashboard-page__section-heading">
+          <div>
+            <h2 id="operational-summary-title">Operational summary</h2>
+            <p>Current workload from server-filtered CareTrack queues.</p>
+          </div>
+        </div>
 
-  <h1
-    id="dashboard-title"
-    class="mt-1 text-3xl font-semibold tracking-tight text-ct-text"
-  >
-    Clinical Referral & Workflow Management System
-  </h1>
-</section>
+        <div class="dashboard-page__summary-grid">
+          @if (audience() === 'clinician') {
+            <ct-surface padding="md">
+              <article class="dashboard-page__summary-card">
+                <i class="ph ph-users dashboard-page__summary-icon" aria-hidden="true"></i>
+                <div>
+                  <p>Patients</p>
+                  @if (patientCount().status === 'loading') {
+                    <ct-skeleton />
+                  } @else if (patientCount().status === 'ready') {
+                    <strong>{{ patientCount().data }}</strong>
+                  } @else {
+                    <strong aria-label="Patients count unavailable">—</strong>
+                  }
+                </div>
+              </article>
+            </ct-surface>
+          }
+
+          <ct-surface padding="md">
+            <article class="dashboard-page__summary-card">
+              <i
+                class="ph ph-inbox dashboard-page__summary-icon dashboard-page__summary-icon--warning"
+                aria-hidden="true"
+              ></i>
+              <div>
+                <p>Awaiting triage</p>
+                @if (awaitingTriage().status === 'loading') {
+                  <ct-skeleton />
+                } @else if (awaitingTriage().status === 'ready') {
+                  <strong>{{ awaitingTriage().data?.totalCount }}</strong>
+                } @else {
+                  <strong aria-label="Awaiting triage count unavailable">—</strong>
+                }
+              </div>
+            </article>
+          </ct-surface>
+
+          <ct-surface padding="md">
+            <article class="dashboard-page__summary-card">
+              <i
+                class="ph ph-chat-circle-dots dashboard-page__summary-icon dashboard-page__summary-icon--warning"
+                aria-hidden="true"
+              ></i>
+              <div>
+                <p>More information required</p>
+                @if (moreInformation().status === 'loading') {
+                  <ct-skeleton />
+                } @else if (moreInformation().status === 'ready') {
+                  <strong>{{ moreInformation().data?.totalCount }}</strong>
+                } @else {
+                  <strong aria-label="More information required count unavailable">—</strong>
+                }
+              </div>
+            </article>
+          </ct-surface>
+          @if (audience() === 'clinician') {
+            <ct-surface padding="md">
+              <article class="dashboard-page__summary-card">
+                <i class="ph ph-calendar-dots dashboard-page__summary-icon" aria-hidden="true"></i>
+                <div>
+                  <p>Scheduled in next 7 days</p>
+                  @if (upcomingAppointments().status === 'loading') {
+                    <ct-skeleton />
+                  } @else if (upcomingAppointments().status === 'ready') {
+                    <strong>{{ upcomingAppointments().data?.totalCount }}</strong>
+                  } @else {
+                    <strong aria-label="Scheduled appointments count unavailable">—</strong>
+                  }
+                </div>
+              </article>
+            </ct-surface>
+            <ct-surface padding="md">
+              <article class="dashboard-page__summary-card">
+                <i
+                  class="ph ph-activity dashboard-page__summary-icon dashboard-page__summary-icon--warning"
+                  aria-hidden="true"
+                ></i>
+                <div>
+                  <p>Appointments in progress</p>
+                  @if (inProgressAppointments().status === 'loading') {
+                    <ct-skeleton />
+                  } @else if (inProgressAppointments().status === 'ready') {
+                    <strong>{{ inProgressAppointments().data?.totalCount }}</strong>
+                  } @else {
+                    <strong aria-label="In-progress appointments count unavailable">—</strong>
+                  }
+                </div>
+              </article>
+            </ct-surface>
+          } @else {
+            <ct-surface padding="md">
+              <article class="dashboard-page__summary-card">
+                <i
+                  class="ph ph-check-circle dashboard-page__summary-icon dashboard-page__summary-icon--success"
+                  aria-hidden="true"
+                ></i>
+                <div>
+                  <p>Accepted</p>
+                  @if (acceptedCount().status === 'loading') {
+                    <ct-skeleton />
+                  } @else if (acceptedCount().status === 'ready') {
+                    <strong>{{ acceptedCount().data }}</strong>
+                  } @else {
+                    <strong aria-label="Accepted referrals count unavailable">—</strong>
+                  }
+                </div>
+              </article>
+            </ct-surface>
+            <ct-surface padding="md">
+              <article class="dashboard-page__summary-card">
+                <i class="ph ph-user-focus dashboard-page__summary-icon" aria-hidden="true"></i>
+                <div>
+                  <p>Assigned</p>
+                  @if (assignedCount().status === 'loading') {
+                    <ct-skeleton />
+                  } @else if (assignedCount().status === 'ready') {
+                    <strong>{{ assignedCount().data }}</strong>
+                  } @else {
+                    <strong aria-label="Assigned referrals count unavailable">—</strong>
+                  }
+                </div>
+              </article>
+            </ct-surface>
+          }
+        </div>
+        @if (summaryHasError()) {
+          <p class="dashboard-page__degraded-note" role="status">
+            Some summary counts are unavailable. Refresh the dashboard to try again.
+          </p>
+        }
+      </section>
+
+      <section class="dashboard-page__section" aria-labelledby="referral-attention-title">
+        <div class="dashboard-page__section-heading">
+          <div>
+            <h2 id="referral-attention-title">Referral attention</h2>
+            <p>Up to five referrals from each active attention queue, ordered by priority.</p>
+          </div>
+          <a routerLink="/referrals">View all referrals</a>
+        </div>
+
+        @if (awaitingTriage().status === 'error' && moreInformation().status === 'error') {
+          <ct-surface padding="lg">
+            <ct-empty-state
+              title="Referral workload is unavailable"
+              description="The referral queues could not be loaded. Refresh the dashboard to try again."
+              icon="ph-warning-circle"
+            />
+          </ct-surface>
+        } @else {
+          <div class="dashboard-page__queue-grid">
+            <ct-surface padding="none">
+              <article class="dashboard-page__queue" aria-labelledby="awaiting-triage-title">
+                <header>
+                  <div>
+                    <h3 id="awaiting-triage-title">Awaiting triage</h3>
+                    <p>Submitted referrals ready for triage review.</p>
+                  </div>
+                  @if (awaitingTriage().status === 'ready') {
+                    <span>{{ awaitingTriage().data?.totalCount }}</span>
+                  }
+                </header>
+
+                @if (awaitingTriage().status === 'loading') {
+                  <div
+                    class="dashboard-page__queue-loading"
+                    role="status"
+                    aria-label="Loading referrals awaiting triage"
+                  >
+                    @for (row of [1, 2, 3]; track row) {
+                      <ct-skeleton variant="block" />
+                    }
+                  </div>
+                } @else if (awaitingTriage().status === 'error') {
+                  <ct-empty-state
+                    title="Awaiting-triage queue unavailable"
+                    description="Other dashboard sections remain available."
+                    icon="ph-warning-circle"
+                  />
+                } @else if (awaitingTriage().data?.items?.length === 0) {
+                  <ct-empty-state title="No referrals awaiting triage" icon="ph-check-circle" />
+                } @else if (awaitingTriage().data; as queue) {
+                  <ul class="dashboard-page__work-list">
+                    @for (referral of queue.items; track referral.id) {
+                      <li>
+                        <div class="dashboard-page__work-primary">
+                          <a [routerLink]="referralRoute(referral.id)">{{
+                            referral.referralReference
+                          }}</a>
+                          <div class="dashboard-page__chips">
+                            <ct-status-chip [tone]="priorityTone(referral.priority)">
+                              {{ priorityLabel(referral.priority) }}
+                            </ct-status-chip>
+                            <ct-status-chip [tone]="referralStatusTone(referral.status)">
+                              {{ referralStatusLabel(referral.status) }}
+                            </ct-status-chip>
+                          </div>
+                        </div>
+                        <div class="dashboard-page__work-meta">
+                          <span
+                            >Created {{ referral.createdAt | date: 'dd MMM yyyy' : 'UTC' }}</span
+                          >
+                          @if (referral.assignedTo) {
+                            <span>{{ referral.assignedTo }}</span>
+                          }
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </article>
+            </ct-surface>
+            <ct-surface padding="none">
+              <article class="dashboard-page__queue" aria-labelledby="more-information-title">
+                <header>
+                  <div>
+                    <h3 id="more-information-title">More information required</h3>
+                    <p>Referrals waiting for additional information.</p>
+                  </div>
+                  @if (moreInformation().status === 'ready') {
+                    <span>{{ moreInformation().data?.totalCount }}</span>
+                  }
+                </header>
+
+                @if (moreInformation().status === 'loading') {
+                  <div
+                    class="dashboard-page__queue-loading"
+                    role="status"
+                    aria-label="Loading referrals requiring more information"
+                  >
+                    @for (row of [1, 2, 3]; track row) {
+                      <ct-skeleton variant="block" />
+                    }
+                  </div>
+                } @else if (moreInformation().status === 'error') {
+                  <ct-empty-state
+                    title="More-information queue unavailable"
+                    description="Other dashboard sections remain available."
+                    icon="ph-warning-circle"
+                  />
+                } @else if (moreInformation().data?.items?.length === 0) {
+                  <ct-empty-state
+                    title="No referrals requiring more information"
+                    icon="ph-check-circle"
+                  />
+                } @else if (moreInformation().data; as queue) {
+                  <ul class="dashboard-page__work-list">
+                    @for (referral of queue.items; track referral.id) {
+                      <li>
+                        <div class="dashboard-page__work-primary">
+                          <a [routerLink]="referralRoute(referral.id)">{{
+                            referral.referralReference
+                          }}</a>
+                          <div class="dashboard-page__chips">
+                            <ct-status-chip [tone]="priorityTone(referral.priority)">
+                              {{ priorityLabel(referral.priority) }}
+                            </ct-status-chip>
+                            <ct-status-chip [tone]="referralStatusTone(referral.status)">
+                              {{ referralStatusLabel(referral.status) }}
+                            </ct-status-chip>
+                          </div>
+                        </div>
+                        <div class="dashboard-page__work-meta">
+                          <span
+                            >Created {{ referral.createdAt | date: 'dd MMM yyyy' : 'UTC' }}</span
+                          >
+                          @if (referral.assignedTo) {
+                            <span>{{ referral.assignedTo }}</span>
+                          }
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </article>
+            </ct-surface>
+          </div>
+        }
+      </section>
+      @if (audience() === 'clinician') {
+        <section class="dashboard-page__section" aria-labelledby="appointment-activity-title">
+          <div class="dashboard-page__section-heading">
+            <div>
+              <h2 id="appointment-activity-title">Appointment activity</h2>
+              <p>Appointments in progress and scheduled within the next seven days in UTC.</p>
+            </div>
+            <a routerLink="/appointments">View all appointments</a>
+          </div>
+
+          @if (
+            upcomingAppointments().status === 'error' && inProgressAppointments().status === 'error'
+          ) {
+            <ct-surface padding="lg">
+              <ct-empty-state
+                title="Appointment activity is unavailable"
+                description="Appointment queues could not be loaded. Referral workload remains available."
+                icon="ph-warning-circle"
+              />
+            </ct-surface>
+          } @else {
+            <div class="dashboard-page__queue-grid">
+              <ct-surface padding="none">
+                <article
+                  class="dashboard-page__queue"
+                  aria-labelledby="appointments-in-progress-title"
+                >
+                  <header>
+                    <div>
+                      <h3 id="appointments-in-progress-title">In progress</h3>
+                      <p>Appointments currently in the active workflow state.</p>
+                    </div>
+                    @if (inProgressAppointments().status === 'ready') {
+                      <span>{{ inProgressAppointments().data?.totalCount }}</span>
+                    }
+                  </header>
+
+                  @if (inProgressAppointments().status === 'loading') {
+                    <div
+                      class="dashboard-page__queue-loading"
+                      role="status"
+                      aria-label="Loading in-progress appointments"
+                    >
+                      @for (row of [1, 2, 3]; track row) {
+                        <ct-skeleton variant="block" />
+                      }
+                    </div>
+                  } @else if (inProgressAppointments().status === 'error') {
+                    <ct-empty-state
+                      title="In-progress appointments unavailable"
+                      description="Other dashboard sections remain available."
+                      icon="ph-warning-circle"
+                    />
+                  } @else if (inProgressAppointments().data?.items?.length === 0) {
+                    <ct-empty-state title="No appointments in progress" icon="ph-check-circle" />
+                  } @else if (inProgressAppointments().data; as queue) {
+                    <ul class="dashboard-page__work-list">
+                      @for (appointment of queue.items; track appointment.id) {
+                        <li>
+                          <div class="dashboard-page__work-primary">
+                            <a [routerLink]="appointmentRoute(appointment.id)">{{
+                              appointment.appointmentReference
+                            }}</a>
+                            <ct-status-chip [tone]="appointmentStatusTone(appointment.status)">
+                              {{ appointmentStatusLabel(appointment.status) }}
+                            </ct-status-chip>
+                          </div>
+                          <div class="dashboard-page__work-meta">
+                            <time [attr.datetime]="appointment.scheduledStart">
+                              {{ appointmentUtc(appointment.scheduledStart) }}
+                            </time>
+                            <span
+                              >{{ appointmentTypeLabel(appointment.appointmentType) }} ·
+                              {{ appointment.location }}</span
+                            >
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </article>
+              </ct-surface>
+              <ct-surface padding="none">
+                <article
+                  class="dashboard-page__queue"
+                  aria-labelledby="upcoming-appointments-title"
+                >
+                  <header>
+                    <div>
+                      <h3 id="upcoming-appointments-title">Next 7 days</h3>
+                      <p>Scheduled appointments overlapping the next seven-day UTC window.</p>
+                    </div>
+                    @if (upcomingAppointments().status === 'ready') {
+                      <span>{{ upcomingAppointments().data?.totalCount }}</span>
+                    }
+                  </header>
+
+                  @if (upcomingAppointments().status === 'loading') {
+                    <div
+                      class="dashboard-page__queue-loading"
+                      role="status"
+                      aria-label="Loading upcoming appointments"
+                    >
+                      @for (row of [1, 2, 3]; track row) {
+                        <ct-skeleton variant="block" />
+                      }
+                    </div>
+                  } @else if (upcomingAppointments().status === 'error') {
+                    <ct-empty-state
+                      title="Upcoming appointments unavailable"
+                      description="Other dashboard sections remain available."
+                      icon="ph-warning-circle"
+                    />
+                  } @else if (upcomingAppointments().data?.items?.length === 0) {
+                    <ct-empty-state
+                      title="No appointments scheduled in the next 7 days"
+                      icon="ph-calendar-check"
+                    />
+                  } @else if (upcomingAppointments().data; as queue) {
+                    <ul class="dashboard-page__work-list">
+                      @for (appointment of queue.items; track appointment.id) {
+                        <li>
+                          <div class="dashboard-page__work-primary">
+                            <a [routerLink]="appointmentRoute(appointment.id)">{{
+                              appointment.appointmentReference
+                            }}</a>
+                            <ct-status-chip [tone]="appointmentStatusTone(appointment.status)">
+                              {{ appointmentStatusLabel(appointment.status) }}
+                            </ct-status-chip>
+                          </div>
+                          <div class="dashboard-page__work-meta">
+                            <time [attr.datetime]="appointment.scheduledStart">
+                              {{ appointmentUtc(appointment.scheduledStart) }}
+                            </time>
+                            <span
+                              >{{ appointmentTypeLabel(appointment.appointmentType) }} ·
+                              {{ appointment.location }}</span
+                            >
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </article>
+              </ct-surface>
+            </div>
+          }
+        </section>
+      }
+      <section class="dashboard-page__section" aria-labelledby="quick-actions-title">
+        <div class="dashboard-page__section-heading">
+          <div>
+            <h2 id="quick-actions-title">Quick actions</h2>
+            <p>Open an existing CareTrack workflow.</p>
+          </div>
+        </div>
+
+        <ct-surface padding="md">
+          <nav class="dashboard-page__quick-actions" aria-label="Dashboard quick actions">
+            <a *ctHasRole="[roles.clinician, roles.referralCoordinator]" routerLink="/patients/new">
+              <i class="ph ph-user-plus" aria-hidden="true"></i>
+              Register patient
+            </a>
+            <a
+              *ctHasRole="[roles.clinician, roles.referralCoordinator]"
+              routerLink="/referrals/new"
+            >
+              <i class="ph ph-plus" aria-hidden="true"></i>
+              Create referral
+            </a>
+            @if (audience() === 'clinician') {
+              <a *ctHasRole="clinicianRole" routerLink="/appointments">
+                <i class="ph ph-calendar-dots" aria-hidden="true"></i>
+                View appointments
+              </a>
+            } @else {
+              <a *ctHasRole="coordinatorRole" routerLink="/referrals">
+                <i class="ph ph-files" aria-hidden="true"></i>
+                View referrals
+              </a>
+            }
+          </nav>
+        </ct-surface>
+      </section>
+    }
+  }
+</div>
