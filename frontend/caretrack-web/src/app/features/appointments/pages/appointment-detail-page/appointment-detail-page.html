@@ -1,0 +1,260 @@
+<div class="appointment-detail-page">
+  @if (loading()) {
+    <div class="appointment-detail-page__loading" role="status" aria-label="Loading appointment">
+      <ct-skeleton height="2.5rem" width="18rem" />
+      <ct-skeleton height="7rem" />
+      <ct-skeleton height="16rem" />
+    </div>
+  } @else if (detailError() === 'forbidden') {
+    <ct-empty-state
+      title="Appointment detail is not available for your role"
+      description="Appointment reads and clinical workflow actions require the Clinician role."
+      icon="ph-lock-key"
+    >
+      <a routerLink="/referrals">Open referrals</a>
+    </ct-empty-state>
+  } @else if (detailError() === 'not-found') {
+    <ct-empty-state
+      title="Appointment not found"
+      description="The appointment may no longer exist or the address may be incorrect."
+      icon="ph-calendar-x"
+    >
+      <a routerLink="/appointments">Back to appointments</a>
+    </ct-empty-state>
+  } @else if (detailError() === 'generic') {
+    <ct-empty-state
+      title="Appointment could not be loaded"
+      description="There was a problem loading this appointment."
+      icon="ph-warning-circle"
+    >
+      <ct-button variant="secondary" (click)="loadAppointment()">Try again</ct-button>
+    </ct-empty-state>
+  } @else if (appointment(); as appointment) {
+    <ct-page-header
+      [title]="appointment.appointmentReference"
+      description="Appointment details, clinical workflow actions, and Clinical Notes."
+    >
+      <a routerLink="/appointments" class="appointment-detail-page__back">
+        <i class="ph ph-arrow-left" aria-hidden="true"></i>
+        Appointments
+      </a>
+    </ct-page-header>
+
+    @if (relatedLoading()) {
+      <ct-skeleton height="7rem" />
+    } @else if (patient(); as patient) {
+      <ct-patient-identity-banner
+        [fullName]="patient.fullName"
+        [patientReference]="patient.patientReference"
+        [dateOfBirth]="patient.dateOfBirth"
+      />
+    } @else if (relatedUnavailable()) {
+      <div class="appointment-detail-page__related-warning" role="status">
+        Patient and referral context is unavailable. The appointment record remains available.
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="appointment-detail-page__success" role="status">
+        <i class="ph ph-check-circle" aria-hidden="true"></i>
+        {{ successMessage() }}
+      </div>
+    }
+
+    @if (commandError(); as error) {
+      <div class="appointment-detail-page__command-error" role="alert">
+        <div>
+          <strong>Action not completed</strong>
+          <p>{{ error.message }}</p>
+        </div>
+        @if (error.kind === 'workflow' || error.kind === 'conflict') {
+          <ct-button variant="secondary" size="sm" (click)="loadAppointment()">Reload appointment</ct-button>
+        }
+      </div>
+    }
+
+    <div class="appointment-detail-page__layout">
+      <div class="appointment-detail-page__main">
+        <ct-surface>
+          <section aria-labelledby="appointment-summary-title">
+            <div class="appointment-detail-page__section-heading">
+              <div>
+                <h2 id="appointment-summary-title">Appointment summary</h2>
+                <p>Current schedule and server-returned workflow state.</p>
+              </div>
+              <ct-status-chip [tone]="statusTone(appointment.status)">
+                {{ statusLabel(appointment.status) }}
+              </ct-status-chip>
+            </div>
+
+            <dl class="appointment-detail-page__metadata">
+              <div>
+                <dt>Scheduled start</dt>
+                <dd>{{ utc(appointment.scheduledStart) }}</dd>
+              </div>
+              <div>
+                <dt>Scheduled end</dt>
+                <dd>{{ utc(appointment.scheduledEnd) }}</dd>
+              </div>
+              <div>
+                <dt>Type</dt>
+                <dd>{{ typeLabel(appointment.appointmentType) }}</dd>
+              </div>
+              <div>
+                <dt>Location</dt>
+                <dd>{{ appointment.location }}</dd>
+              </div>
+              <div>
+                <dt>Created</dt>
+                <dd>{{ utc(appointment.createdAt) }}</dd>
+              </div>
+              <div>
+                <dt>Last updated</dt>
+                <dd>{{ utc(appointment.updatedAt) }}</dd>
+              </div>
+            </dl>
+          </section>
+        </ct-surface>
+
+        <ct-surface>
+          <section aria-labelledby="appointment-workflow-history-title">
+            <div class="appointment-detail-page__section-heading">
+              <div>
+                <h2 id="appointment-workflow-history-title">Workflow timestamps</h2>
+                <p>Recorded milestones returned by the Appointment API.</p>
+              </div>
+            </div>
+            <dl class="appointment-detail-page__metadata">
+              <div><dt>Checked in</dt><dd>{{ utc(appointment.checkedInAt) }}</dd></div>
+              <div><dt>Started</dt><dd>{{ utc(appointment.startedAt) }}</dd></div>
+              <div><dt>Completed</dt><dd>{{ utc(appointment.completedAt) }}</dd></div>
+              <div><dt>Cancelled</dt><dd>{{ utc(appointment.cancelledAt) }}</dd></div>
+              <div><dt>Did not attend</dt><dd>{{ utc(appointment.didNotAttendAt) }}</dd></div>
+            </dl>
+          </section>
+        </ct-surface>
+
+        @if (referral(); as referral) {
+          <ct-surface>
+            <section class="appointment-detail-page__referral" aria-labelledby="related-referral-title">
+              <div>
+                <h2 id="related-referral-title">Related referral</h2>
+                <a [routerLink]="['/referrals', referral.id]">{{ referral.referralReference }}</a>
+              </div>
+              <ct-status-chip [tone]="referralStatusTone(referral)">
+                {{ referralStatusLabel(referral) }}
+              </ct-status-chip>
+            </section>
+          </ct-surface>
+        }
+
+        <app-clinical-notes-section
+          *ctHasRole="clinicianRole"
+          [notes]="notes()"
+          [loading]="notesLoading()"
+          [loadError]="notesError()"
+          [mutationError]="noteMutationError()"
+          [creating]="creatingNote()"
+          [updatingId]="updatingNoteId()"
+          [currentUserId]="currentUser()?.id ?? ''"
+          [currentUserName]="currentUser()?.name ?? ''"
+          [saveVersion]="noteSaveVersion()"
+          (retryRequested)="loadNotes()"
+          (createRequested)="createNote($event)"
+          (updateRequested)="updateNote($event)"
+        />
+      </div>
+
+      <aside *ctHasRole="clinicianRole" class="appointment-detail-page__actions" aria-labelledby="appointment-actions-title">
+        <ct-surface>
+          <h2 id="appointment-actions-title">Workflow actions</h2>
+          <p>Actions shown here match the current server-returned status.</p>
+
+          @if (appointment.status === statuses.scheduled) {
+            <ct-button
+              [loading]="activeAction() === 'check-in'"
+              [disabled]="!!activeAction()"
+              (click)="checkIn()"
+            >
+              Check in
+            </ct-button>
+
+            @if (confirmingDidNotAttend()) {
+              <div class="appointment-detail-page__confirmation" role="group" aria-label="Confirm did not attend">
+                <p>Mark this scheduled appointment as did not attend?</p>
+                <div>
+                  <ct-button
+                    variant="danger"
+                    size="sm"
+                    [loading]="activeAction() === 'did-not-attend'"
+                    [disabled]="!!activeAction()"
+                    (click)="markDidNotAttend()"
+                  >
+                    Confirm did not attend
+                  </ct-button>
+                  <ct-button variant="ghost" size="sm" [disabled]="!!activeAction()" (click)="confirmingDidNotAttend.set(false)">
+                    Keep scheduled
+                  </ct-button>
+                </div>
+              </div>
+            } @else {
+              <ct-button variant="secondary" [disabled]="!!activeAction()" (click)="confirmingDidNotAttend.set(true)">
+                Mark as did not attend
+              </ct-button>
+            }
+          } @else if (appointment.status === statuses.checkedIn) {
+            <ct-button
+              [loading]="activeAction() === 'start'"
+              [disabled]="!!activeAction()"
+              (click)="start()"
+            >
+              Start appointment
+            </ct-button>
+          } @else if (appointment.status === statuses.inProgress) {
+            <ct-button
+              [loading]="activeAction() === 'complete'"
+              [disabled]="!!activeAction()"
+              (click)="complete()"
+            >
+              Complete appointment
+            </ct-button>
+            <p class="appointment-detail-page__referral-note">
+              Completing this appointment does not complete the related referral.
+            </p>
+          } @else {
+            <p class="appointment-detail-page__no-actions">No workflow actions are available in this terminal state.</p>
+          }
+
+          @if (
+            appointment.status === statuses.scheduled ||
+            appointment.status === statuses.checkedIn
+          ) {
+            @if (confirmingCancel()) {
+              <div class="appointment-detail-page__confirmation" role="group" aria-label="Confirm appointment cancellation">
+                <p>Cancel this appointment? This action moves it to a terminal state.</p>
+                <div>
+                  <ct-button
+                    variant="danger"
+                    size="sm"
+                    [loading]="activeAction() === 'cancel'"
+                    [disabled]="!!activeAction()"
+                    (click)="cancel()"
+                  >
+                    Confirm cancellation
+                  </ct-button>
+                  <ct-button variant="ghost" size="sm" [disabled]="!!activeAction()" (click)="confirmingCancel.set(false)">
+                    Keep appointment
+                  </ct-button>
+                </div>
+              </div>
+            } @else {
+              <ct-button variant="ghost" [disabled]="!!activeAction()" (click)="confirmingCancel.set(true)">
+                Cancel appointment
+              </ct-button>
+            }
+          }
+        </ct-surface>
+      </aside>
+    </div>
+  }
+</div>

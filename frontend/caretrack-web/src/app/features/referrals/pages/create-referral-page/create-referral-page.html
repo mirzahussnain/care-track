@@ -1,0 +1,97 @@
+<div class="create-referral-page">
+  <ct-page-header
+    title="Create referral"
+    description="Create a draft referral against a confirmed patient record."
+  />
+
+  @if (!canManageReferrals()) {
+    <ct-empty-state title="Referral management is not available for your role" description="Referral creation requires a Clinician or Referral Coordinator role." icon="ph-lock-key">
+      <a routerLink="/referrals">Back to referrals</a>
+    </ct-empty-state>
+  } @else {
+  @if (errorMessage()) {
+    <div class="create-referral-page__alert" role="alert">
+      <i class="ph ph-warning-circle" aria-hidden="true"></i>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <ct-surface>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <app-referral-patient-selector
+        [selectedPatient]="selectedPatient()"
+        (patientSelected)="selectPatient($event)"
+      />
+      @if (form.controls.patientId.invalid && submitted()) {
+        <p class="create-referral-page__patient-error" role="alert">
+          Select a patient before creating the referral.
+        </p>
+      }
+
+      @if (selectedPatient(); as patient) {
+        <ct-patient-identity-banner
+          [fullName]="patient.fullName"
+          [patientReference]="patient.patientReference"
+          [dateOfBirth]="patient.dateOfBirth"
+        />
+      }
+
+      <fieldset>
+        <legend>Referral details</legend>
+        <div class="create-referral-page__grid">
+          <ct-form-field
+            label="Referral reference"
+            forId="referral-reference"
+            [required]="true"
+            hint="Maximum 30 characters."
+            [error]="errorFor(form.controls.referralReference, 'Referral reference', 30)"
+          >
+            <input
+              id="referral-reference"
+              type="text"
+              formControlName="referralReference"
+              maxlength="30"
+              autocomplete="off"
+              [attr.aria-invalid]="
+                form.controls.referralReference.invalid &&
+                (form.controls.referralReference.touched || submitted())
+              "
+            />
+          </ct-form-field>
+
+          <ct-form-field label="Priority" forId="referral-priority" [required]="true">
+            <select id="referral-priority" formControlName="priority">
+              @for (priority of priorities; track priority) {
+                <option [ngValue]="priority">{{ priorityLabel(priority) }}</option>
+              }
+            </select>
+          </ct-form-field>
+        </div>
+
+        <ct-form-field
+          label="Reason for referral"
+          forId="referral-reason"
+          [required]="true"
+          hint="Maximum 2,000 characters."
+          [error]="errorFor(form.controls.reason, 'Reason for referral', 2000)"
+        >
+          <textarea
+            id="referral-reason"
+            formControlName="reason"
+            rows="7"
+            maxlength="2000"
+            [attr.aria-invalid]="
+              form.controls.reason.invalid && (form.controls.reason.touched || submitted())
+            "
+          ></textarea>
+        </ct-form-field>
+      </fieldset>
+
+      <div class="create-referral-page__actions">
+        <a routerLink="/referrals">Cancel</a>
+        <ct-button type="submit" [loading]="submitting()">Create draft referral</ct-button>
+      </div>
+    </form>
+  </ct-surface>
+  }
+</div>

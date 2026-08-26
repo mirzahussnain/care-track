@@ -1,0 +1,69 @@
+.create-referral-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.create-referral-page form,
+.create-referral-page fieldset {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.create-referral-page fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.create-referral-page legend {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 650;
+  color: var(--ct-text);
+}
+
+.create-referral-page__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(10rem, 1fr);
+  gap: 1rem;
+}
+
+.create-referral-page__alert,
+.create-referral-page__patient-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ct-danger);
+}
+
+.create-referral-page__alert {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--ct-danger);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-danger-soft);
+}
+
+.create-referral-page textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.create-referral-page__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.create-referral-page__actions a {
+  color: var(--ct-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+@media (max-width: 44rem) {
+  .create-referral-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

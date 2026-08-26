@@ -1,0 +1,89 @@
+<section class="patient-selector" aria-labelledby="patient-selector-title">
+  <div class="patient-selector__heading">
+    <div>
+      <h2 id="patient-selector-title">Patient identity</h2>
+      <p>Search by patient name or reference, then confirm the correct record.</p>
+    </div>
+    @if (selectedPatient(); as patient) {
+      <div class="patient-selector__selected" role="status">
+        <i class="ph ph-check-circle" aria-hidden="true"></i>
+        <span><strong>{{ patient.fullName }}</strong> · {{ patient.patientReference }}</span>
+      </div>
+    }
+  </div>
+
+  <form [formGroup]="searchForm" (ngSubmit)="submitSearch()" role="search">
+    <ct-form-field label="Search patients" forId="referral-patient-search">
+      <div class="patient-selector__search">
+        <input
+          id="referral-patient-search"
+          type="search"
+          formControlName="search"
+          placeholder="Name or patient reference"
+          autocomplete="off"
+        />
+        <ct-button type="submit" variant="secondary">Search</ct-button>
+        @if (appliedSearch()) {
+          <ct-button type="button" variant="ghost" (click)="clearSearch()">Clear</ct-button>
+        }
+      </div>
+    </ct-form-field>
+  </form>
+
+  @if (loading()) {
+    <div class="patient-selector__loading" role="status" aria-label="Loading patient results">
+      <ct-skeleton /><ct-skeleton /><ct-skeleton />
+    </div>
+  } @else if (error() === 'forbidden') {
+    <ct-empty-state
+      title="Patient lookup is not available"
+      description="Your account cannot use the referral patient lookup."
+      icon="ph-lock-key"
+    />
+  } @else if (error() === 'generic') {
+    <ct-empty-state
+      title="Patients could not be loaded"
+      description="Try the patient search again."
+      icon="ph-warning-circle"
+    >
+      <ct-button variant="secondary" (click)="retry()">Try again</ct-button>
+    </ct-empty-state>
+  } @else if (result(); as patients) {
+    @if (patients.totalCount === 0) {
+      <ct-empty-state
+        title="No patients matched"
+        description="Try a different patient name or reference."
+        icon="ph-users"
+      />
+    } @else {
+      <ul class="patient-selector__results" aria-label="Patient search results">
+        @for (patient of patients.items; track patient.id) {
+          <li>
+            <button
+              type="button"
+              [class.patient-selector__result--selected]="selectedPatient()?.id === patient.id"
+              [attr.aria-pressed]="selectedPatient()?.id === patient.id"
+              (click)="selectPatient(patient)"
+            >
+              <span>
+                <strong>{{ patient.fullName }}</strong>
+                <small>{{ patient.patientReference }} · Born {{ patient.dateOfBirth }}</small>
+              </span>
+              <span>{{ selectedPatient()?.id === patient.id ? 'Selected' : 'Select' }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+      <ct-pagination
+        [page]="patients.page"
+        [pageSize]="patients.pageSize"
+        [totalCount]="patients.totalCount"
+        [totalPages]="patients.totalPages"
+        ariaLabel="Patient lookup pagination"
+        (pageChange)="changePage($event)"
+      />
+    }
+  } @else if (!searched()) {
+    <p class="patient-selector__prompt">Search to choose an existing patient record.</p>
+  }
+</section>

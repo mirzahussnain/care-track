@@ -200,7 +200,7 @@ public static class ReferralApiTestHelper
   public static async Task<ReferralResponse>
       CreateAssignedReferralAsync(
           HttpClient client,
-          string assignedTo = "Integration Test Team",
+          string assignedTo = ReferralTestAssignmentTargets.Default,
           ReferralPriority? passedPriority = null,
           Guid? passedPatientId = null)
   {

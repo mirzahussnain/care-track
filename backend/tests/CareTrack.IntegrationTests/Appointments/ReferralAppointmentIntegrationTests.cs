@@ -41,7 +41,7 @@ public class ReferralAppointmentIntegrationTests
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
                 referralCoordinatorClient,
-                "Cardiology Team",
+                ReferralTestAssignmentTargets.CardiologyTeamA,
                 passedPatientId: patient.Id);
 
     Assert.Equal(
@@ -186,7 +186,7 @@ public class ReferralAppointmentIntegrationTests
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
                 referralCoordinatorClient,
-                "Cardiology Team",
+                ReferralTestAssignmentTargets.CardiologyTeamA,
                 passedPatientId: patient.Id);
 
     // Act
@@ -274,7 +274,7 @@ public class ReferralAppointmentIntegrationTests
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
                 referralCoordinatorClient,
-                "Cardiology Team",
+                ReferralTestAssignmentTargets.CardiologyTeamA,
                 passedPatientId: patient.Id);
 
     // Act
@@ -371,7 +371,7 @@ public class ReferralAppointmentIntegrationTests
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
                 referralCoordinatorClient,
-                "Cardiology Team",
+                ReferralTestAssignmentTargets.CardiologyTeamA,
                 passedPatientId: patient.Id);
 
     var scheduledAppointment =
@@ -501,7 +501,7 @@ public class ReferralAppointmentIntegrationTests
         await ReferralApiTestHelper
             .CreateAssignedReferralAsync(
                 referralCoordinatorClient,
-                "Cardiology Team",
+                ReferralTestAssignmentTargets.CardiologyTeamA,
                 passedPatientId: patient.Id);
 
     var firstStart =

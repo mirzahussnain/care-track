@@ -1,0 +1,111 @@
+.clinical-notes,
+.clinical-notes__loading,
+.clinical-notes__create,
+.clinical-notes__create > div:first-child,
+.clinical-notes article,
+.clinical-notes form {
+  display: grid;
+  gap: 1rem;
+}
+
+.clinical-notes__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.clinical-notes h2,
+.clinical-notes h3 {
+  color: var(--ct-text);
+  font-weight: 650;
+}
+
+.clinical-notes h2 {
+  font-size: 1.125rem;
+}
+
+.clinical-notes h3 {
+  font-size: 1rem;
+}
+
+.clinical-notes__heading p,
+.clinical-notes__create > div:first-child p {
+  color: var(--ct-text-secondary);
+}
+
+.clinical-notes__list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+}
+
+.clinical-notes__list li {
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--ct-border);
+}
+
+.clinical-notes__list li:first-child {
+  padding-top: 0;
+}
+
+.clinical-notes__list li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.clinical-notes article > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.clinical-notes article > header > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.clinical-notes article strong {
+  color: var(--ct-text);
+  font-size: 0.875rem;
+}
+
+.clinical-notes time,
+.clinical-notes article header span {
+  color: var(--ct-text-muted);
+  font-size: 0.75rem;
+}
+
+.clinical-notes__content {
+  color: var(--ct-text-secondary);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.clinical-notes textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.clinical-notes__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.clinical-notes__mutation-error {
+  padding: 0.75rem;
+  border: 1px solid var(--ct-danger);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-danger-soft);
+  color: var(--ct-text);
+}
+
+@media (max-width: 38rem) {
+  .clinical-notes article > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

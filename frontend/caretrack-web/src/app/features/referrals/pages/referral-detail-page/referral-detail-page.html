@@ -1,0 +1,355 @@
+<div class="referral-detail-page">
+  @if (loading()) {
+    <div class="referral-detail-page__loading" role="status" aria-label="Loading referral">
+      <ct-skeleton height="2.5rem" width="18rem" />
+      <ct-skeleton height="7rem" />
+      <ct-skeleton height="14rem" />
+    </div>
+  } @else if (detailError() === 'forbidden') {
+    <ct-empty-state
+      title="Referral management is not available for your role"
+      description="Referral access requires a Clinician or Referral Coordinator role."
+      icon="ph-lock-key"
+    >
+      <a routerLink="/dashboard">Back to dashboard</a>
+    </ct-empty-state>
+  } @else if (detailError() === 'not-found') {
+    <ct-empty-state
+      title="Referral not found"
+      description="The referral may have been removed or the address may be incorrect."
+      icon="ph-file-x"
+    >
+      <a routerLink="/referrals">Back to referrals</a>
+    </ct-empty-state>
+  } @else if (detailError() === 'generic') {
+    <ct-empty-state
+      title="Referral could not be loaded"
+      description="There was a problem loading this referral."
+      icon="ph-warning-circle"
+    >
+      <ct-button variant="secondary" (click)="loadDetail()">Try again</ct-button>
+    </ct-empty-state>
+  } @else if (referral(); as referral) {
+    <ct-page-header
+      [title]="referral.referralReference"
+      description="Referral details, workflow actions, and recorded history."
+    >
+      <a routerLink="/referrals" class="referral-detail-page__back">
+        <i class="ph ph-arrow-left" aria-hidden="true"></i>
+        Referrals
+      </a>
+    </ct-page-header>
+
+    @if (patient(); as patient) {
+      <ct-patient-identity-banner
+        [fullName]="patient.fullName"
+        [patientReference]="patient.patientReference"
+        [dateOfBirth]="patient.dateOfBirth"
+      />
+    }
+
+    @if (successMessage()) {
+      <div class="referral-detail-page__success" role="status">
+        <i class="ph ph-check-circle" aria-hidden="true"></i>
+        {{ successMessage() }}
+      </div>
+    }
+
+    @if (commandError(); as error) {
+      <div class="referral-detail-page__command-error" role="alert">
+        <div>
+          <strong>Action not completed</strong>
+          <p>{{ error.message }}</p>
+        </div>
+        @if (error.kind === 'concurrency' || error.kind === 'workflow') {
+          <ct-button variant="secondary" size="sm" (click)="loadDetail()">Reload referral</ct-button>
+        }
+      </div>
+    }
+
+    <div class="referral-detail-page__layout">
+      <div class="referral-detail-page__main">
+        <ct-surface>
+          <section aria-labelledby="referral-summary-title">
+            <div class="referral-detail-page__section-heading">
+              <div>
+                <h2 id="referral-summary-title">Referral summary</h2>
+                <p>Current operational state and referral information.</p>
+              </div>
+              <div class="referral-detail-page__chips">
+                <ct-status-chip [tone]="priorityTone(referral.priority)">
+                  {{ priorityLabel(referral.priority) }}
+                </ct-status-chip>
+                <ct-status-chip [tone]="statusTone(referral.status)">
+                  {{ statusLabel(referral.status) }}
+                </ct-status-chip>
+              </div>
+            </div>
+
+            <dl class="referral-detail-page__metadata">
+              <div>
+                <dt>Created</dt>
+                <dd>{{ referral.createdAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC</dd>
+              </div>
+              <div>
+                <dt>Submitted</dt>
+                <dd>
+                  {{
+                    referral.submittedAt
+                      ? (referral.submittedAt | date: 'dd MMM yyyy, HH:mm' : 'UTC') + ' UTC'
+                      : 'Not submitted'
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>Assigned team</dt>
+                <dd>{{ referral.assignedTo || 'Not assigned' }}</dd>
+              </div>
+              <div>
+                <dt>Last updated</dt>
+                <dd>
+                  {{
+                    referral.updatedAt
+                      ? (referral.updatedAt | date: 'dd MMM yyyy, HH:mm' : 'UTC') + ' UTC'
+                      : 'No updates'
+                  }}
+                </dd>
+              </div>
+            </dl>
+
+            <div class="referral-detail-page__narrative">
+              <h3>Reason for referral</h3>
+              <p>{{ referral.reason }}</p>
+            </div>
+
+            @if (referral.triageNote) {
+              <div class="referral-detail-page__narrative">
+                <h3>Triage assessment</h3>
+                <p>{{ referral.triageNote }}</p>
+              </div>
+            }
+          </section>
+        </ct-surface>
+
+        <ct-surface>
+          <section aria-labelledby="referral-history-title">
+            <div class="referral-detail-page__section-heading">
+              <div>
+                <h2 id="referral-history-title">Referral history</h2>
+                <p>Recorded workflow events in chronological order.</p>
+              </div>
+            </div>
+            <ol class="referral-detail-page__history">
+              @for (entry of history(); track entry.id) {
+                <li>
+                  <div class="referral-detail-page__history-marker" aria-hidden="true"></div>
+                  <div>
+                    <strong>{{ historyLabel(entry) }}</strong>
+                    <time [attr.datetime]="entry.occurredAt">
+                      {{ entry.occurredAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC
+                    </time>
+                    @if (entry.assignedTo) {
+                      <p>Team: {{ entry.assignedTo }}</p>
+                    }
+                    @if (entry.triageNote) {
+                      <p>{{ entry.triageNote }}</p>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+          </section>
+        </ct-surface>
+      </div>
+
+      @if (canManageReferrals()) {
+        <aside class="referral-detail-page__actions" aria-labelledby="workflow-actions-title">
+          <ct-surface>
+            <h2 id="workflow-actions-title">Workflow actions</h2>
+            <p class="referral-detail-page__action-intro">
+              Actions shown here are relevant to the current server state.
+            </p>
+
+            @if (canScheduleAppointment(referral.status)) {
+              <a
+                class="referral-detail-page__schedule-link"
+                routerLink="/appointments/new"
+                [queryParams]="{ referralId: referral.id }"
+              >
+                <i class="ph ph-calendar-plus" aria-hidden="true"></i>
+                Schedule appointment
+              </a>
+            }
+
+            @if (referral.status === statuses.draft) {
+              <ct-button
+                [loading]="activeAction() === 'submit'"
+                [disabled]="!!activeAction()"
+                (click)="submitReferral()"
+              >
+                Submit referral
+              </ct-button>
+            } @else if (referral.status === statuses.submitted) {
+              <ct-button
+                [loading]="activeAction() === 'start-triage'"
+                [disabled]="!!activeAction()"
+                (click)="startTriage()"
+              >
+                Start triage
+              </ct-button>
+            } @else if (referral.status === statuses.awaitingTriage) {
+              <form [formGroup]="triageForm" (ngSubmit)="recordTriageAssessment()">
+                <h3>Record triage assessment</h3>
+                <ct-form-field label="Priority" forId="triage-priority">
+                  <select id="triage-priority" formControlName="priority">
+                    @for (priority of priorities; track priority) {
+                      <option [ngValue]="priority">{{ priorityLabel(priority) }}</option>
+                    }
+                  </select>
+                </ct-form-field>
+                <ct-form-field
+                  label="Triage note"
+                  forId="triage-note"
+                  [required]="true"
+                  hint="Maximum 2,000 characters."
+                  [error]="
+                    triageForm.controls.note.touched && triageForm.controls.note.invalid
+                      ? 'A triage note is required and cannot exceed 2,000 characters.'
+                      : undefined
+                  "
+                >
+                  <textarea
+                    id="triage-note"
+                    rows="5"
+                    maxlength="2000"
+                    formControlName="note"
+                    [attr.aria-invalid]="
+                      triageForm.controls.note.touched && triageForm.controls.note.invalid
+                    "
+                  ></textarea>
+                </ct-form-field>
+                <ct-button
+                  type="submit"
+                  variant="secondary"
+                  [loading]="activeAction() === 'triage-assessment'"
+                  [disabled]="!!activeAction()"
+                >
+                  Save assessment
+                </ct-button>
+              </form>
+
+              <div class="referral-detail-page__decision-actions">
+                <ct-button
+                  [loading]="activeAction() === 'accept'"
+                  [disabled]="!!activeAction()"
+                  (click)="acceptReferral()"
+                >
+                  Accept referral
+                </ct-button>
+                <ct-button
+                  variant="secondary"
+                  [loading]="activeAction() === 'request-information'"
+                  [disabled]="!!activeAction()"
+                  (click)="requestMoreInformation()"
+                >
+                  Request information
+                </ct-button>
+                @if (confirmingReject()) {
+                  <div class="referral-detail-page__reject-confirmation" role="group" aria-label="Confirm referral rejection">
+                    <p>Rejecting ends the active referral workflow.</p>
+                    <div>
+                      <ct-button
+                        variant="danger"
+                        [loading]="activeAction() === 'reject'"
+                        [disabled]="!!activeAction()"
+                        (click)="rejectReferral()"
+                      >
+                        Confirm rejection
+                      </ct-button>
+                      <ct-button
+                        variant="ghost"
+                        [disabled]="!!activeAction()"
+                        (click)="confirmingReject.set(false)"
+                      >
+                        Keep referral
+                      </ct-button>
+                    </div>
+                  </div>
+                } @else {
+                  <ct-button
+                    variant="ghost"
+                    [disabled]="!!activeAction()"
+                    (click)="confirmingReject.set(true)"
+                  >
+                    Reject referral
+                  </ct-button>
+                }
+              </div>
+            } @else if (referral.status === statuses.moreInformationRequired) {
+              <ct-button
+                [loading]="activeAction() === 'resubmit'"
+                [disabled]="!!activeAction()"
+                (click)="resubmitReferral()"
+              >
+                Resubmit referral
+              </ct-button>
+            } @else if (
+              referral.status === statuses.accepted || referral.status === statuses.assigned
+            ) {
+              <form
+                [formGroup]="assignmentForm"
+                (ngSubmit)="assignReferral(referral.status === statuses.assigned)"
+              >
+                <h3>
+                  {{ referral.status === statuses.assigned ? 'Reassign clinical team' : 'Assign clinical team' }}
+                </h3>
+                <ct-form-field
+                  label="Clinical team"
+                  forId="assignment-target"
+                  [required]="true"
+                  [error]="
+                    assignmentForm.controls.assignedTo.touched &&
+                    assignmentForm.controls.assignedTo.invalid
+                      ? 'Select a configured clinical team.'
+                      : undefined
+                  "
+                >
+                  <select id="assignment-target" formControlName="assignedTo">
+                    <option value="">Select a team</option>
+                    @for (target of assignmentTargets(); track target) {
+                      <option [value]="target">{{ target }}</option>
+                    }
+                  </select>
+                </ct-form-field>
+                <ct-button
+                  type="submit"
+                  [loading]="
+                    activeAction() === 'assign' || activeAction() === 'reassign'
+                  "
+                  [disabled]="!!activeAction()"
+                >
+                  {{ referral.status === statuses.assigned ? 'Reassign referral' : 'Assign referral' }}
+                </ct-button>
+              </form>
+            } @else if (referral.status === statuses.inProgress) {
+              <p class="referral-detail-page__precondition-note">
+                Completion requires a completed appointment and no active appointments. The server verifies these conditions.
+              </p>
+              <ct-button
+                [loading]="activeAction() === 'complete'"
+                [disabled]="!!activeAction()"
+                (click)="completeReferral()"
+              >
+                Complete referral
+              </ct-button>
+            } @else {
+              <p class="referral-detail-page__no-actions">
+                No direct referral actions are available in this state.
+              </p>
+            }
+          </ct-surface>
+        </aside>
+      }
+    </div>
+  }
+</div>

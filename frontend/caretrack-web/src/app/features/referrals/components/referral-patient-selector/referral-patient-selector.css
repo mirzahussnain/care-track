@@ -1,0 +1,100 @@
+:host {
+  display: block;
+}
+
+.patient-selector {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-lg);
+  background: var(--ct-surface-subtle);
+}
+
+.patient-selector__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.patient-selector h2 {
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--ct-text);
+}
+
+.patient-selector p,
+.patient-selector small {
+  color: var(--ct-text-secondary);
+}
+
+.patient-selector__selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ct-success);
+}
+
+.patient-selector__search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.patient-selector__search input {
+  min-width: min(100%, 18rem);
+  flex: 1;
+}
+
+.patient-selector__loading {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.patient-selector__results {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+.patient-selector__result--selected {
+  border-color: var(--ct-primary) !important;
+  background: var(--ct-primary-soft) !important;
+}
+
+.patient-selector__results button {
+  width: 100%;
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+  color: var(--ct-text);
+  text-align: left;
+  transition: border-color var(--ct-duration-fast), background var(--ct-duration-fast);
+}
+
+.patient-selector__results button:hover {
+  border-color: var(--ct-border-strong);
+  background: var(--ct-surface-muted);
+}
+
+.patient-selector__results button:focus-visible {
+  outline: 3px solid var(--ct-focus);
+  outline-offset: 2px;
+}
+
+.patient-selector__results button span:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.patient-selector__prompt {
+  padding-block: 0.5rem;
+}

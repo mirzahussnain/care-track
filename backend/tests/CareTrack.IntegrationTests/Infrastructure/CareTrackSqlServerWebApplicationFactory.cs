@@ -1,3 +1,5 @@
+using CareTrack.Application.Common.Interfaces;
+using CareTrack.Infrastructure.Configuration;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.IntegrationTests.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authentication;
@@ -8,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CareTrack.IntegrationTests.Infrastructure;
 
@@ -32,6 +35,22 @@ public sealed class CareTrackSqlServerWebApplicationFactory
 
     builder.ConfigureServices(services =>
     {
+      services.RemoveAll<IReferralAssignmentTargetDirectory>();
+      services.AddSingleton<IReferralAssignmentTargetDirectory>(
+          serviceProvider =>
+          {
+            var configuration = serviceProvider
+                .GetRequiredService<IConfiguration>();
+            var configuredTargets = configuration
+                .GetSection("ReferralAssignment:Targets")
+                .GetChildren()
+                .Select(section => section.Value ?? string.Empty)
+                .ToArray();
+
+            return new ConfiguredReferralAssignmentTargetDirectory(
+                configuredTargets);
+          });
+
       var descriptor =
               services.SingleOrDefault(
                   service =>

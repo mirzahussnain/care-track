@@ -43,7 +43,9 @@ public sealed class ReferralPrerequisiteEndpointTests
   {
     var patient =
         await PatientApiTestHelper.CreatePatientAsync(
-            _coordinatorClient);
+            _coordinatorClient,
+            firstName: "Integration",
+            lastName: "Lookup");
 
     var response =
         await _coordinatorClient.GetAsync(
@@ -149,8 +151,7 @@ public sealed class ReferralPrerequisiteEndpointTests
             ReferralAssignmentTargetsResponse>();
 
     Assert.NotNull(result);
-    Assert.Contains("Cardiology Team A", result.Items);
-    Assert.Contains("Cardiology Team B", result.Items);
+    Assert.Equal(ReferralTestAssignmentTargets.All, result.Items);
   }
 
   [Fact]

@@ -1,0 +1,173 @@
+<div class="referrals-page">
+  <ct-page-header
+    title="Referrals"
+    description="Review referral workload and progress each record through its supported workflow."
+  >
+    <a
+      *ctHasRole="referralManagers"
+      routerLink="/referrals/new"
+      class="referrals-page__primary-link"
+    >
+      <i class="ph ph-plus" aria-hidden="true"></i>
+      Create referral
+    </a>
+  </ct-page-header>
+
+  <ct-surface padding="none">
+    <ct-data-toolbar>
+      <form
+        ctToolbarPrimary
+        class="referrals-page__filters"
+        [formGroup]="filters"
+        (ngSubmit)="applyFilters()"
+        aria-label="Referral filters"
+      >
+        <ct-form-field label="Status" forId="referral-status-filter">
+          <select id="referral-status-filter" formControlName="status">
+            <option [ngValue]="null">All statuses</option>
+            @for (status of statuses; track status) {
+              <option [ngValue]="status">{{ statusLabel(status) }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Priority" forId="referral-priority-filter">
+          <select id="referral-priority-filter" formControlName="priority">
+            <option [ngValue]="null">All priorities</option>
+            @for (priority of priorities; track priority) {
+              <option [ngValue]="priority">{{ priorityLabel(priority) }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Assigned team" forId="referral-team-filter">
+          <select id="referral-team-filter" formControlName="assignedTo">
+            <option value="">All teams</option>
+            @for (target of assignmentTargets(); track target) {
+              <option [value]="target">{{ target }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Created from" forId="referral-created-from">
+          <input id="referral-created-from" type="date" formControlName="createdFrom" />
+        </ct-form-field>
+
+        <ct-form-field label="Created to" forId="referral-created-to">
+          <input id="referral-created-to" type="date" formControlName="createdTo" />
+        </ct-form-field>
+
+        <ct-form-field label="Sort by" forId="referral-sort-by">
+          <select id="referral-sort-by" formControlName="sortBy">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Direction" forId="referral-sort-direction">
+          <select id="referral-sort-direction" formControlName="sortDirection">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </ct-form-field>
+
+        <div class="referrals-page__filter-actions">
+          <ct-button type="submit" variant="secondary">Apply</ct-button>
+          <ct-button type="button" variant="ghost" (click)="resetFilters()">Reset</ct-button>
+        </div>
+      </form>
+    </ct-data-toolbar>
+
+    @if (loading()) {
+      <div class="referrals-page__loading" role="status" aria-label="Loading referrals">
+        <span class="sr-only">Loading referrals</span>
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="referrals-page__skeleton-row">
+            <ct-skeleton /><ct-skeleton /><ct-skeleton /><ct-skeleton />
+          </div>
+        }
+      </div>
+    } @else if (error() === 'forbidden') {
+      <ct-empty-state
+        title="Referral management is not available for your role"
+        description="Referral access requires a Clinician or Referral Coordinator role."
+        icon="ph-lock-key"
+      />
+    } @else if (error() === 'validation') {
+      <ct-empty-state
+        title="Check the referral filters"
+        description="The date range or another filter is not valid."
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" (click)="resetFilters()">Reset filters</ct-button>
+      </ct-empty-state>
+    } @else if (error() === 'generic') {
+      <ct-empty-state
+        title="Referrals could not be loaded"
+        description="There was a problem loading referral records. Try again."
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" (click)="retry()">Try again</ct-button>
+      </ct-empty-state>
+    } @else if (result(); as referrals) {
+      @if (referrals.totalCount === 0) {
+        <ct-empty-state
+          title="No referrals matched these filters"
+          description="Reset the filters to review the full referral queue."
+          icon="ph-files"
+        >
+          <ct-button variant="secondary" (click)="resetFilters()">Reset filters</ct-button>
+        </ct-empty-state>
+      } @else {
+        <div class="referrals-page__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Reference</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Assigned team</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (referral of referrals.items; track referral.id) {
+                <tr>
+                  <td><strong>{{ referral.referralReference }}</strong></td>
+                  <td>
+                    <ct-status-chip [tone]="priorityTone(referral.priority)">
+                      {{ priorityLabel(referral.priority) }}
+                    </ct-status-chip>
+                  </td>
+                  <td>
+                    <ct-status-chip [tone]="statusTone(referral.status)">
+                      {{ statusLabel(referral.status) }}
+                    </ct-status-chip>
+                  </td>
+                  <td>{{ referral.createdAt | date: 'dd MMM yyyy' : 'UTC' }}</td>
+                  <td>{{ referral.assignedTo || 'Not assigned' }}</td>
+                  <td>
+                    <a [routerLink]="['/referrals', referral.id]">
+                      View referral
+                      <span class="sr-only"> {{ referral.referralReference }}</span>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ct-pagination
+          [page]="referrals.page"
+          [pageSize]="referrals.pageSize"
+          [totalCount]="referrals.totalCount"
+          [totalPages]="referrals.totalPages"
+          ariaLabel="Referral results pagination"
+          (pageChange)="changePage($event)"
+        />
+      }
+    }
+  </ct-surface>
+</div>

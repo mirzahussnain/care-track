@@ -1,0 +1,127 @@
+<section class="clinical-notes" aria-labelledby="clinical-notes-title">
+  <div class="clinical-notes__heading">
+    <div>
+      <h2 id="clinical-notes-title">Clinical Notes</h2>
+      <p>Encounter documentation in chronological order.</p>
+    </div>
+  </div>
+
+  <ct-surface>
+    @if (loading()) {
+      <div class="clinical-notes__loading" role="status" aria-label="Loading clinical notes">
+        <ct-skeleton height="5rem" />
+        <ct-skeleton height="5rem" />
+      </div>
+    } @else if (loadError()) {
+      <ct-empty-state
+        title="Clinical Notes could not be loaded"
+        [description]="loadError() ?? ''"
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" size="sm" (click)="retryRequested.emit()">Try again</ct-button>
+      </ct-empty-state>
+    } @else if (notes().length === 0) {
+      <ct-empty-state
+        title="No Clinical Notes recorded"
+        description="Add the first note for this appointment below."
+        icon="ph-note-blank"
+      />
+    } @else {
+      <ol class="clinical-notes__list">
+        @for (note of notes(); track note.id) {
+          <li>
+            <article>
+              <header>
+                <div>
+                  <strong>{{ authorLabel(note) }}</strong>
+                  <time [attr.datetime]="note.createdAt">
+                    {{ note.createdAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC
+                  </time>
+                  @if (note.updatedAt) {
+                    <span>
+                      Updated {{ note.updatedAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC
+                    </span>
+                  }
+                </div>
+                @if (editingId() !== note.id) {
+                  <ct-button variant="ghost" size="sm" (click)="beginEdit(note)">Edit note</ct-button>
+                }
+              </header>
+
+              @if (editingId() === note.id) {
+                <form [formGroup]="editForm" (ngSubmit)="updateNote(note.id)" novalidate>
+                  <ct-form-field
+                    label="Clinical note content"
+                    [forId]="'clinical-note-edit-' + note.id"
+                    [required]="true"
+                    hint="Maximum 5,000 characters."
+                    [error]="contentError(editForm.controls.content, editSubmitted())"
+                  >
+                    <textarea
+                      [id]="'clinical-note-edit-' + note.id"
+                      rows="7"
+                      maxlength="5000"
+                      formControlName="content"
+                    ></textarea>
+                  </ct-form-field>
+                  <div class="clinical-notes__form-actions">
+                    <ct-button
+                      type="submit"
+                      size="sm"
+                      [loading]="updatingId() === note.id"
+                      [disabled]="!!updatingId()"
+                    >
+                      Save note
+                    </ct-button>
+                    <ct-button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      [disabled]="!!updatingId()"
+                      (click)="cancelEdit()"
+                    >
+                      Cancel
+                    </ct-button>
+                  </div>
+                </form>
+              } @else {
+                <p class="clinical-notes__content">{{ note.content }}</p>
+              }
+            </article>
+          </li>
+        }
+      </ol>
+    }
+  </ct-surface>
+
+  <ct-surface>
+    <form class="clinical-notes__create" [formGroup]="createForm" (ngSubmit)="createNote()" novalidate>
+      <div>
+        <h3>Add Clinical Note</h3>
+        <p>The author is derived from your authenticated account.</p>
+      </div>
+      <ct-form-field
+        label="Clinical note content"
+        forId="clinical-note-content"
+        [required]="true"
+        hint="Maximum 5,000 characters."
+        [error]="contentError(createForm.controls.content, submitted())"
+      >
+        <textarea
+          id="clinical-note-content"
+          rows="7"
+          maxlength="5000"
+          formControlName="content"
+        ></textarea>
+      </ct-form-field>
+      @if (mutationError()) {
+        <p class="clinical-notes__mutation-error" role="alert">{{ mutationError() }}</p>
+      }
+      <div class="clinical-notes__form-actions">
+        <ct-button type="submit" [loading]="creating()" [disabled]="creating() || !!updatingId()">
+          Add Clinical Note
+        </ct-button>
+      </div>
+    </form>
+  </ct-surface>
+</section>

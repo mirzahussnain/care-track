@@ -1,0 +1,187 @@
+<div class="appointments-page">
+  <ct-page-header
+    title="Appointments"
+    description="Review scheduled care and progress appointments through the supported clinical workflow."
+  />
+
+  <ct-surface padding="none">
+    <ct-data-toolbar>
+      <form
+        ctToolbarPrimary
+        class="appointments-page__filters"
+        [formGroup]="filters"
+        (ngSubmit)="applyFilters()"
+        aria-label="Appointment filters"
+      >
+        <ct-form-field label="Status" forId="appointment-status-filter">
+          <select id="appointment-status-filter" formControlName="status">
+            <option [ngValue]="null">All statuses</option>
+            @for (status of statuses; track status) {
+              <option [ngValue]="status">{{ statusLabel(status) }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Type" forId="appointment-type-filter">
+          <select id="appointment-type-filter" formControlName="appointmentType">
+            <option [ngValue]="null">All types</option>
+            @for (type of appointmentTypes; track type) {
+              <option [ngValue]="type">{{ typeLabel(type) }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Location" forId="appointment-location-filter">
+          <input id="appointment-location-filter" type="search" formControlName="location" />
+        </ct-form-field>
+
+        <ct-form-field label="Scheduled from (UTC)" forId="appointment-scheduled-from">
+          <input id="appointment-scheduled-from" type="datetime-local" formControlName="scheduledFrom" />
+        </ct-form-field>
+
+        <ct-form-field
+          label="Scheduled to (UTC)"
+          forId="appointment-scheduled-to"
+          [error]="filters.hasError('appointmentRange') ? 'The end must be after the start.' : undefined"
+        >
+          <input
+            id="appointment-scheduled-to"
+            type="datetime-local"
+            formControlName="scheduledTo"
+            [attr.aria-invalid]="filters.invalid && filters.touched"
+          />
+        </ct-form-field>
+
+        <ct-form-field label="Sort by" forId="appointment-sort-by">
+          <select id="appointment-sort-by" formControlName="sortBy">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </ct-form-field>
+
+        <ct-form-field label="Direction" forId="appointment-sort-direction">
+          <select id="appointment-sort-direction" formControlName="sortDirection">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </ct-form-field>
+
+        <div class="appointments-page__filter-actions">
+          <ct-button type="submit" variant="secondary">Apply</ct-button>
+          <ct-button type="button" variant="ghost" (click)="resetFilters()">Reset</ct-button>
+        </div>
+      </form>
+    </ct-data-toolbar>
+
+    @if (loading()) {
+      <div class="appointments-page__loading" role="status" aria-label="Loading appointments">
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="appointments-page__skeleton-row">
+            <ct-skeleton /><ct-skeleton /><ct-skeleton /><ct-skeleton />
+          </div>
+        }
+      </div>
+    } @else if (error() === 'forbidden') {
+      <ct-empty-state
+        title="Appointments are not available for your role"
+        description="Appointment search and detail access require the Clinician role. Referral Coordinators can schedule from an eligible referral."
+        icon="ph-lock-key"
+      >
+        <a routerLink="/referrals">Open referrals</a>
+      </ct-empty-state>
+    } @else if (error() === 'validation') {
+      <ct-empty-state
+        title="Check the appointment filters"
+        description="The scheduled range or another filter is not valid."
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" (click)="resetFilters()">Reset filters</ct-button>
+      </ct-empty-state>
+    } @else if (error() === 'generic') {
+      <ct-empty-state
+        title="Appointments could not be loaded"
+        description="There was a problem loading appointment records."
+        icon="ph-warning-circle"
+      >
+        <ct-button variant="secondary" (click)="retry()">Try again</ct-button>
+      </ct-empty-state>
+    } @else if (result(); as appointments) {
+      @if (appointments.totalCount === 0) {
+        <ct-empty-state
+          [title]="isFiltered() ? 'No appointments matched these filters' : 'No appointments yet'"
+          [description]="isFiltered() ? 'Reset the filters to review all appointments.' : 'Appointments are scheduled from eligible referrals.'"
+          icon="ph-calendar-dots"
+        >
+          @if (isFiltered()) {
+            <ct-button variant="secondary" (click)="resetFilters()">Reset filters</ct-button>
+          } @else {
+            <a routerLink="/referrals">Open referrals</a>
+          }
+        </ct-empty-state>
+      } @else {
+        <div class="appointments-page__table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Appointment</th>
+                <th scope="col">Scheduled</th>
+                <th scope="col">Patient</th>
+                <th scope="col">Referral</th>
+                <th scope="col">Type and location</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (appointment of appointments.items; track appointment.id) {
+                <tr>
+                  <td><strong>{{ appointment.appointmentReference }}</strong></td>
+                  <td><time [attr.datetime]="appointment.scheduledStart">{{ utc(appointment.scheduledStart) }}</time></td>
+                  <td>
+                    @if (patientFor(appointment.patientId); as patient) {
+                      <strong>{{ patient.fullName }}</strong>
+                      <span>{{ patient.patientReference }}</span>
+                    } @else {
+                      <span>Unavailable</span>
+                    }
+                  </td>
+                  <td>
+                    @if (referralFor(appointment.referralId); as referral) {
+                      <a [routerLink]="['/referrals', referral.id]">{{ referral.referralReference }}</a>
+                    } @else {
+                      <span>Unavailable</span>
+                    }
+                  </td>
+                  <td>
+                    <strong>{{ typeLabel(appointment.appointmentType) }}</strong>
+                    <span>{{ appointment.location }}</span>
+                  </td>
+                  <td>
+                    <ct-status-chip [tone]="statusTone(appointment.status)">
+                      {{ statusLabel(appointment.status) }}
+                    </ct-status-chip>
+                  </td>
+                  <td>
+                    <a [routerLink]="['/appointments', appointment.id]">
+                      View appointment
+                      <span class="sr-only"> {{ appointment.appointmentReference }}</span>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ct-pagination
+          [page]="appointments.page"
+          [pageSize]="appointments.pageSize"
+          [totalCount]="appointments.totalCount"
+          [totalPages]="appointments.totalPages"
+          ariaLabel="Appointment results pagination"
+          (pageChange)="changePage($event)"
+        />
+      }
+    }
+  </ct-surface>
+</div>
