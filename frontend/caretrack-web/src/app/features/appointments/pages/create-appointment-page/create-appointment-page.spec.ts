@@ -203,4 +203,22 @@ describe('CreateAppointmentPage', () => {
       expect(fixture.componentInstance.contextError()).toBeNull();
     },
   );
+
+  it('links visible validation and focuses the first invalid native field after submit', async () => {
+    fixture.detectChanges();
+    fixture.componentInstance.submit();
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const input = element.querySelector<HTMLInputElement>('#appointment-reference')!;
+    const describedBy = input.getAttribute('aria-describedby') ?? '';
+
+    expect(input.required).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(describedBy).toContain('appointment-reference-hint');
+    expect(describedBy).toContain('appointment-reference-error');
+    for (const id of describedBy.split(' ')) expect(element.querySelector(`#${id}`)).not.toBeNull();
+    expect(document.activeElement).toBe(input);
+  });
 });

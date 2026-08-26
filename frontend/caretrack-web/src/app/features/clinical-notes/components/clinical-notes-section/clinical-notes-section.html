@@ -65,8 +65,28 @@
                       [id]="'clinical-note-edit-' + note.id"
                       rows="7"
                       maxlength="5000"
+                      required
                       formControlName="content"
+                      [attr.aria-invalid]="
+                        !!contentError(editForm.controls.content, editSubmitted())
+                      "
+                      [attr.aria-describedby]="
+                        (contentError(editForm.controls.content, editSubmitted())
+                          ? 'clinical-note-edit-' + note.id + '-error '
+                          : '') +
+                        'clinical-note-edit-' +
+                        note.id +
+                        '-hint clinical-note-edit-' +
+                        note.id +
+                        '-count'
+                      "
                     ></textarea>
+                    <p
+                      class="clinical-notes__character-count"
+                      [id]="'clinical-note-edit-' + note.id + '-count'"
+                    >
+                      {{ characterCount(editForm.controls.content.value) }}
+                    </p>
                   </ct-form-field>
                   <div class="clinical-notes__form-actions">
                     <ct-button
@@ -120,8 +140,18 @@
           id="clinical-note-content"
           rows="7"
           maxlength="5000"
+          required
           formControlName="content"
+          [attr.aria-invalid]="!!contentError(createForm.controls.content, submitted())"
+          [attr.aria-describedby]="
+            (contentError(createForm.controls.content, submitted())
+              ? 'clinical-note-content-error '
+              : '') + 'clinical-note-content-hint clinical-note-content-count'
+          "
         ></textarea>
+        <p class="clinical-notes__character-count" id="clinical-note-content-count">
+          {{ characterCount(createForm.controls.content.value) }}
+        </p>
       </ct-form-field>
       @if (mutationError()) {
         <p class="clinical-notes__mutation-error" role="alert">{{ mutationError() }}</p>

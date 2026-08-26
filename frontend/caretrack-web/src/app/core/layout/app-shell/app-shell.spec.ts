@@ -73,6 +73,21 @@ describe('AppShell', () => {
     expect(component.mobileNavigationOpen()).toBe(false);
   });
 
+  it('returns focus to the mobile menu trigger after the drawer closes', async () => {
+    const element = fixture.nativeElement as HTMLElement;
+    const trigger = element.querySelector<HTMLButtonElement>('[aria-label="Open navigation"]')!;
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Close navigation"]')?.click();
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(component.mobileNavigationOpen()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+  });
+
   it('renders the mobile navigation drawer when opened', () => {
     component.openMobileNavigation();
     fixture.detectChanges();
@@ -91,18 +106,24 @@ describe('AppShell', () => {
     expect(element.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it('shows account context and delegates Sign Out to the existing auth service', () => {
+  it('shows account context and delegates sign out to the existing auth service', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('Amina Khan');
     expect(element.textContent).toContain('Clinician');
 
-    element.querySelector<HTMLButtonElement>('[data-testid="topbar-sign-out"]')?.click();
+    const signOutButton = element.querySelector<HTMLButtonElement>(
+      '[data-testid="topbar-sign-out"]',
+    )!;
+    expect(signOutButton.textContent).toContain('Sign out');
+    expect(signOutButton.type).toBe('button');
+
+    signOutButton.click();
 
     expect(signOut).toHaveBeenCalledOnce();
   });
 
-  it('keeps Sign Out reachable from mobile navigation and closes the drawer', () => {
+  it('keeps sign out reachable from mobile navigation and closes the drawer', () => {
     component.openMobileNavigation();
     fixture.detectChanges();
 

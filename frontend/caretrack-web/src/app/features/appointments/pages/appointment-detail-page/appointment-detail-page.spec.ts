@@ -297,4 +297,30 @@ describe('AppointmentDetailPage', () => {
 
     expect(buttonFor('Complete appointment').classList).toContain('ct-button--success');
   });
+
+  it('restores focus when inline appointment confirmations are dismissed', async () => {
+    fixture.detectChanges();
+    const buttonFor = (label: string): HTMLButtonElement =>
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement;
+
+    const didNotAttendTrigger = buttonFor('Mark as did not attend');
+    didNotAttendTrigger.focus();
+    didNotAttendTrigger.click();
+    fixture.detectChanges();
+    buttonFor('Keep scheduled').click();
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(didNotAttendTrigger);
+
+    const cancelTrigger = buttonFor('Cancel appointment');
+    cancelTrigger.focus();
+    cancelTrigger.click();
+    fixture.detectChanges();
+    buttonFor('Keep appointment').click();
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(document.activeElement).toBe(cancelTrigger);
+  });
 });

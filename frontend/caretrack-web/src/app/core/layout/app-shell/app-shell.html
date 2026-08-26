@@ -78,7 +78,7 @@
           (click)="signOut()"
         >
           <i class="ph ph-sign-out" aria-hidden="true"></i>
-          Sign Out
+          Sign out
         </button>
       </div>
     </aside>
@@ -88,7 +88,7 @@
       [areaLabel]="areaLabel()"
       [accountName]="accountName()"
       [accountRoleLabel]="accountRoleLabel()"
-      (mobileMenuOpen)="openMobileNavigation()"
+      (mobileMenuOpen)="openMobileNavigation($event)"
       (signOut)="signOut()"
     />
 

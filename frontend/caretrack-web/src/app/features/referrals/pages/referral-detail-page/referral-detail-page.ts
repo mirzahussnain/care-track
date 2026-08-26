@@ -20,6 +20,11 @@ import { PageHeader } from '../../../../design-system/patterns';
 import { PatientIdentityBanner } from '../../../../design-system/patterns/patient-identity-banner/patient-identity-banner';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralPatientSummary } from '../../../patients/models/patient.models';
+import {
+  buttonFromEvent,
+  focusFirstInvalidControl,
+  restoreFocusIfAvailable,
+} from '../../../../shared/utils/focus-management';
 import { ReferralApiService } from '../../data-access/referral-api.service';
 import { ReferralErrorMessage, referralErrorMessage } from '../../models/referral-errors';
 import {
@@ -77,6 +82,7 @@ export class ReferralDetailPage {
   readonly commandError = signal<ReferralErrorMessage | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly confirmingReject = signal(false);
+  private rejectTrigger: HTMLButtonElement | null = null;
   readonly canManageReferrals = computed(
     () =>
       this.authService.hasRole(CARETRACK_ROLES.clinician) ||
@@ -209,11 +215,23 @@ export class ReferralDetailPage {
     );
   }
 
+  showRejectConfirmation(event: MouseEvent): void {
+    this.rejectTrigger = buttonFromEvent(event);
+    this.confirmingReject.set(true);
+  }
+
+  dismissRejectConfirmation(): void {
+    this.confirmingReject.set(false);
+    restoreFocusIfAvailable(this.rejectTrigger);
+  }
+
   recordTriageAssessment(): void {
-    if (this.triageForm.invalid || this.activeAction()) {
+    if (this.triageForm.invalid) {
       this.triageForm.markAllAsTouched();
+      focusFirstInvalidControl(['triage-priority', 'triage-note']);
       return;
     }
+    if (this.activeAction()) return;
     const value = this.triageForm.getRawValue();
     this.runReferralAction(
       'triage-assessment',
@@ -226,10 +244,12 @@ export class ReferralDetailPage {
   }
 
   assignReferral(reassign = false): void {
-    if (this.assignmentForm.invalid || this.activeAction()) {
+    if (this.assignmentForm.invalid) {
       this.assignmentForm.markAllAsTouched();
+      focusFirstInvalidControl(['assignment-target']);
       return;
     }
+    if (this.activeAction()) return;
     const request = {
       assignedTo: this.assignmentForm.controls.assignedTo.value,
     };

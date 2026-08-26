@@ -53,6 +53,7 @@
               <input
                 id="referral-reference"
                 type="text"
+                required
                 formControlName="referralReference"
                 maxlength="30"
                 autocomplete="off"
@@ -60,11 +61,16 @@
                   form.controls.referralReference.invalid &&
                   (form.controls.referralReference.touched || submitted())
                 "
+                [attr.aria-describedby]="
+                  errorFor(form.controls.referralReference, 'Referral reference', 30)
+                    ? 'referral-reference-hint referral-reference-error'
+                    : 'referral-reference-hint'
+                "
               />
             </ct-form-field>
 
             <ct-form-field label="Priority" forId="referral-priority" [required]="true">
-              <select id="referral-priority" formControlName="priority">
+              <select id="referral-priority" required formControlName="priority">
                 @for (priority of priorities; track priority) {
                   <option [ngValue]="priority">{{ priorityLabel(priority) }}</option>
                 }
@@ -81,11 +87,17 @@
           >
             <textarea
               id="referral-reason"
+              required
               formControlName="reason"
               rows="7"
               maxlength="2000"
               [attr.aria-invalid]="
                 form.controls.reason.invalid && (form.controls.reason.touched || submitted())
+              "
+              [attr.aria-describedby]="
+                errorFor(form.controls.reason, 'Reason for referral', 2000)
+                  ? 'referral-reason-hint referral-reason-error'
+                  : 'referral-reason-hint'
               "
             ></textarea>
           </ct-form-field>

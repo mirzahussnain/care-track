@@ -127,6 +127,7 @@
             ><input
               id="edit-first-name"
               type="text"
+              required
               formControlName="firstName"
               maxlength="100"
               autocomplete="given-name"
@@ -147,6 +148,7 @@
             ><input
               id="edit-last-name"
               type="text"
+              required
               formControlName="lastName"
               maxlength="100"
               autocomplete="family-name"
@@ -165,6 +167,7 @@
             ><input
               id="edit-date-of-birth"
               type="date"
+              required
               formControlName="dateOfBirth"
               [max]="maxDateOfBirth"
               [attr.aria-invalid]="

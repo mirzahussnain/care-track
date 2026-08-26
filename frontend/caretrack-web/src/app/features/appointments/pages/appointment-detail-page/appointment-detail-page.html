@@ -137,6 +137,14 @@
               Check in
             </ct-button>
 
+            <ct-button
+              variant="warning"
+              [hidden]="confirmingDidNotAttend()"
+              [disabled]="!!activeAction()"
+              (click)="showDidNotAttendConfirmation($event)"
+            >
+              Mark as did not attend
+            </ct-button>
             @if (confirmingDidNotAttend()) {
               <div
                 class="appointment-detail-page__confirmation"
@@ -158,20 +166,12 @@
                     variant="ghost"
                     size="sm"
                     [disabled]="!!activeAction()"
-                    (click)="confirmingDidNotAttend.set(false)"
+                    (click)="dismissDidNotAttendConfirmation()"
                   >
                     Keep scheduled
                   </ct-button>
                 </div>
               </div>
-            } @else {
-              <ct-button
-                variant="warning"
-                [disabled]="!!activeAction()"
-                (click)="confirmingDidNotAttend.set(true)"
-              >
-                Mark as did not attend
-              </ct-button>
             }
           } @else if (appointment.status === statuses.checkedIn) {
             <ct-button
@@ -202,6 +202,14 @@
           @if (
             appointment.status === statuses.scheduled || appointment.status === statuses.checkedIn
           ) {
+            <ct-button
+              variant="danger"
+              [hidden]="confirmingCancel()"
+              [disabled]="!!activeAction()"
+              (click)="showCancelConfirmation($event)"
+            >
+              Cancel appointment
+            </ct-button>
             @if (confirmingCancel()) {
               <div
                 class="appointment-detail-page__confirmation"
@@ -223,20 +231,12 @@
                     variant="ghost"
                     size="sm"
                     [disabled]="!!activeAction()"
-                    (click)="confirmingCancel.set(false)"
+                    (click)="dismissCancelConfirmation()"
                   >
                     Keep appointment
                   </ct-button>
                 </div>
               </div>
-            } @else {
-              <ct-button
-                variant="danger"
-                [disabled]="!!activeAction()"
-                (click)="confirmingCancel.set(true)"
-              >
-                Cancel appointment
-              </ct-button>
             }
           }
         </ct-surface>

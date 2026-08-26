@@ -12,6 +12,7 @@ import { PatientIdentityBanner } from '../../../../design-system/patterns/patien
 import { PatientApiService } from '../../data-access/patient-api.service';
 import { dateNotInFuture, fieldError, trimmedRequired } from '../../forms/patient-form.validators';
 import { Patient } from '../../models/patient.models';
+import { focusFirstInvalidControl } from '../../../../shared/utils/focus-management';
 
 type CreateError = 'validation' | 'duplicate' | 'forbidden' | 'generic' | null;
 
@@ -64,10 +65,12 @@ export class CreatePatientPage {
   submit(): void {
     this.submitted.set(true);
     this.error.set(null);
-    if (this.form.invalid || this.submitting()) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(['patient-reference', 'date-of-birth', 'first-name', 'last-name']);
       return;
     }
+    if (this.submitting()) return;
 
     const value = this.form.getRawValue();
     this.submitting.set(true);

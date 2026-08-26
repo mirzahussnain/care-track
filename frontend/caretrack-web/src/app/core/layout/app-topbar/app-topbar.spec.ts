@@ -43,14 +43,21 @@ describe('AppTopbar', () => {
     expect(element.querySelector('.app-topbar__context')?.textContent).toContain('Dashboard');
   });
 
-  it('renders account context and emits Sign Out', () => {
+  it('renders account context and emits sign out', () => {
     const emitSpy = vi.spyOn(component.signOut, 'emit');
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('Amina Khan');
     expect(element.textContent).toContain('Clinician');
 
-    element.querySelector<HTMLButtonElement>('[data-testid="topbar-sign-out"]')?.click();
+    const signOutButton = element.querySelector<HTMLButtonElement>(
+      '[data-testid="topbar-sign-out"]',
+    )!;
+    expect(signOutButton.type).toBe('button');
+    expect(signOutButton.textContent).toContain('Sign out');
+    signOutButton.focus();
+    expect(document.activeElement).toBe(signOutButton);
+    signOutButton.click();
 
     expect(emitSpy).toHaveBeenCalledOnce();
   });

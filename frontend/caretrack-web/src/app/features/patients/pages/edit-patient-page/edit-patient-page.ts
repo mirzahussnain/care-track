@@ -19,6 +19,7 @@ import { PatientIdentityBanner } from '../../../../design-system/patterns/patien
 import { PatientApiService } from '../../data-access/patient-api.service';
 import { dateNotInFuture, fieldError, trimmedRequired } from '../../forms/patient-form.validators';
 import { Patient } from '../../models/patient.models';
+import { focusFirstInvalidControl } from '../../../../shared/utils/focus-management';
 
 type EditLoadError = 'not-found' | 'forbidden' | 'generic' | null;
 type EditSubmitError = 'validation' | 'forbidden' | 'not-found' | 'generic' | null;
@@ -88,10 +89,12 @@ export class EditPatientPage {
   submit(): void {
     this.submitted.set(true);
     this.submitError.set(null);
-    if (this.form.invalid || this.submitting() || this.conflict()) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(['edit-first-name', 'edit-last-name', 'edit-date-of-birth']);
       return;
     }
+    if (this.submitting() || this.conflict()) return;
 
     const rowVersion = this.originalRowVersion();
     if (!rowVersion) {

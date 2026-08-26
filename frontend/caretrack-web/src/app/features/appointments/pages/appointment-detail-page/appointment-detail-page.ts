@@ -25,6 +25,10 @@ import { PatientApiService } from '../../../patients/data-access/patient-api.ser
 import { ReferralPatientSummary } from '../../../patients/models/patient.models';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
 import {
+  buttonFromEvent,
+  restoreFocusIfAvailable,
+} from '../../../../shared/utils/focus-management';
+import {
   Referral,
   referralStatusLabel,
   referralStatusTone,
@@ -88,6 +92,8 @@ export class AppointmentDetailPage {
   readonly successMessage = signal<string | null>(null);
   readonly confirmingCancel = signal(false);
   readonly confirmingDidNotAttend = signal(false);
+  private cancelTrigger: HTMLButtonElement | null = null;
+  private didNotAttendTrigger: HTMLButtonElement | null = null;
 
   readonly notes = signal<readonly ClinicalNote[]>([]);
   readonly notesLoading = signal(false);
@@ -173,6 +179,26 @@ export class AppointmentDetailPage {
     );
   }
 
+  showCancelConfirmation(event: MouseEvent): void {
+    this.cancelTrigger = buttonFromEvent(event);
+    this.confirmingCancel.set(true);
+  }
+
+  dismissCancelConfirmation(): void {
+    this.confirmingCancel.set(false);
+    restoreFocusIfAvailable(this.cancelTrigger);
+  }
+
+  showDidNotAttendConfirmation(event: MouseEvent): void {
+    this.didNotAttendTrigger = buttonFromEvent(event);
+    this.confirmingDidNotAttend.set(true);
+  }
+
+  dismissDidNotAttendConfirmation(): void {
+    this.confirmingDidNotAttend.set(false);
+    restoreFocusIfAvailable(this.didNotAttendTrigger);
+  }
+
   loadNotes(): void {
     this.notesLoading.set(true);
     this.notesError.set(null);
@@ -207,7 +233,7 @@ export class AppointmentDetailPage {
         error: (error: HttpErrorResponse) => {
           this.creatingNote.set(false);
           this.noteMutationError.set(
-            this.noteErrorMessage(error, 'The Clinical Note could not be added.'),
+            this.noteErrorMessage(error, 'The clinical note could not be added.'),
           );
         },
       });
@@ -231,7 +257,7 @@ export class AppointmentDetailPage {
         error: (error: HttpErrorResponse) => {
           this.updatingNoteId.set(null);
           this.noteMutationError.set(
-            this.noteErrorMessage(error, 'The Clinical Note could not be updated.'),
+            this.noteErrorMessage(error, 'The clinical note could not be updated.'),
           );
         },
       });
@@ -321,9 +347,9 @@ export class AppointmentDetailPage {
   }
 
   private noteErrorMessage(error: HttpErrorResponse, fallback: string): string {
-    if (error.status === 400) return 'Clinical Note content is not valid. Check it and try again.';
+    if (error.status === 400) return 'Clinical note content is not valid. Check it and try again.';
     if (error.status === 403) return 'Your role does not permit access to Clinical Notes.';
-    if (error.status === 404) return 'The Appointment or Clinical Note is no longer available.';
+    if (error.status === 404) return 'The appointment or clinical note is no longer available.';
     return fallback;
   }
 }

@@ -19,6 +19,7 @@ import { PatientApiService } from '../../../patients/data-access/patient-api.ser
 import { ReferralPatientSummary } from '../../../patients/models/patient.models';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
 import { REFERRAL_STATUSES, Referral } from '../../../referrals/models/referral.models';
+import { focusFirstInvalidControl } from '../../../../shared/utils/focus-management';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import { appointmentUtcRangeValidator } from '../../forms/appointment-form.validators';
 import { appointmentErrorMessage } from '../../models/appointment-errors';
@@ -146,16 +147,18 @@ export class CreateAppointmentPage {
     this.submitted.set(true);
     this.errorMessage.set(null);
     const referral = this.referral();
-    if (
-      !referral ||
-      !this.patient() ||
-      this.contextError() ||
-      this.form.invalid ||
-      this.submitting()
-    ) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl([
+        'appointment-reference',
+        'appointment-type',
+        'appointment-start',
+        'appointment-end',
+        'appointment-location',
+      ]);
       return;
     }
+    if (!referral || !this.patient() || this.contextError() || this.submitting()) return;
 
     const value = this.form.getRawValue();
     this.submitting.set(true);
@@ -212,6 +215,16 @@ export class CreateAppointmentPage {
   dateError(control: FormControl<string>, label: string): string | undefined {
     if (!(control.touched || this.submitted())) return undefined;
     return control.hasError('required') ? `${label} is required.` : undefined;
+  }
+
+  appointmentEndError(): string | undefined {
+    if (
+      this.form.hasError('appointmentRange') &&
+      (this.form.controls.scheduledEnd.touched || this.submitted())
+    ) {
+      return 'Scheduled end must be after scheduled start.';
+    }
+    return this.dateError(this.form.controls.scheduledEnd, 'Scheduled end');
   }
 
   private isSchedulable(referral: Referral): boolean {

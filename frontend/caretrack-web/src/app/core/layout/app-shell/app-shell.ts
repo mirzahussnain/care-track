@@ -7,6 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 
 import { AuthService } from '../../auth/auth.service';
+import { buttonFromEvent, restoreFocusIfAvailable } from '../../../shared/utils/focus-management';
 
 @Component({
   selector: 'app-shell',
@@ -18,6 +19,7 @@ export class AppShell {
   readonly navigation = SHELL_NAVIGATION;
   readonly sidebarCollapsed = signal(false);
   readonly mobileNavigationOpen = signal(false);
+  private mobileMenuTrigger: HTMLButtonElement | null = null;
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
@@ -55,16 +57,18 @@ export class AppShell {
     this.sidebarCollapsed.update((collapsed) => !collapsed);
   }
 
-  openMobileNavigation(): void {
+  openMobileNavigation(event?: MouseEvent): void {
+    this.mobileMenuTrigger = event ? buttonFromEvent(event) : null;
     this.mobileNavigationOpen.set(true);
   }
 
-  closeMobileNavigation(): void {
+  closeMobileNavigation(restoreFocus = true): void {
     this.mobileNavigationOpen.set(false);
+    if (restoreFocus) restoreFocusIfAvailable(this.mobileMenuTrigger);
   }
 
   signOut(): void {
-    this.closeMobileNavigation();
+    this.closeMobileNavigation(false);
     this.authService.signOut();
   }
 

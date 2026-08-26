@@ -10,6 +10,6 @@ export class AppTopbar {
   readonly areaLabel = input.required<string>();
   readonly accountName = input.required<string>();
   readonly accountRoleLabel = input.required<string>();
-  readonly mobileMenuOpen = output<void>();
+  readonly mobileMenuOpen = output<MouseEvent>();
   readonly signOut = output<void>();
 }

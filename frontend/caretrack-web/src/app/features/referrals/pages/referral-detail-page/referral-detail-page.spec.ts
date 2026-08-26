@@ -293,4 +293,89 @@ describe('ReferralDetailPage', () => {
     expect(buttonFor('Request more information').classList).toContain('ct-button--warning');
     expect(buttonFor('Reject referral').classList).toContain('ct-button--danger');
   });
+
+  it('restores focus to the reject trigger when rejection is dismissed', async () => {
+    fixture.componentInstance.referral.set({
+      ...referral,
+      status: REFERRAL_STATUSES.awaitingTriage,
+    });
+    fixture.detectChanges();
+
+    const buttonFor = (label: string): HTMLButtonElement =>
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement;
+    const trigger = buttonFor('Reject referral');
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+
+    buttonFor('Keep referral').click();
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('does not restore focus to a reject trigger removed by a successful transition', async () => {
+    rejectReferral.mockReturnValue(of({ ...referral, status: REFERRAL_STATUSES.rejected }));
+    fixture.componentInstance.referral.set({
+      ...referral,
+      status: REFERRAL_STATUSES.awaitingTriage,
+    });
+    fixture.detectChanges();
+
+    const buttonFor = (label: string): HTMLButtonElement =>
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement;
+    const trigger = buttonFor('Reject referral');
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+    buttonFor('Confirm rejection').click();
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(trigger.isConnected).toBe(false);
+    expect(document.activeElement).not.toBe(trigger);
+  });
+
+  it('links triage validation only after interaction and focuses the invalid note on submit', async () => {
+    fixture.componentInstance.referral.set({
+      ...referral,
+      status: REFERRAL_STATUSES.awaitingTriage,
+    });
+    fixture.componentInstance.triageForm.controls.note.setValue('');
+    fixture.detectChanges();
+    const textarea = fixture.nativeElement.querySelector('#triage-note') as HTMLTextAreaElement;
+
+    expect(textarea.getAttribute('aria-invalid')).not.toBe('true');
+    expect(textarea.getAttribute('aria-describedby')).toBe('triage-note-hint');
+
+    fixture.componentInstance.recordTriageAssessment();
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(textarea.getAttribute('aria-invalid')).toBe('true');
+    expect(textarea.getAttribute('aria-describedby')).toBe('triage-note-hint triage-note-error');
+    expect(fixture.nativeElement.querySelector('#triage-note-error')).not.toBeNull();
+    expect(document.activeElement).toBe(textarea);
+  });
+
+  it('keeps Referral History as an ordered timeline with semantic timestamps', () => {
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const timeline = element.querySelector('ol.referral-detail-page__history');
+    const event = timeline?.querySelector('li');
+    const marker = event?.querySelector('.referral-detail-page__history-marker');
+    const time = event?.querySelector('time');
+
+    expect(timeline).not.toBeNull();
+    expect(marker?.getAttribute('aria-hidden')).toBe('true');
+    expect(time?.getAttribute('datetime')).toBe(history[0].occurredAt);
+    expect(event?.textContent?.indexOf('Referral created')).toBeLessThan(
+      event?.textContent?.indexOf('25 Aug 2026') ?? -1,
+    );
+  });
 });

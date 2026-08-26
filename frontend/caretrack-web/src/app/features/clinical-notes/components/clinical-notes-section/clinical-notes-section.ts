@@ -10,6 +10,7 @@ import {
   Surface,
 } from '../../../../design-system/components';
 import { ClinicalNote } from '../../models/clinical-note.models';
+import { focusFirstInvalidControl } from '../../../../shared/utils/focus-management';
 
 export interface UpdateClinicalNoteEvent {
   readonly id: string;
@@ -70,10 +71,12 @@ export class ClinicalNotesSection {
 
   createNote(): void {
     this.submitted.set(true);
-    if (this.createForm.invalid || this.creating()) {
+    if (this.createForm.invalid) {
       this.createForm.markAllAsTouched();
+      focusFirstInvalidControl(['clinical-note-content']);
       return;
     }
+    if (this.creating()) return;
     this.createRequested.emit(this.createForm.controls.content.value.trim());
   }
 
@@ -91,10 +94,12 @@ export class ClinicalNotesSection {
 
   updateNote(id: string): void {
     this.editSubmitted.set(true);
-    if (this.editForm.invalid || this.updatingId()) {
+    if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
+      focusFirstInvalidControl([`clinical-note-edit-${id}`]);
       return;
     }
+    if (this.updatingId()) return;
     this.updateRequested.emit({ id, content: this.editForm.controls.content.value.trim() });
   }
 
@@ -105,6 +110,10 @@ export class ClinicalNotesSection {
     return control.hasError('maxlength')
       ? 'Clinical note content cannot exceed 5,000 characters.'
       : undefined;
+  }
+
+  characterCount(content: string): string {
+    return `${content.length.toLocaleString()} of 5,000 characters`;
   }
 
   authorLabel(note: ClinicalNote): string {

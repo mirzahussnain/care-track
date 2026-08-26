@@ -18,6 +18,7 @@ import {
   ReferralPriority,
   referralPriorityLabel,
 } from '../../models/referral.models';
+import { focusFirstInvalidControl } from '../../../../shared/utils/focus-management';
 
 @Component({
   selector: 'app-create-referral-page',
@@ -81,10 +82,12 @@ export class CreateReferralPage {
   submit(): void {
     this.submitted.set(true);
     this.errorMessage.set(null);
-    if (this.form.invalid || this.submitting()) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalidControl(['referral-reference', 'referral-priority', 'referral-reason']);
       return;
     }
+    if (this.submitting()) return;
 
     const value = this.form.getRawValue();
     this.submitting.set(true);

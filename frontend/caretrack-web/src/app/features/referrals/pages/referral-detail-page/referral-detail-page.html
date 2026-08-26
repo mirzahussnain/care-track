@@ -194,9 +194,15 @@
                     id="triage-note"
                     rows="5"
                     maxlength="2000"
+                    required
                     formControlName="note"
                     [attr.aria-invalid]="
                       triageForm.controls.note.touched && triageForm.controls.note.invalid
+                    "
+                    [attr.aria-describedby]="
+                      triageForm.controls.note.touched && triageForm.controls.note.invalid
+                        ? 'triage-note-hint triage-note-error'
+                        : 'triage-note-hint'
                     "
                   ></textarea>
                 </ct-form-field>
@@ -227,6 +233,14 @@
                 >
                   Request more information
                 </ct-button>
+                <ct-button
+                  variant="danger"
+                  [hidden]="confirmingReject()"
+                  [disabled]="!!activeAction()"
+                  (click)="showRejectConfirmation($event)"
+                >
+                  Reject referral
+                </ct-button>
                 @if (confirmingReject()) {
                   <div
                     class="referral-detail-page__reject-confirmation"
@@ -246,20 +260,12 @@
                       <ct-button
                         variant="ghost"
                         [disabled]="!!activeAction()"
-                        (click)="confirmingReject.set(false)"
+                        (click)="dismissRejectConfirmation()"
                       >
                         Keep referral
                       </ct-button>
                     </div>
                   </div>
-                } @else {
-                  <ct-button
-                    variant="danger"
-                    [disabled]="!!activeAction()"
-                    (click)="confirmingReject.set(true)"
-                  >
-                    Reject referral
-                  </ct-button>
                 }
               </div>
             } @else if (referral.status === statuses.moreInformationRequired) {
@@ -295,7 +301,21 @@
                       : undefined
                   "
                 >
-                  <select id="assignment-target" formControlName="assignedTo">
+                  <select
+                    id="assignment-target"
+                    required
+                    formControlName="assignedTo"
+                    [attr.aria-invalid]="
+                      assignmentForm.controls.assignedTo.touched &&
+                      assignmentForm.controls.assignedTo.invalid
+                    "
+                    [attr.aria-describedby]="
+                      assignmentForm.controls.assignedTo.touched &&
+                      assignmentForm.controls.assignedTo.invalid
+                        ? 'assignment-target-error'
+                        : null
+                    "
+                  >
                     <option value="">Select a team</option>
                     @for (target of assignmentTargets(); track target) {
                       <option [value]="target">{{ target }}</option>
