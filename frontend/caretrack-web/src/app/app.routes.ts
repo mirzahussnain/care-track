@@ -3,6 +3,14 @@ import { MsalGuard } from '@azure/msal-angular';
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/landing/pages/landing-page/landing-page').then(
+        (module) => module.LandingPage,
+      ),
+  },
+  {
     path: 'auth/sign-in',
     loadComponent: () =>
       import('./core/auth/pages/sign-in-page/sign-in-page').then((module) => module.SignInPage),

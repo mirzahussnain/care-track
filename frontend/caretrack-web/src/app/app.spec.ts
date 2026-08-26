@@ -1,15 +1,18 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-
 import { provideRouter, Router } from '@angular/router';
-
 import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
-
 import { AccountInfo, AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
-
 import { Subject } from 'rxjs';
 
 import { App } from './app';
 import { AuthService } from './core/auth/auth.service';
+
+@Component({
+  standalone: true,
+  template: '',
+})
+class TestRouteComponent {}
 
 describe('App', () => {
   let activeAccount: AccountInfo | null;
@@ -18,13 +21,10 @@ describe('App', () => {
   let interactionStatus$: Subject<InteractionStatus>;
 
   const getActiveAccount = vi.fn(() => activeAccount);
-
   const getAllAccounts = vi.fn(() => cachedAccounts);
-
   const setActiveAccount = vi.fn((account: AccountInfo | null) => {
     activeAccount = account;
   });
-
   const handleRedirectObservable = vi.fn();
   const loadCurrentUser = vi.fn();
   const clearCurrentUser = vi.fn();
@@ -75,9 +75,14 @@ describe('App', () => {
     handleRedirectObservable.mockReturnValue(redirectResult$);
 
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, TestRouteComponent],
       providers: [
-        provideRouter([]),
+        provideRouter([
+          { path: '', pathMatch: 'full', component: TestRouteComponent },
+          { path: 'auth/sign-in', component: TestRouteComponent },
+          { path: 'dashboard', component: TestRouteComponent },
+          { path: 'patients', component: TestRouteComponent },
+        ]),
         {
           provide: MsalService,
           useValue: msalServiceMock,
@@ -96,111 +101,97 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  function createApp(): void {
-    TestBed.createComponent(App);
+  function createApp(): ReturnType<typeof TestBed.createComponent<App>> {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  async function navigate(url: string): Promise<void> {
+    await TestBed.inject(Router).navigateByUrl(url);
   }
 
   function redirectResult(account: AccountInfo): AuthenticationResult {
-    return {
-      account,
-    } as AuthenticationResult;
+    return { account } as AuthenticationResult;
   }
 
   it('creates the app', () => {
-    const fixture = TestBed.createComponent(App);
-
-    expect(fixture.componentInstance).toBeTruthy();
+    expect(createApp().componentInstance).toBeTruthy();
   });
 
-  it('establishes the redirect account then loads the CareTrack user', () => {
-    const router = TestBed.inject(Router);
-    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    createApp();
-
-    redirectResult$.next(redirectResult(firstAccount));
-
-    expect(setActiveAccount).toHaveBeenCalledOnce();
-    expect(setActiveAccount).toHaveBeenCalledWith(firstAccount);
-    expect(activeAccount).toBe(firstAccount);
-    expect(loadCurrentUser).toHaveBeenCalledOnce();
-    expect(navigate).toHaveBeenCalledWith(['/dashboard']);
-  });
-
-  it('uses the single cached account fallback and loads its user', () => {
+  it('does not hydrate or make an application-user request for public root with a cached account', async () => {
     cachedAccounts = [firstAccount];
     createApp();
 
     interactionStatus$.next(InteractionStatus.None);
+    await navigate('/');
 
-    expect(setActiveAccount).toHaveBeenCalledWith(firstAccount);
-    expect(activeAccount).toBe(firstAccount);
-    expect(loadCurrentUser).toHaveBeenCalledOnce();
+    expect(setActiveAccount).not.toHaveBeenCalled();
+    expect(loadCurrentUser).not.toHaveBeenCalled();
+    expect(clearCurrentUser).not.toHaveBeenCalled();
   });
 
-  it('loads the user for an already active account after MSAL settles', () => {
+  it('does not hydrate the application user on the public sign-in route', async () => {
     activeAccount = firstAccount;
     createApp();
 
+    await navigate('/auth/sign-in');
     interactionStatus$.next(InteractionStatus.None);
 
-    expect(setActiveAccount).not.toHaveBeenCalled();
+    expect(loadCurrentUser).not.toHaveBeenCalled();
+  });
+
+  it('hydrates once only after router navigation confirms guarded workspace access', async () => {
+    activeAccount = firstAccount;
+    createApp();
+
+    await navigate('/dashboard');
+
     expect(loadCurrentUser).toHaveBeenCalledOnce();
   });
 
-  it('does not select or load when multiple cached accounts exist', () => {
+  it('does not duplicate hydration while navigating within the guarded workspace', async () => {
+    activeAccount = firstAccount;
+    createApp();
+
+    await navigate('/dashboard');
+    await navigate('/patients');
+    interactionStatus$.next(InteractionStatus.None);
+
+    expect(loadCurrentUser).toHaveBeenCalledOnce();
+  });
+
+  it('clears only application-user state when navigating from workspace to the public landing page', async () => {
+    activeAccount = firstAccount;
+    createApp();
+
+    await navigate('/dashboard');
+    await navigate('/');
+
+    expect(clearCurrentUser).toHaveBeenCalledOnce();
+    expect(activeAccount).toBe(firstAccount);
+    expect(setActiveAccount).not.toHaveBeenCalledWith(null);
+  });
+
+  it('preserves redirect completion then hydrates once after dashboard navigation', async () => {
+    const fixture = createApp();
+
+    redirectResult$.next(redirectResult(firstAccount));
+    await fixture.whenStable();
+
+    expect(activeAccount).toBe(firstAccount);
+    expect(TestBed.inject(Router).url).toBe('/dashboard');
+    expect(loadCurrentUser).toHaveBeenCalledOnce();
+  });
+
+  it('does not select or hydrate when multiple cached accounts exist', async () => {
     cachedAccounts = [firstAccount, secondAccount];
     createApp();
 
     interactionStatus$.next(InteractionStatus.None);
+    await navigate('/dashboard');
 
     expect(setActiveAccount).not.toHaveBeenCalled();
     expect(loadCurrentUser).not.toHaveBeenCalled();
-    expect(activeAccount).toBeNull();
-  });
-
-  it('does not load a user when no account can be resolved', () => {
-    createApp();
-
-    interactionStatus$.next(InteractionStatus.None);
-
-    expect(setActiveAccount).not.toHaveBeenCalled();
-    expect(loadCurrentUser).not.toHaveBeenCalled();
-  });
-
-  it('does not duplicate loading or navigation for repeated MSAL None events', () => {
-    const router = TestBed.inject(Router);
-    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    createApp();
-
-    redirectResult$.next(redirectResult(firstAccount));
-    interactionStatus$.next(InteractionStatus.None);
-    interactionStatus$.next(InteractionStatus.None);
-
-    expect(setActiveAccount).toHaveBeenCalledOnce();
-    expect(loadCurrentUser).toHaveBeenCalledOnce();
-    expect(navigate).toHaveBeenCalledOnce();
-  });
-
-  it('loads again when MSAL resolves a different active account', () => {
-    activeAccount = firstAccount;
-    createApp();
-    interactionStatus$.next(InteractionStatus.None);
-
-    activeAccount = secondAccount;
-    interactionStatus$.next(InteractionStatus.None);
-
-    expect(loadCurrentUser).toHaveBeenCalledTimes(2);
-  });
-
-  it('clears the CareTrack user when the previously resolved account disappears', () => {
-    activeAccount = firstAccount;
-    createApp();
-    interactionStatus$.next(InteractionStatus.None);
-
-    activeAccount = null;
-    cachedAccounts = [];
-    interactionStatus$.next(InteractionStatus.None);
-
-    expect(clearCurrentUser).toHaveBeenCalledOnce();
   });
 });

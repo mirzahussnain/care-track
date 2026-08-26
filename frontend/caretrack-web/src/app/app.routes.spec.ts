@@ -3,8 +3,18 @@ import { MsalGuard } from '@azure/msal-angular';
 import { routes } from './app.routes';
 
 describe('app routes', () => {
+  function getShellRoute() {
+    return routes.find((route) => route.path === '' && route.canActivate?.includes(MsalGuard));
+  }
+
+  it('registers a public full-match landing route', () => {
+    const landingRoute = routes.find((route) => route.path === '' && route.pathMatch === 'full');
+
+    expect(landingRoute?.canActivate).toBeUndefined();
+    expect(landingRoute?.loadComponent).toBeDefined();
+  });
   it('protects the application shell with MsalGuard', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
 
     expect(shellRoute).toBeDefined();
 
@@ -12,7 +22,7 @@ describe('app routes', () => {
   });
 
   it('registers all Patients routes inside the protected shell', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const patientRoutes = shellRoute?.children?.filter((route) =>
       route.path?.startsWith('patients'),
     );
@@ -28,7 +38,7 @@ describe('app routes', () => {
   });
 
   it('orders static and edit Patients routes before patient detail', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const paths = shellRoute?.children?.map((route) => route.path) ?? [];
 
     expect(paths.indexOf('patients/new')).toBeLessThan(paths.indexOf('patients/:id'));
@@ -36,7 +46,7 @@ describe('app routes', () => {
   });
 
   it('registers all Referrals routes inside the protected shell', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const referralRoutes = shellRoute?.children?.filter((route) =>
       route.path?.startsWith('referrals'),
     );
@@ -51,14 +61,14 @@ describe('app routes', () => {
   });
 
   it('orders the static Referrals create route before referral detail', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const paths = shellRoute?.children?.map((route) => route.path) ?? [];
 
     expect(paths.indexOf('referrals/new')).toBeLessThan(paths.indexOf('referrals/:id'));
   });
 
   it('registers Appointment routes inside the protected shell', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const appointmentRoutes = shellRoute?.children?.filter((route) =>
       route.path?.startsWith('appointments'),
     );
@@ -75,7 +85,7 @@ describe('app routes', () => {
   });
 
   it('orders the static Appointment create route before appointment detail', () => {
-    const shellRoute = routes.find((route) => route.path === '' && route.loadComponent);
+    const shellRoute = getShellRoute();
     const paths = shellRoute?.children?.map((route) => route.path) ?? [];
 
     expect(paths.indexOf('appointments/new')).toBeLessThan(paths.indexOf('appointments/:id'));

@@ -148,6 +148,19 @@ html {
   background: var(--ct-bg);
 }
 
+html:has(app-landing-page),
+body:has(app-landing-page) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(app-landing-page)::-webkit-scrollbar,
+body:has(app-landing-page)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 body {
   min-height: 100vh;
   background: var(--ct-bg);

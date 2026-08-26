@@ -333,7 +333,7 @@ describe('AuthService', () => {
     expect(logoutRedirect).toHaveBeenCalledOnce();
     expect(logoutRedirect).toHaveBeenCalledWith({
       account: clinicianAccount,
-      postLogoutRedirectUri: `${environment.auth.redirectUri}/auth/sign-in`,
+      postLogoutRedirectUri: `${environment.auth.redirectUri}/`,
     });
   });
 
@@ -345,7 +345,7 @@ describe('AuthService', () => {
     expect(service.status()).toBe('idle');
     expect(logoutRedirect).toHaveBeenCalledWith({
       account: undefined,
-      postLogoutRedirectUri: `${environment.auth.redirectUri}/auth/sign-in`,
+      postLogoutRedirectUri: `${environment.auth.redirectUri}/`,
     });
   });
 });

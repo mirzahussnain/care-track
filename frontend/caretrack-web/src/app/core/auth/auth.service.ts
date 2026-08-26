@@ -100,7 +100,7 @@ export class AuthService {
     this.msalService.logoutRedirect({
       account: this.msalService.instance.getActiveAccount() ?? undefined,
 
-      postLogoutRedirectUri: `${environment.auth.redirectUri}/auth/sign-in`,
+      postLogoutRedirectUri: `${environment.auth.redirectUri}/`,
     });
   }
 

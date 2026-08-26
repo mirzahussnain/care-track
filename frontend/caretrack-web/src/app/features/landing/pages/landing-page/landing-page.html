@@ -1,0 +1,543 @@
+<div class="landing-page min-h-screen w-full max-w-full overflow-x-hidden text-ct-text">
+  <a class="landing-page__skip-link" href="#landing-main">Skip to main content</a>
+  <header class="landing-page__header" [class.landing-page__header--elevated]="headerElevated()">
+    <nav class="landing-page__nav" aria-label="Public navigation">
+      <a class="landing-page__brand" href="#top" (click)="closeMobileMenu()">
+        <img src="/brand/caretrack-symbol.svg" alt="CareTrack" width="42" height="42" />
+        <span><strong>CareTrack</strong><small>Clinical operations</small></span>
+      </a>
+      <div class="landing-page__desktop-nav">
+        <a href="#overview">Overview</a><a href="#features">Features</a>
+        <a href="#workflow">Workflow</a><a href="#engineering">Engineering</a>
+      </div>
+      <a
+        class="landing-page__button landing-page__button--nav landing-page__desktop-cta"
+        [routerLink]="authCta.route"
+        data-auth-cta="desktop"
+      >
+        {{ authCta.label }}<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+      </a>
+      <button
+        class="landing-page__menu-button"
+        type="button"
+        [attr.aria-label]="mobileMenuOpen() ? 'Close navigation menu' : 'Open navigation menu'"
+        aria-controls="public-mobile-menu"
+        [attr.aria-expanded]="mobileMenuOpen()"
+        (click)="toggleMobileMenu()"
+      >
+        <i
+          class="ph"
+          [class.ph-list]="!mobileMenuOpen()"
+          [class.ph-x]="mobileMenuOpen()"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </nav>
+    @if (mobileMenuOpen()) {
+      <div id="public-mobile-menu" class="landing-page__mobile-menu">
+        <a href="#overview" (click)="closeMobileMenu()">Overview</a>
+        <a href="#features" (click)="closeMobileMenu()">Features</a>
+        <a href="#workflow" (click)="closeMobileMenu()">Workflow</a>
+        <a href="#engineering" (click)="closeMobileMenu()">Engineering</a>
+        <a
+          class="landing-page__button landing-page__button--primary"
+          [routerLink]="authCta.route"
+          data-auth-cta="mobile"
+          (click)="closeMobileMenu()"
+        >
+          {{ authCta.label }}<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    }
+  </header>
+  <main id="landing-main">
+    <section id="top" class="landing-page__hero" aria-labelledby="landing-title">
+      <div class="landing-page__hero-grid" aria-hidden="true"></div>
+      <div class="landing-page__orb landing-page__orb--one" aria-hidden="true"></div>
+      <div class="landing-page__orb landing-page__orb--two" aria-hidden="true"></div>
+      <svg class="landing-page__hero-paths" viewBox="0 0 1440 760" aria-hidden="true">
+        <path d="M-20 530 C 230 360, 380 650, 650 430 S 1100 170, 1480 330" />
+        <path d="M220 80 C 470 220, 620 110, 790 250 S 1110 560, 1460 510" />
+        <circle cx="651" cy="430" r="5" />
+        <circle cx="1115" cy="294" r="5" />
+      </svg>
+      <div class="landing-page__hero-inner">
+        <div class="landing-page__hero-copy">
+          <p class="landing-page__eyebrow landing-page__hero-enter landing-page__hero-enter--one">
+            Clinical Referral &amp; Workflow Management
+          </p>
+          <h1
+            id="landing-title"
+            class="max-w-5xl landing-page__hero-enter landing-page__hero-enter--two"
+          >
+            Clinical Workflows, Clear From Referral to <span>Completion.</span>
+          </h1>
+          <p
+            class="landing-page__hero-lede landing-page__hero-enter landing-page__hero-enter--three"
+          >
+            CareTrack connects patient registration, referral workflows, appointment management,
+            Clinical Notes, and role-based access in one structured operational workspace.
+          </p>
+          <div
+            class="landing-page__hero-actions landing-page__hero-enter landing-page__hero-enter--four"
+          >
+            <a
+              class="landing-page__button landing-page__button--primary landing-page__button--large"
+              [routerLink]="authCta.route"
+              data-auth-cta="hero"
+            >
+              {{ authCta.prominentLabel }}<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              class="landing-page__button landing-page__button--secondary landing-page__button--large"
+              href="#workflow"
+            >
+              Explore the workflow<i class="ph ph-arrow-down" aria-hidden="true"></i>
+            </a>
+          </div>
+          <p
+            class="landing-page__portfolio-note landing-page__hero-enter landing-page__hero-enter--five"
+          >
+            <i class="ph ph-shield-check" aria-hidden="true"></i>Independent portfolio demonstration
+            using synthetic data.
+          </p>
+        </div>
+        <div
+          class="landing-page__hero-visual landing-page__hero-enter landing-page__hero-enter--visual"
+        >
+          <div class="landing-page__product-glow" aria-hidden="true"></div>
+          <figure class="landing-page__product-window">
+            <div class="landing-page__window-bar" aria-hidden="true">
+              <span></span><span></span><span></span><small>CareTrack workspace</small>
+            </div>
+            <div class="landing-page__product-screen">
+              <img
+                src="/product-demos/dashboard-overview.png"
+                alt="CareTrack operational dashboard showing referral attention queues and scheduled clinical work."
+                width="1917"
+                height="997"
+                fetchpriority="high"
+              />
+            </div>
+          </figure>
+          <div
+            class="landing-page__floating-card landing-page__floating-card--state"
+            aria-hidden="true"
+          >
+            <i class="ph ph-path"></i
+            ><span><small>Workflow state</small><strong>Awaiting Triage</strong></span>
+          </div>
+          <div
+            class="landing-page__floating-card landing-page__floating-card--access"
+            aria-hidden="true"
+          >
+            <i class="ph ph-user-focus"></i
+            ><span><small>Workspace access</small><strong>Role-aware</strong></span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="landing-page__proof" aria-label="CareTrack project qualities">
+      <div class="landing-page__proof-inner">
+        <span><i class="ph ph-stack" aria-hidden="true"></i>Full-stack workflow system</span>
+        <span
+          ><i class="ph ph-lock-key" aria-hidden="true"></i>Microsoft Entra role-based auth</span
+        >
+        <span
+          ><i class="ph ph-check-circle" aria-hidden="true"></i>Frontend + backend
+          verification</span
+        >
+        <span><i class="ph ph-flask" aria-hidden="true"></i>Synthetic portfolio data</span>
+      </div>
+    </section>
+    <section id="overview" class="landing-page__section landing-page__gallery-section">
+      <div class="landing-page__container">
+        <div class="landing-page__section-heading" data-landing-reveal>
+          <p class="landing-page__eyebrow">The Product</p>
+          <h2>See CareTrack in Action</h2>
+          <p>
+            Real product screens show how records, referrals, and scheduled work stay connected
+            without inventing functionality for the marketing surface.
+          </p>
+        </div>
+        <div class="landing-page__gallery" data-landing-reveal>
+          <div
+            class="landing-page__gallery-tabs"
+            role="tablist"
+            aria-label="CareTrack product screens"
+          >
+            @for (demo of demos; track demo.src; let index = $index) {
+              <button
+                id="product-tab-{{ index }}"
+                type="button"
+                role="tab"
+                [attr.aria-selected]="selectedDemoIndex() === index"
+                aria-controls="product-demo-panel"
+                [attr.tabindex]="selectedDemoIndex() === index ? 0 : -1"
+                [class.landing-page__gallery-tab--selected]="selectedDemoIndex() === index"
+                (click)="selectDemo(index)"
+                (keydown)="onDemoKeydown($event, index)"
+              >
+                <span>{{ demo.label }}</span>
+              </button>
+            }
+          </div>
+          <div
+            id="product-demo-panel"
+            class="landing-page__gallery-panel"
+            role="tabpanel"
+            [attr.aria-labelledby]="'product-tab-' + selectedDemoIndex()"
+          >
+            <div class="landing-page__gallery-copy">
+              <p class="landing-page__gallery-kicker">{{ selectedDemo.label }}</p>
+              <h3>{{ selectedDemo.description }}</h3>
+              <ul>
+                @for (highlight of selectedDemo.highlights; track $index) {
+                  <li><i class="ph ph-check" aria-hidden="true"></i>{{ highlight }}</li>
+                }
+              </ul>
+            </div>
+            <figure class="landing-page__screen-frame landing-page__screen-frame--gallery">
+              <div class="landing-page__window-bar" aria-hidden="true">
+                <span></span><span></span><span></span><small>{{ selectedDemo.label }}</small>
+              </div>
+              <div class="landing-page__screen-image-wrap">
+                <img
+                  [src]="selectedDemo.src"
+                  [alt]="selectedDemo.alt"
+                  [width]="selectedDemo.width"
+                  [height]="selectedDemo.height"
+                  loading="lazy"
+                />
+              </div>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="features" class="landing-page__section landing-page__features-section">
+      <div class="landing-page__container">
+        <div
+          class="landing-page__section-heading landing-page__section-heading--light"
+          data-landing-reveal
+        >
+          <p class="landing-page__eyebrow">Connected Capabilities</p>
+          <h2>One Workspace, Every Operational Hand-Off</h2>
+          <p>
+            Purpose-built surfaces keep the clinical workflow legible while server-authoritative
+            rules protect every meaningful transition.
+          </p>
+        </div>
+        <div class="landing-page__bento" data-landing-reveal>
+          <article class="landing-page__feature landing-page__feature--wide">
+            <i class="ph ph-users-three" aria-hidden="true"></i>
+            <div>
+              <h3>Patient Management</h3>
+              <p>Structured registration, searchable records, and consistent patient references.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--medium">
+            <i class="ph ph-path" aria-hidden="true"></i>
+            <div>
+              <h3>Referral Workflow</h3>
+              <p>Explicit progression from draft through triage, delivery, and completion.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--third">
+            <i class="ph ph-git-branch" aria-hidden="true"></i>
+            <div>
+              <h3>Triage &amp; Assignment</h3>
+              <p>Clear exception paths, team assignment, and visible status context.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--third">
+            <i class="ph ph-calendar-check" aria-hidden="true"></i>
+            <div>
+              <h3>Appointment Scheduling</h3>
+              <p>Referral-linked scheduling with overlap and transition protection.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--third">
+            <i class="ph ph-note-pencil" aria-hidden="true"></i>
+            <div>
+              <h3>Clinical Notes</h3>
+              <p>Clinician-only notes with server-derived author identity.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--half">
+            <i class="ph ph-shield-check" aria-hidden="true"></i>
+            <div>
+              <h3>Role-Based Access</h3>
+              <p>Responsibilities stay distinct across clinical and coordination roles.</p>
+            </div>
+          </article>
+          <article class="landing-page__feature landing-page__feature--half">
+            <i class="ph ph-squares-four" aria-hidden="true"></i>
+            <div>
+              <h3>Operational Dashboard</h3>
+              <p>Role-aware queues surface upcoming work and referral attention states.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section id="workflow" class="landing-page__section landing-page__workflow-section">
+      <div class="landing-page__container">
+        <div class="landing-page__workflow-intro" data-landing-reveal>
+          <div class="landing-page__section-heading">
+            <p class="landing-page__eyebrow">Referral Workflow</p>
+            <h2>Every State Has a Clear Next Step</h2>
+          </div>
+          <p>
+            CareTrack makes referral progression visible, while the API remains authoritative over
+            which transitions are permitted for each role and current state.
+          </p>
+        </div>
+        <div class="landing-page__workflow-board" data-landing-reveal>
+          <ol class="landing-page__workflow-main" aria-label="Primary referral lifecycle">
+            <li><span>Draft</span></li>
+            <li><span>Submitted</span></li>
+            <li class="landing-page__workflow-focus"><span>Awaiting Triage</span></li>
+            <li><span>Accepted</span></li>
+            <li><span>Assigned</span></li>
+            <li><span>Scheduled</span></li>
+            <li><span>In Progress</span></li>
+            <li class="landing-page__workflow-complete"><span>Completed</span></li>
+          </ol>
+          <div
+            class="landing-page__workflow-exceptions"
+            aria-label="Referral triage exception paths"
+          >
+            <p>From Awaiting Triage</p>
+            <div>
+              <span><i class="ph ph-info" aria-hidden="true"></i>More Information Required</span>
+              <span><i class="ph ph-x-circle" aria-hidden="true"></i>Rejected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="landing-page__section landing-page__operations-section">
+      <div class="landing-page__container">
+        <div class="landing-page__operations-heading" data-landing-reveal>
+          <p class="landing-page__eyebrow">Connected Clinical Activity</p>
+          <h2>Plan the Appointment. Preserve the Referral Context.</h2>
+        </div>
+        <div class="landing-page__showcase-row" data-landing-reveal>
+          <figure class="landing-page__screen-frame">
+            <div class="landing-page__window-bar" aria-hidden="true">
+              <span></span><span></span><span></span><small>Appointments</small>
+            </div>
+            <div class="landing-page__screen-image-wrap">
+              <img
+                src="/product-demos/Appointments-Page.png"
+                alt="CareTrack appointment list demonstrating referral-linked scheduling and appointment status tracking."
+                width="1916"
+                height="987"
+                loading="lazy"
+              />
+            </div>
+          </figure>
+          <div class="landing-page__showcase-copy">
+            <i class="ph ph-calendar-dots" aria-hidden="true"></i>
+            <h3>Appointment Work Stays Explicit</h3>
+            <p>
+              Scheduling, check-in, start, and completion are separate operational actions. Starting
+              an appointment can move a scheduled referral into progress.
+            </p>
+            <ol aria-label="Appointment workflow">
+              <li>Referral</li>
+              <li>Schedule</li>
+              <li>Check In</li>
+              <li>Start</li>
+              <li>Complete</li>
+            </ol>
+            <strong>Appointment completion does not automatically complete the referral.</strong>
+          </div>
+        </div>
+        <div
+          class="landing-page__showcase-row landing-page__showcase-row--reverse"
+          data-landing-reveal
+        >
+          <figure class="landing-page__screen-frame">
+            <div class="landing-page__window-bar" aria-hidden="true">
+              <span></span><span></span><span></span><small>Referral detail</small>
+            </div>
+            <div class="landing-page__screen-image-wrap">
+              <img
+                src="/product-demos/Referrals-Details.png"
+                alt="CareTrack referral detail retaining patient, triage, assignment, and workflow context."
+                width="1911"
+                height="997"
+                loading="lazy"
+              />
+            </div>
+          </figure>
+          <div class="landing-page__showcase-copy">
+            <i class="ph ph-note-pencil" aria-hidden="true"></i>
+            <h3>Clinical Notes Keep Authorship Trustworthy</h3>
+            <p>
+              Clinical Notes are available to Clinicians only. Author identity is derived by the
+              server from the authenticated user rather than accepted from the browser.
+            </p>
+            <div class="landing-page__note-sequence" aria-label="Clinical completion relationship">
+              <span>Start</span><i class="ph ph-arrow-right" aria-hidden="true"></i>
+              <span>Clinical Notes</span><i class="ph ph-arrow-right" aria-hidden="true"></i>
+              <span>Complete Appointment</span><i class="ph ph-arrow-right" aria-hidden="true"></i>
+              <span>Complete Referral Explicitly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section
+      class="landing-page__section landing-page__roles-section"
+      aria-labelledby="roles-title"
+    >
+      <div class="landing-page__container">
+        <div class="landing-page__section-heading" data-landing-reveal>
+          <p class="landing-page__eyebrow">Role Boundaries</p>
+          <h2 id="roles-title">Access Shaped Around Responsibility</h2>
+          <p>
+            Roles define permitted work; Administrator does not create an automatic clinical bypass.
+          </p>
+        </div>
+        <div class="landing-page__roles" data-landing-reveal>
+          <article>
+            <div>
+              <i class="ph ph-stethoscope" aria-hidden="true"></i>
+              <h3>Clinician</h3>
+            </div>
+            <ul>
+              <li>Patient records</li>
+              <li>Referrals</li>
+              <li>Appointments</li>
+              <li>Clinical Notes</li>
+            </ul>
+          </article>
+          <article class="landing-page__role-card--featured">
+            <div>
+              <i class="ph ph-arrows-split" aria-hidden="true"></i>
+              <h3>Referral Coordinator</h3>
+            </div>
+            <ul>
+              <li>Patient registration</li>
+              <li>Referral workflow</li>
+              <li>Permitted assignment</li>
+              <li>Permitted scheduling</li>
+            </ul>
+          </article>
+          <article>
+            <div>
+              <i class="ph ph-gear-six" aria-hidden="true"></i>
+              <h3>Administrator</h3>
+            </div>
+            <ul>
+              <li>Safe workspace boundary</li>
+              <li>No implicit clinical access</li>
+              <li>No automatic role bypass</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section id="engineering" class="landing-page__section landing-page__engineering-section">
+      <div class="landing-page__container">
+        <div class="landing-page__engineering-intro" data-landing-reveal>
+          <p class="landing-page__eyebrow">Engineering</p>
+          <h2>A Portfolio Surface With a Real System Behind It</h2>
+          <p>
+            CareTrack separates domain behavior, application orchestration, infrastructure, and API
+            delivery while keeping the Angular client accessible and responsive.
+          </p>
+        </div>
+        <div class="landing-page__engineering-grid" data-landing-reveal>
+          <article>
+            <i class="ph ph-browser" aria-hidden="true"></i>
+            <h3>Frontend</h3>
+            <p>Angular 22 · TypeScript · Signals · Reactive Forms · Responsive semantic UI</p>
+          </article>
+          <article>
+            <i class="ph ph-database" aria-hidden="true"></i>
+            <h3>Backend</h3>
+            <p>ASP.NET Core · C# · EF Core · SQL Server</p>
+          </article>
+          <article>
+            <i class="ph ph-stack" aria-hidden="true"></i>
+            <h3>Architecture</h3>
+            <p>Domain · Application · Infrastructure · API · Dependency Injection</p>
+          </article>
+          <article>
+            <i class="ph ph-lock-key" aria-hidden="true"></i>
+            <h3>Security</h3>
+            <p>Microsoft Entra ID · OIDC/OAuth2 · App Roles · Policy-based Authorization</p>
+          </article>
+          <article>
+            <i class="ph ph-checks" aria-hidden="true"></i>
+            <h3>Quality</h3>
+            <p>xUnit · Integration Tests · Vitest · Accessibility · Responsive Verification</p>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="landing-page__final-section">
+      <div class="landing-page__final-orb" aria-hidden="true"></div>
+      <div class="landing-page__final-inner" data-landing-reveal>
+        <div>
+          <p class="landing-page__eyebrow">Explore the Workspace</p>
+          <h2>Ready to Explore CareTrack?</h2>
+          <p>
+            Open the clinical workflow workspace and explore role-based referral and appointment
+            management.
+          </p>
+        </div>
+        <a
+          class="landing-page__button landing-page__button--inverse landing-page__button--large"
+          [routerLink]="authCta.route"
+          data-auth-cta="final"
+        >
+          {{ authCta.prominentLabel }}<i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+  <footer class="landing-page__footer">
+    <div class="landing-page__footer-grid">
+      <div class="landing-page__footer-brand">
+        <a class="landing-page__brand landing-page__brand--footer" href="#top">
+          <img src="/brand/caretrack-symbol.svg" alt="" width="42" height="42" />
+          <span
+            ><strong>CareTrack</strong
+            ><small>Clinical Referral &amp; Workflow Management</small></span
+          >
+        </a>
+        <p>
+          A full-stack clinical operations portfolio project built around clear, role-aware
+          workflows.
+        </p>
+      </div>
+      <nav aria-label="Product links">
+        <h2>Product</h2>
+        <a href="#overview">Overview</a><a href="#features">Features</a>
+        <a href="#workflow">Workflow</a><a href="#engineering">Engineering</a>
+      </nav>
+      <nav aria-label="Application links">
+        <h2>Application</h2>
+        <a [routerLink]="authCta.route" data-auth-cta="footer">{{ authCta.label }}</a>
+        <a routerLink="/dashboard">CareTrack workspace</a>
+      </nav>
+      <nav aria-label="Project links">
+        <h2>Project</h2>
+        <a href="#engineering">Technology &amp; engineering</a>
+        <a href="#portfolio-disclaimer">Portfolio disclaimer</a>
+      </nav>
+    </div>
+    <div id="portfolio-disclaimer" class="landing-page__footer-bottom">
+      <span>© {{ currentYear }} CareTrack — Independent Portfolio Project</span>
+      <p>
+        Uses synthetic demonstration data. Not affiliated with, endorsed by, or certified by the NHS
+        or any healthcare provider.
+      </p>
+    </div>
+  </footer>
+</div>

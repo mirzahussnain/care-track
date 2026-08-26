@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 
 import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 
@@ -47,7 +47,6 @@ export class App {
           }
 
           this.activateAccount(result.account);
-          this.loadForAccount(result.account);
 
           if (this.navigatedRedirectAccountId !== result.account.homeAccountId) {
             this.navigatedRedirectAccountId = result.account.homeAccountId;
@@ -64,30 +63,16 @@ export class App {
 
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(() => {
-        let account = this.msalService.instance.getActiveAccount();
+      .subscribe(() => this.synchroniseUserForRoute(this.router.url));
 
-        if (!account) {
-          const accounts = this.msalService.instance.getAllAccounts();
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
 
-          if (accounts.length === 1) {
-            account = accounts[0];
-            this.activateAccount(account);
-          }
-        }
-
-        if (account) {
-          this.loadForAccount(account);
-          return;
-        }
-
-        if (this.lifecycleAccountId !== null) {
-          this.lifecycleAccountId = null;
-          this.authService.clearCurrentUser();
-        }
-      });
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((event) => this.synchroniseUserForRoute(event.urlAfterRedirects));
   }
-
   private activateAccount(account: AccountInfo): void {
     if (this.msalService.instance.getActiveAccount()?.homeAccountId === account.homeAccountId) {
       return;
@@ -103,5 +88,50 @@ export class App {
 
     this.lifecycleAccountId = account.homeAccountId;
     this.authService.loadCurrentUser();
+  }
+
+  private synchroniseUserForRoute(url: string): void {
+    if (!this.isWorkspaceRoute(url)) {
+      this.clearApplicationUser();
+      return;
+    }
+
+    const account = this.resolveAccount();
+
+    if (account) {
+      this.loadForAccount(account);
+      return;
+    }
+
+    this.clearApplicationUser();
+  }
+
+  private resolveAccount(): AccountInfo | null {
+    let account = this.msalService.instance.getActiveAccount();
+
+    if (!account) {
+      const accounts = this.msalService.instance.getAllAccounts();
+
+      if (accounts.length === 1) {
+        account = accounts[0];
+        this.activateAccount(account);
+      }
+    }
+
+    return account;
+  }
+
+  private isWorkspaceRoute(url: string): boolean {
+    const path = url.split(/[?#]/)[0];
+    return path !== '/' && path !== '/auth/sign-in' && path !== '/design-lab';
+  }
+
+  private clearApplicationUser(): void {
+    if (this.lifecycleAccountId === null) {
+      return;
+    }
+
+    this.lifecycleAccountId = null;
+    this.authService.clearCurrentUser();
   }
 }
