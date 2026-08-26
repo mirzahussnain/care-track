@@ -7,19 +7,11 @@ import {
   signal,
 } from '@angular/core';
 
-import {
-  takeUntilDestroyed,
-} from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import {
-  MsalBroadcastService,
-  MsalService,
-} from '@azure/msal-angular';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 
-import {
-  InteractionStatus,
-  RedirectRequest,
-} from '@azure/msal-browser';
+import { InteractionStatus, RedirectRequest } from '@azure/msal-browser';
 
 import { filter } from 'rxjs/operators';
 
@@ -30,44 +22,36 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-sign-in-page',
   standalone: true,
-  imports: [
-    Button,
-  ],
+  imports: [Button],
   templateUrl: './sign-in-page.html',
   styleUrl: './sign-in-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInPage {
-private readonly router=inject(Router);
-  private readonly msalService =
-    inject(MsalService);
+  private readonly router = inject(Router);
+  private readonly msalService = inject(MsalService);
 
-  private readonly msalBroadcastService =
-    inject(MsalBroadcastService);
+  private readonly msalBroadcastService = inject(MsalBroadcastService);
 
-  private readonly destroyRef =
-    inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly interactionInProgress =
-    signal(true);
+  readonly interactionInProgress = signal(true);
 
-  readonly canSignIn = computed(
-    () => !this.interactionInProgress()
-  );
+  readonly canSignIn = computed(() => !this.interactionInProgress());
 
   constructor() {
     this.msalBroadcastService.inProgress$
-      .pipe(
-        takeUntilDestroyed(this.destroyRef)
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((status) => {
-        const busy=status!==InteractionStatus.None;
+        const busy = status !== InteractionStatus.None;
         this.interactionInProgress.set(busy);
-        if(busy){ return;}
+        if (busy) {
+          return;
+        }
 
-        const account=this.msalService.instance.getActiveAccount();
-        if(account){
-            void this.router.navigate(['/dashboard'])
+        const account = this.msalService.instance.getActiveAccount();
+        if (account) {
+          void this.router.navigate(['/dashboard']);
         }
       });
   }
@@ -78,9 +62,7 @@ private readonly router=inject(Router);
     }
 
     const request: RedirectRequest = {
-      scopes: [
-        environment.auth.apiScope,
-      ],
+      scopes: [environment.auth.apiScope],
     };
 
     this.msalService.loginRedirect(request);

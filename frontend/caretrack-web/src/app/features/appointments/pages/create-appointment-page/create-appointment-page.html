@@ -1,6 +1,6 @@
 <div class="create-appointment-page">
   <ct-page-header
-    title="Schedule appointment"
+    title="Schedule Appointment"
     description="Schedule care against a verified referral and patient record. All appointment times use UTC."
   />
 
@@ -54,14 +54,12 @@
       <section class="create-appointment-page__success" aria-labelledby="appointment-created-title">
         <i class="ph ph-check-circle" aria-hidden="true"></i>
         <div>
-          <h2 id="appointment-created-title">Appointment scheduled</h2>
+          <h2 id="appointment-created-title">Appointment Scheduled</h2>
           <p>
             {{ appointment.appointmentReference }} is scheduled for
             {{ utc(appointment.scheduledStart) }}.
           </p>
-          <p>
-            Appointment detail and clinical workflow access require the Clinician role.
-          </p>
+          <p>Appointment detail and clinical workflow access require the Clinician role.</p>
           <a [routerLink]="['/referrals', appointment.referralId]">Return to referral</a>
         </div>
       </section>
@@ -122,7 +120,11 @@
               [required]="true"
               [error]="dateError(form.controls.scheduledStart, 'Scheduled start')"
             >
-              <input id="appointment-start" type="datetime-local" formControlName="scheduledStart" />
+              <input
+                id="appointment-start"
+                type="datetime-local"
+                formControlName="scheduledStart"
+              />
             </ct-form-field>
 
             <ct-form-field
@@ -130,7 +132,8 @@
               forId="appointment-end"
               [required]="true"
               [error]="
-                form.hasError('appointmentRange') && (form.controls.scheduledEnd.touched || submitted())
+                form.hasError('appointmentRange') &&
+                (form.controls.scheduledEnd.touched || submitted())
                   ? 'Scheduled end must be after scheduled start.'
                   : dateError(form.controls.scheduledEnd, 'Scheduled end')
               "
@@ -151,7 +154,12 @@
             hint="Maximum 200 characters."
             [error]="textError(form.controls.location, 'Location', 200)"
           >
-            <input id="appointment-location" type="text" maxlength="200" formControlName="location" />
+            <input
+              id="appointment-location"
+              type="text"
+              maxlength="200"
+              formControlName="location"
+            />
           </ct-form-field>
         </fieldset>
 

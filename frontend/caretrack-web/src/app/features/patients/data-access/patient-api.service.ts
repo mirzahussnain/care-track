@@ -40,9 +40,7 @@ export class PatientApiService {
   searchReferralPatients(
     query: ReferralPatientSearchQuery,
   ): Observable<PagedResult<ReferralPatientSummary>> {
-    let params = new HttpParams()
-      .set('page', query.page)
-      .set('pageSize', query.pageSize);
+    let params = new HttpParams().set('page', query.page).set('pageSize', query.pageSize);
 
     const search = query.search?.trim();
     if (search) {
@@ -56,9 +54,7 @@ export class PatientApiService {
   }
 
   getReferralPatientSummary(id: string): Observable<ReferralPatientSummary> {
-    return this.http.get<ReferralPatientSummary>(
-      `${this.patientsUrl}/${id}/referral-summary`,
-    );
+    return this.http.get<ReferralPatientSummary>(`${this.patientsUrl}/${id}/referral-summary`);
   }
 
   createPatient(request: CreatePatientRequest): Observable<Patient> {

@@ -1,7 +1,4 @@
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppTopbar } from './app-topbar';
 
@@ -15,14 +12,10 @@ describe('AppTopbar', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppTopbar);
-
-    fixture.componentRef.setInput(
-      'areaLabel',
-      'Dashboard'
-    );
-
+    fixture.componentRef.setInput('areaLabel', 'Dashboard');
+    fixture.componentRef.setInput('accountName', 'Amina Khan');
+    fixture.componentRef.setInput('accountRoleLabel', 'Clinician');
     component = fixture.componentInstance;
-
     fixture.detectChanges();
   });
 
@@ -31,27 +24,34 @@ describe('AppTopbar', () => {
   });
 
   it('renders the current area label', () => {
-    const element =
-      fixture.nativeElement as HTMLElement;
-
-    expect(element.textContent).toContain(
-      'Dashboard'
-    );
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Dashboard');
   });
 
   it('emits a mobile menu request', () => {
-  const emitSpy = vi.spyOn(
-    component.mobileMenuOpen,
-    'emit'
-  );
+    const emitSpy = vi.spyOn(component.mobileMenuOpen, 'emit');
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    button.click();
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
 
-  const button =
-    fixture.nativeElement.querySelector(
-      'button'
-    ) as HTMLButtonElement;
+  it('keeps route context compact without a repeated workspace subtitle', () => {
+    const element = fixture.nativeElement as HTMLElement;
 
-  button.click();
+    expect(element.textContent).toContain('Dashboard');
+    expect(element.textContent).not.toContain('CareTrack Workspace');
+    expect(element.querySelector('.app-topbar__context')?.textContent).toContain('Dashboard');
+  });
 
-  expect(emitSpy).toHaveBeenCalledOnce();
-});
+  it('renders account context and emits Sign Out', () => {
+    const emitSpy = vi.spyOn(component.signOut, 'emit');
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.textContent).toContain('Amina Khan');
+    expect(element.textContent).toContain('Clinician');
+
+    element.querySelector<HTMLButtonElement>('[data-testid="topbar-sign-out"]')?.click();
+
+    expect(emitSpy).toHaveBeenCalledOnce();
+  });
 });

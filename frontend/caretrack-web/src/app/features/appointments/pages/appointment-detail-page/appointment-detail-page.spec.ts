@@ -10,7 +10,11 @@ import { ClinicalNoteApiService } from '../../../clinical-notes/data-access/clin
 import { ClinicalNote } from '../../../clinical-notes/models/clinical-note.models';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
-import { REFERRAL_PRIORITIES, REFERRAL_STATUSES, Referral } from '../../../referrals/models/referral.models';
+import {
+  REFERRAL_PRIORITIES,
+  REFERRAL_STATUSES,
+  Referral,
+} from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import {
   APPOINTMENT_STATUSES,
@@ -23,7 +27,10 @@ describe('AppointmentDetailPage', () => {
   let fixture: ComponentFixture<AppointmentDetailPage>;
   const roles = signal<readonly CareTrackRole[]>([CARETRACK_ROLES.clinician]);
   const currentUser = signal({
-    id: 'user-001', name: 'Dr Amina Khan', username: 'amina@example.test', roles: ['Clinician'],
+    id: 'user-001',
+    name: 'Dr Amina Khan',
+    username: 'amina@example.test',
+    roles: ['Clinician'],
   });
   const appointmentId = '33333333-3333-3333-3333-333333333333';
   const patientId = '11111111-1111-1111-1111-111111111111';
@@ -96,11 +103,17 @@ describe('AppointmentDetailPage', () => {
       getNotesForAppointment,
       createClinicalNote,
       updateClinicalNote,
-    ]) mock.mockReset();
+    ])
+      mock.mockReset();
 
     getAppointment.mockReturnValue(of(appointment));
     getReferralPatientSummary.mockReturnValue(
-      of({ id: patientId, patientReference: 'PAT-001', fullName: 'Amina Khan', dateOfBirth: '1988-04-12' }),
+      of({
+        id: patientId,
+        patientReference: 'PAT-001',
+        fullName: 'Amina Khan',
+        dateOfBirth: '1988-04-12',
+      }),
     );
     getReferral.mockReturnValue(of(referral));
     getNotesForAppointment.mockReturnValue(of([note]));
@@ -109,7 +122,10 @@ describe('AppointmentDetailPage', () => {
       imports: [AppointmentDetailPage],
       providers: [
         provideRouter([]),
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: appointmentId }) } } },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: convertToParamMap({ id: appointmentId }) } },
+        },
         {
           provide: AppointmentApiService,
           useValue: {
@@ -179,7 +195,11 @@ describe('AppointmentDetailPage', () => {
   });
 
   it('uses the exact workflow service and refreshes referral state after Start', () => {
-    const started = { ...appointment, status: APPOINTMENT_STATUSES.inProgress, startedAt: '2026-09-01T09:05:00Z' };
+    const started = {
+      ...appointment,
+      status: APPOINTMENT_STATUSES.inProgress,
+      startedAt: '2026-09-01T09:05:00Z',
+    };
     startAppointment.mockReturnValue(of(started));
     getReferral.mockReturnValue(of({ ...referral, status: REFERRAL_STATUSES.inProgress }));
 
@@ -213,7 +233,9 @@ describe('AppointmentDetailPage', () => {
   it('updates note state from create and edit responses without submitting CreatedBy', () => {
     const created = { ...note, id: '55555555-5555-5555-5555-555555555555', content: 'New note.' };
     createClinicalNote.mockReturnValue(of(created));
-    updateClinicalNote.mockReturnValue(of({ ...note, content: 'Updated note.', updatedAt: '2026-08-25T12:00:00Z' }));
+    updateClinicalNote.mockReturnValue(
+      of({ ...note, content: 'Updated note.', updatedAt: '2026-08-25T12:00:00Z' }),
+    );
 
     fixture.componentInstance.createNote('New note.');
     expect(createClinicalNote).toHaveBeenCalledWith(appointmentId, { content: 'New note.' });
@@ -221,7 +243,9 @@ describe('AppointmentDetailPage', () => {
 
     fixture.componentInstance.updateNote({ id: note.id, content: 'Updated note.' });
     expect(updateClinicalNote).toHaveBeenCalledWith(note.id, { content: 'Updated note.' });
-    expect(fixture.componentInstance.notes().find((item) => item.id === note.id)?.content).toBe('Updated note.');
+    expect(fixture.componentInstance.notes().find((item) => item.id === note.id)?.content).toBe(
+      'Updated note.',
+    );
   });
 
   it('hides workflow actions and Clinical Notes without an Administrator bypass', () => {
@@ -233,13 +257,44 @@ describe('AppointmentDetailPage', () => {
   });
 
   it('keeps the Appointment visible when related identity or notes fail', () => {
-    getReferralPatientSummary.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
-    getNotesForAppointment.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+    getReferralPatientSummary.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 })),
+    );
+    getNotesForAppointment.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 })),
+    );
     fixture.componentInstance.loadAppointment();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('APT-001');
-    expect(fixture.nativeElement.textContent).toContain('Patient and referral context is unavailable');
-    expect(fixture.nativeElement.textContent).toContain('Clinical Notes could not be loaded');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Patient and referral context is unavailable',
+    );
+    expect(fixture.nativeElement.textContent).toContain('Clinical notes could not be loaded');
+  });
+
+  it('maps appointment workflow decisions to their required semantic variants', () => {
+    fixture.componentInstance.appointment.set({
+      ...appointment,
+      status: APPOINTMENT_STATUSES.scheduled,
+    });
+    fixture.detectChanges();
+
+    const buttonFor = (label: string): HTMLButtonElement =>
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement;
+
+    expect(buttonFor('Check in').classList).toContain('ct-button--primary');
+    expect(buttonFor('Mark as did not attend').classList).toContain('ct-button--warning');
+    expect(buttonFor('Cancel appointment').classList).toContain('ct-button--danger');
+
+    fixture.componentInstance.appointment.set({
+      ...appointment,
+      status: APPOINTMENT_STATUSES.inProgress,
+    });
+    fixture.detectChanges();
+
+    expect(buttonFor('Complete appointment').classList).toContain('ct-button--success');
   });
 });

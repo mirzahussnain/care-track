@@ -1,13 +1,15 @@
 <section class="patient-selector" aria-labelledby="patient-selector-title">
   <div class="patient-selector__heading">
     <div>
-      <h2 id="patient-selector-title">Patient identity</h2>
+      <h2 id="patient-selector-title">Patient Identity</h2>
       <p>Search by patient name or reference, then confirm the correct record.</p>
     </div>
     @if (selectedPatient(); as patient) {
       <div class="patient-selector__selected" role="status">
         <i class="ph ph-check-circle" aria-hidden="true"></i>
-        <span><strong>{{ patient.fullName }}</strong> · {{ patient.patientReference }}</span>
+        <span
+          ><strong>{{ patient.fullName }}</strong> · {{ patient.patientReference }}</span
+        >
       </div>
     }
   </div>
@@ -18,6 +20,7 @@
         <input
           id="referral-patient-search"
           type="search"
+          class="ct-standalone-control"
           formControlName="search"
           placeholder="Name or patient reference"
           autocomplete="off"

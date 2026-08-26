@@ -6,7 +6,11 @@ import { Subject, of, throwError } from 'rxjs';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
-import { REFERRAL_PRIORITIES, REFERRAL_STATUSES, Referral } from '../../../referrals/models/referral.models';
+import {
+  REFERRAL_PRIORITIES,
+  REFERRAL_STATUSES,
+  Referral,
+} from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import {
   APPOINTMENT_STATUSES,
@@ -55,7 +59,12 @@ describe('AppointmentsPage', () => {
     response$ = new Subject<PagedResult<AppointmentSearchItem>>();
     searchAppointments.mockReset().mockReturnValue(response$);
     getReferralPatientSummary.mockReset().mockReturnValue(
-      of({ id: patientId, patientReference: 'PAT-001', fullName: 'Amina Khan', dateOfBirth: '1988-04-12' }),
+      of({
+        id: patientId,
+        patientReference: 'PAT-001',
+        fullName: 'Amina Khan',
+        dateOfBirth: '1988-04-12',
+      }),
     );
     getReferral.mockReset().mockReturnValue(of(referral));
 
@@ -85,7 +94,9 @@ describe('AppointmentsPage', () => {
       sortBy: 'scheduledStart',
       sortDirection: 'asc',
     });
-    expect(fixture.nativeElement.querySelector('[aria-label="Loading appointments"]')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Loading appointments"]'),
+    ).not.toBeNull();
   });
 
   it('deduplicates identity enrichment and renders human-readable context', () => {
@@ -109,9 +120,15 @@ describe('AppointmentsPage', () => {
   });
 
   it('degrades failed enrichment to Unavailable without failing results', () => {
-    searchAppointments.mockReturnValue(of({
-      items: [appointment], page: 1, pageSize: 20, totalCount: 1, totalPages: 1,
-    }));
+    searchAppointments.mockReturnValue(
+      of({
+        items: [appointment],
+        page: 1,
+        pageSize: 20,
+        totalCount: 1,
+        totalPages: 1,
+      }),
+    );
     getReferralPatientSummary.mockReturnValue(throwError(() => new Error('lookup failed')));
     getReferral.mockReturnValue(throwError(() => new Error('lookup failed')));
 
@@ -123,7 +140,9 @@ describe('AppointmentsPage', () => {
   });
 
   it('converts filter values through the UTC convention and preserves numeric zero enums', () => {
-    searchAppointments.mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 }));
+    searchAppointments.mockReturnValue(
+      of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 }),
+    );
     fixture.componentInstance.filters.patchValue({
       status: APPOINTMENT_STATUSES.scheduled,
       appointmentType: APPOINTMENT_TYPES.consultation,
@@ -158,7 +177,9 @@ describe('AppointmentsPage', () => {
     expect(searchAppointments).toHaveBeenCalledOnce();
     expect(fixture.componentInstance.error()).toBe('validation');
 
-    searchAppointments.mockReturnValueOnce(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 }));
+    searchAppointments.mockReturnValueOnce(
+      of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 }),
+    );
     fixture.componentInstance.filters.patchValue({
       scheduledFrom: '2026-09-01T09:00',
       scheduledTo: '2026-09-01T10:00',
@@ -167,10 +188,31 @@ describe('AppointmentsPage', () => {
     expect(response$.observed).toBe(false);
   });
 
+  it('toggles the mobile appointment filters from the filter button', () => {
+    fixture.detectChanges();
+    const toggle = fixture.nativeElement.querySelector(
+      '.appointments-page__filter-toggle',
+    ) as HTMLButtonElement;
+    const filters = fixture.nativeElement.querySelector(
+      '.appointments-page__filters',
+    ) as HTMLElement;
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(filters.classList.contains('appointments-page__filters--expanded')).toBe(false);
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(filters.classList.contains('appointments-page__filters--expanded')).toBe(true);
+  });
+
   it('shows a capability state for 403 and a retry for generic failures', () => {
     response$.error(new HttpErrorResponse({ status: 403 }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Appointments are not available for your role');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Appointments are not available for your role',
+    );
 
     searchAppointments.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
     fixture.componentInstance.retry();

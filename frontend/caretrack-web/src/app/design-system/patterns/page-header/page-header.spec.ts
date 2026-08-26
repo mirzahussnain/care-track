@@ -22,8 +22,9 @@ describe('PageHeader', () => {
     expect(fixture.nativeElement.querySelector('.ct-page-header__description')).toBeNull();
     fixture.componentRef.setInput('description', 'Review and coordinate current work.');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.ct-page-header__description')?.textContent)
-      .toContain('Review and coordinate current work.');
+    expect(
+      fixture.nativeElement.querySelector('.ct-page-header__description')?.textContent,
+    ).toContain('Review and coordinate current work.');
   });
 });
 

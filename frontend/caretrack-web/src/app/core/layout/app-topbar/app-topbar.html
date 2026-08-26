@@ -1,53 +1,35 @@
 <header
-  class="
-    flex min-h-16 items-center gap-3
-    border-b border-ct-border
-    bg-ct-surface
-    px-4
-    md:px-6
-    lg:px-8
-  "
+  class="flex min-h-16 items-center gap-3 border-b border-ct-border bg-ct-surface px-4 md:px-6 lg:px-8"
 >
   <button
     type="button"
-    class="
-      grid size-11 shrink-0 place-items-center
-      rounded-ct-md
-      text-ct-text-secondary
-      transition-colors
-      duration-150
-      ease-ct-standard
-      hover:bg-ct-surface-muted
-      hover:text-ct-text
-      md:hidden
-    "
+    class="grid size-11 shrink-0 place-items-center rounded-ct-md text-ct-text-secondary transition-colors duration-150 ease-ct-standard hover:bg-ct-surface-muted hover:text-ct-text md:hidden"
     aria-label="Open navigation"
     (click)="mobileMenuOpen.emit()"
   >
-    <i
-      class="ph ph-list text-xl"
-      aria-hidden="true"
-    ></i>
+    <i class="ph ph-list text-xl" aria-hidden="true"></i>
   </button>
 
-  <div class="min-w-0">
-    <span
-      class="
-        block truncate
-        text-sm font-semibold
-        text-ct-text
-      "
-    >
-      {{ areaLabel() }}
-    </span>
+  <span
+    class="app-topbar__context min-w-0 flex-1 truncate text-sm font-semibold text-ct-primary-strong"
+  >
+    {{ areaLabel() }}
+  </span>
 
-    <span
-      class="
-        block truncate
-        text-xs text-ct-text-muted
-      "
+  <div class="hidden min-w-0 items-center gap-3 md:flex">
+    <div class="min-w-0 max-w-56 text-right leading-tight">
+      <strong class="block truncate text-sm font-semibold text-ct-text">{{ accountName() }}</strong>
+      <span class="block truncate text-xs text-ct-text-muted">{{ accountRoleLabel() }}</span>
+    </div>
+
+    <button
+      type="button"
+      data-testid="topbar-sign-out"
+      class="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-ct-md border border-ct-border px-3 text-sm font-semibold text-ct-text-secondary transition-colors duration-150 ease-ct-standard hover:border-ct-border-strong hover:bg-ct-surface-muted hover:text-ct-text"
+      (click)="signOut.emit()"
     >
-      CareTrack Workspace
-    </span>
+      <i class="ph ph-sign-out" aria-hidden="true"></i>
+      Sign Out
+    </button>
   </div>
 </header>

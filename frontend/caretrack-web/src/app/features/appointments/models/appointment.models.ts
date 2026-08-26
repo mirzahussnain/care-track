@@ -9,8 +9,7 @@ export const APPOINTMENT_STATUSES = {
   didNotAttend: 5,
 } as const;
 
-export type AppointmentStatus =
-  (typeof APPOINTMENT_STATUSES)[keyof typeof APPOINTMENT_STATUSES];
+export type AppointmentStatus = (typeof APPOINTMENT_STATUSES)[keyof typeof APPOINTMENT_STATUSES];
 
 export const APPOINTMENT_TYPES = {
   consultation: 0,
@@ -19,15 +18,10 @@ export const APPOINTMENT_TYPES = {
   procedure: 3,
 } as const;
 
-export type AppointmentType =
-  (typeof APPOINTMENT_TYPES)[keyof typeof APPOINTMENT_TYPES];
+export type AppointmentType = (typeof APPOINTMENT_TYPES)[keyof typeof APPOINTMENT_TYPES];
 
 export type AppointmentSortField =
-  | 'scheduledStart'
-  | 'scheduledEnd'
-  | 'createdAt'
-  | 'appointmentReference'
-  | 'status';
+  'scheduledStart' | 'scheduledEnd' | 'createdAt' | 'appointmentReference' | 'status';
 
 export type SortDirection = 'asc' | 'desc';
 

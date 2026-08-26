@@ -38,3 +38,19 @@
 .skip-link:focus {
   transform: translateY(0);
 }
+.app-shell__mobile-brand-mark {
+  display: grid;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  place-items: center;
+  padding: 0.25rem;
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+}
+
+.app-shell__mobile-brand-mark img {
+  display: block;
+  width: 1.75rem;
+  height: auto;
+}

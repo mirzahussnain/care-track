@@ -1,8 +1,8 @@
 @import './styles/_reset.css';
 
 @import 'tailwindcss';
-@import "@phosphor-icons/web/regular";
-@import "@phosphor-icons/web/bold";
+@import '@phosphor-icons/web/regular';
+@import '@phosphor-icons/web/bold';
 
 :root {
   color-scheme: light;
@@ -175,6 +175,199 @@ textarea {
   outline-offset: 2px;
 }
 
+/* Opt-in form controls: projected controls in ct-form-field and explicit standalone search fields. */
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > select,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+) {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ct-border-strong);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface-subtle);
+  color: var(--ct-text);
+  transition:
+    border-color var(--ct-duration-fast) var(--ct-ease-standard),
+    background var(--ct-duration-fast) var(--ct-ease-standard),
+    box-shadow var(--ct-duration-fast) var(--ct-ease-standard);
+}
+
+:is(.ct-form-field__control.ct-form-field__control > textarea) {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+:is(
+    .ct-form-field__control.ct-form-field__control > input,
+    .ct-form-field__control.ct-form-field__control > select,
+    .ct-form-field__control.ct-form-field__control > textarea,
+    .ct-standalone-control.ct-standalone-control
+  ):hover:not(:disabled) {
+  border-color: var(--ct-primary);
+}
+
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > select,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+):focus-visible {
+  border-color: var(--ct-focus);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ct-focus) 22%, transparent);
+}
+
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > select,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+)[aria-invalid='true'] {
+  border-color: var(--ct-danger);
+  background: var(--ct-danger-soft);
+}
+
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > select,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+):disabled {
+  border-color: var(--ct-border);
+  background: var(--ct-surface-muted);
+  color: var(--ct-text-secondary);
+  cursor: not-allowed;
+}
+
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+)::placeholder {
+  color: var(--ct-text-muted);
+  opacity: 1;
+}
+
+/* Opt-in responsive data table shared by the three operational list pages. */
+.ct-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ct-data-table th,
+.ct-data-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--ct-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ct-data-table th {
+  background: var(--ct-surface-subtle);
+  color: var(--ct-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.ct-data-table td {
+  color: var(--ct-text-secondary);
+}
+
+.ct-data-table tbody tr {
+  transition: background var(--ct-duration-fast) var(--ct-ease-standard);
+}
+
+.ct-data-table tbody tr:hover,
+.ct-data-table tbody tr:focus-within {
+  background: var(--ct-primary-soft);
+}
+
+.ct-data-table td strong {
+  color: var(--ct-text);
+  font-weight: 650;
+}
+
+.ct-data-table td:last-child {
+  text-align: right;
+}
+
+.ct-data-table td a {
+  color: var(--ct-primary-strong);
+  font-weight: 650;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 767px) {
+  .ct-data-table.ct-data-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .ct-data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .ct-data-table tbody {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .ct-data-table tr {
+    display: grid;
+    min-width: 0;
+    gap: 0.55rem;
+    padding: 0.875rem;
+    border: 1px solid var(--ct-border);
+    border-radius: var(--ct-radius-lg);
+    background: var(--ct-surface);
+  }
+
+  .ct-data-table.ct-data-table td,
+  .ct-data-table.ct-data-table td:last-child {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0;
+    border: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .ct-data-table.ct-data-table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--ct-text-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+    text-align: left;
+  }
+
+  .ct-data-table.ct-data-table td:last-child {
+    justify-content: flex-end;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--ct-border);
+  }
+
+  .ct-data-table.ct-data-table td:last-child::before {
+    content: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
     scroll-behavior: auto;
@@ -188,5 +381,273 @@ textarea {
     scroll-behavior: auto !important;
     transition-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+ct-surface.ct-workflow-surface > .ct-surface {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  border-color: color-mix(in srgb, var(--ct-primary) 22%, var(--ct-border));
+  background: color-mix(in srgb, var(--ct-primary-soft) 42%, var(--ct-surface));
+}
+
+ct-surface.ct-workflow-surface > .ct-surface > h2,
+ct-surface.ct-workflow-surface > .ct-surface > p,
+ct-surface.ct-workflow-surface > .ct-surface > form,
+ct-surface.ct-workflow-surface > .ct-surface > div {
+  flex-basis: 100%;
+}
+
+ct-surface.ct-workflow-surface form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.875rem;
+}
+
+ct-surface.ct-workflow-surface form > h3,
+ct-surface.ct-workflow-surface form > ct-form-field:has(textarea) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 767px) {
+  ct-surface.ct-workflow-surface > .ct-surface,
+  ct-surface.ct-workflow-surface form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  ct-surface.ct-workflow-surface ct-button,
+  ct-surface.ct-workflow-surface .referral-detail-page__schedule-link {
+    width: 100%;
+  }
+}
+.dashboard-page__welcome {
+  display: flex;
+  min-width: 0;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border: 1px solid color-mix(in srgb, var(--ct-primary) 24%, var(--ct-border));
+  border-radius: var(--ct-radius-xl);
+  background: var(--ct-primary-soft);
+}
+
+.dashboard-page__welcome-copy {
+  min-width: 0;
+}
+
+.dashboard-page__welcome-copy p {
+  margin: 0 0 0.35rem;
+  color: var(--ct-primary-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.dashboard-page__welcome-copy h1 {
+  margin: 0;
+  color: var(--ct-primary-strong);
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 680;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-page__welcome-copy span {
+  display: block;
+  max-width: 42rem;
+  margin-top: 0.45rem;
+  color: var(--ct-text-secondary);
+  font-size: 0.9rem;
+}
+
+.dashboard-page__welcome-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+.referral-detail-page__decision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+@media (max-width: 767px) {
+  .dashboard-page__welcome {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dashboard-page__welcome-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 479px) {
+  .dashboard-page__welcome-actions,
+  .dashboard-page__welcome-actions ct-button,
+  .dashboard-page__welcome-actions .dashboard-page__quick-actions {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .patients-page .ct-data-table td[data-label='Reference'] {
+    order: 1;
+  }
+  .patients-page .ct-data-table td[data-label='Patient'] {
+    order: 2;
+  }
+  .patients-page .ct-data-table td[data-label='Date of birth'] {
+    order: 3;
+  }
+  .patients-page .ct-data-table td[data-label='Actions'] {
+    order: 4;
+  }
+
+  .referrals-page .ct-data-table td[data-label='Reference'] {
+    order: 1;
+  }
+  .referrals-page .ct-data-table td[data-label='Status'] {
+    order: 2;
+  }
+  .referrals-page .ct-data-table td[data-label='Priority'] {
+    order: 3;
+  }
+  .referrals-page .ct-data-table td[data-label='Assigned team'] {
+    order: 4;
+  }
+  .referrals-page .ct-data-table td[data-label='Created'] {
+    order: 5;
+  }
+  .referrals-page .ct-data-table td[data-label='Actions'] {
+    order: 6;
+  }
+
+  .appointments-page .ct-data-table td[data-label='Reference'] {
+    order: 1;
+  }
+  .appointments-page .ct-data-table td[data-label='Scheduled (UTC)'] {
+    order: 2;
+  }
+  .appointments-page .ct-data-table td[data-label='Status'] {
+    order: 3;
+  }
+  .appointments-page .ct-data-table td[data-label='Type and location'] {
+    order: 4;
+  }
+  .appointments-page .ct-data-table td[data-label='Patient'] {
+    order: 5;
+  }
+  .appointments-page .ct-data-table td[data-label='Referral'] {
+    order: 6;
+  }
+  .appointments-page .ct-data-table td[data-label='Actions'] {
+    order: 7;
+  }
+
+  ct-surface.ct-workflow-surface ct-button > .ct-button {
+    width: 100%;
+  }
+}
+/* Intrinsic sizing guards for narrow operational layouts. */
+ct-surface,
+ct-data-toolbar,
+ct-form-field,
+.ct-data-toolbar__primary,
+.ct-data-toolbar__actions,
+.ct-workflow-surface,
+.ct-workflow-surface > .ct-surface,
+.ct-workflow-surface > .ct-surface > * {
+  min-width: 0;
+}
+
+:is(
+  .ct-form-field__control.ct-form-field__control > input,
+  .ct-form-field__control.ct-form-field__control > select,
+  .ct-form-field__control.ct-form-field__control > textarea,
+  .ct-standalone-control.ct-standalone-control
+) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.referral-detail-page,
+.appointment-detail-page,
+.clinical-notes {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .referrals-page__table-wrap,
+  .appointments-page__table-wrap {
+    min-width: 0;
+    overflow-x: visible;
+  }
+
+  .referrals-page table.ct-data-table,
+  .appointments-page table.ct-data-table {
+    min-width: 0;
+  }
+
+  .ct-data-toolbar__primary,
+  .ct-data-toolbar__actions,
+  .ct-data-toolbar__primary > *,
+  .ct-data-toolbar__actions > * {
+    width: 100%;
+  }
+
+  .referral-detail-page__decision-actions,
+  .appointment-detail-page__confirmation > div,
+  .clinical-notes__form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .referral-detail-page__decision-actions ct-button,
+  .appointment-detail-page__confirmation ct-button,
+  .clinical-notes__form-actions ct-button,
+  .referral-detail-page__decision-actions ct-button > .ct-button,
+  .appointment-detail-page__confirmation ct-button > .ct-button,
+  .clinical-notes__form-actions ct-button > .ct-button {
+    width: 100%;
+  }
+
+  .referral-detail-page__decision-actions ct-button > .ct-button,
+  .appointment-detail-page__confirmation ct-button > .ct-button,
+  .clinical-notes__form-actions ct-button > .ct-button {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 479px) {
+  .referrals-page__filter-actions,
+  .appointments-page__filter-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .referrals-page__filter-actions ct-button,
+  .appointments-page__filter-actions ct-button,
+  .referrals-page__filter-actions ct-button > .ct-button,
+  .appointments-page__filter-actions ct-button > .ct-button {
+    width: 100%;
+  }
+
+  .ct-pagination,
+  .ct-pagination__controls {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ct-pagination__controls {
+    justify-content: space-between;
   }
 }

@@ -1,17 +1,46 @@
 <div class="dashboard-page">
-  <ct-page-header title="Dashboard" [description]="dashboardDescription()">
+  <section class="dashboard-page__welcome" aria-labelledby="dashboard-welcome-title">
+    <div class="dashboard-page__welcome-copy">
+      <p>{{ audienceRoleLabel() }}</p>
+      <h1 id="dashboard-welcome-title">{{ welcomeTitle() }}</h1>
+      <span>{{ dashboardDescription() }}</span>
+    </div>
+
     @if (operationalAudience()) {
-      <ct-button
-        variant="secondary"
-        [loading]="batchLoading()"
-        [disabled]="batchLoading()"
-        (click)="refresh()"
-      >
-        <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
-        Refresh dashboard
-      </ct-button>
+      <div class="dashboard-page__welcome-actions">
+        <nav class="dashboard-page__quick-actions" aria-label="Dashboard quick actions">
+          <a *ctHasRole="[roles.clinician, roles.referralCoordinator]" routerLink="/patients/new">
+            <i class="ph ph-user-plus" aria-hidden="true"></i>
+            Register patient
+          </a>
+          <a *ctHasRole="[roles.clinician, roles.referralCoordinator]" routerLink="/referrals/new">
+            <i class="ph ph-plus" aria-hidden="true"></i>
+            Create referral
+          </a>
+          @if (audience() === 'clinician') {
+            <a *ctHasRole="clinicianRole" routerLink="/appointments">
+              <i class="ph ph-calendar-dots" aria-hidden="true"></i>
+              View appointments
+            </a>
+          } @else {
+            <a *ctHasRole="coordinatorRole" routerLink="/referrals">
+              <i class="ph ph-files" aria-hidden="true"></i>
+              View referrals
+            </a>
+          }
+        </nav>
+        <ct-button
+          variant="secondary"
+          [loading]="batchLoading()"
+          [disabled]="batchLoading()"
+          (click)="refresh()"
+        >
+          <i class="ph ph-arrows-clockwise" aria-hidden="true"></i>
+          Refresh dashboard
+        </ct-button>
+      </div>
     }
-  </ct-page-header>
+  </section>
   @switch (audience()) {
     @case ('loading') {
       <section aria-labelledby="dashboard-loading-title">
@@ -40,7 +69,7 @@
     @case ('administrator') {
       <ct-surface padding="lg">
         <ct-empty-state
-          title="Administrator workspace"
+          title="Administrator Workspace"
           description="Clinical workload is not available to the Administrator role. Administrative tools are not yet part of this workspace."
           icon="ph-shield-check"
         />
@@ -59,7 +88,7 @@
       <section class="dashboard-page__section" aria-labelledby="operational-summary-title">
         <div class="dashboard-page__section-heading">
           <div>
-            <h2 id="operational-summary-title">Operational summary</h2>
+            <h2 id="operational-summary-title">Operational Summary</h2>
             <p>Current workload from server-filtered CareTrack queues.</p>
           </div>
         </div>
@@ -90,7 +119,7 @@
                 aria-hidden="true"
               ></i>
               <div>
-                <p>Awaiting triage</p>
+                <p>Awaiting Triage</p>
                 @if (awaitingTriage().status === 'loading') {
                   <ct-skeleton />
                 } @else if (awaitingTriage().status === 'ready') {
@@ -109,7 +138,7 @@
                 aria-hidden="true"
               ></i>
               <div>
-                <p>More information required</p>
+                <p>More Information Required</p>
                 @if (moreInformation().status === 'loading') {
                   <ct-skeleton />
                 } @else if (moreInformation().status === 'ready') {
@@ -200,7 +229,7 @@
       <section class="dashboard-page__section" aria-labelledby="referral-attention-title">
         <div class="dashboard-page__section-heading">
           <div>
-            <h2 id="referral-attention-title">Referral attention</h2>
+            <h2 id="referral-attention-title">Referral Attention</h2>
             <p>Up to five referrals from each active attention queue, ordered by priority.</p>
           </div>
           <a routerLink="/referrals">View all referrals</a>
@@ -220,7 +249,7 @@
               <article class="dashboard-page__queue" aria-labelledby="awaiting-triage-title">
                 <header>
                   <div>
-                    <h3 id="awaiting-triage-title">Awaiting triage</h3>
+                    <h3 id="awaiting-triage-title">Awaiting Triage</h3>
                     <p>Submitted referrals ready for triage review.</p>
                   </div>
                   @if (awaitingTriage().status === 'ready') {
@@ -281,7 +310,7 @@
               <article class="dashboard-page__queue" aria-labelledby="more-information-title">
                 <header>
                   <div>
-                    <h3 id="more-information-title">More information required</h3>
+                    <h3 id="more-information-title">More Information Required</h3>
                     <p>Referrals waiting for additional information.</p>
                   </div>
                   @if (moreInformation().status === 'ready') {
@@ -348,7 +377,7 @@
         <section class="dashboard-page__section" aria-labelledby="appointment-activity-title">
           <div class="dashboard-page__section-heading">
             <div>
-              <h2 id="appointment-activity-title">Appointment activity</h2>
+              <h2 id="appointment-activity-title">Appointment Activity</h2>
               <p>Appointments in progress and scheduled within the next seven days in UTC.</p>
             </div>
             <a routerLink="/appointments">View all appointments</a>
@@ -373,7 +402,7 @@
                 >
                   <header>
                     <div>
-                      <h3 id="appointments-in-progress-title">In progress</h3>
+                      <h3 id="appointments-in-progress-title">In Progress</h3>
                       <p>Appointments currently in the active workflow state.</p>
                     </div>
                     @if (inProgressAppointments().status === 'ready') {
@@ -433,7 +462,7 @@
                 >
                   <header>
                     <div>
-                      <h3 id="upcoming-appointments-title">Next 7 days</h3>
+                      <h3 id="upcoming-appointments-title">Upcoming Appointments</h3>
                       <p>Scheduled appointments overlapping the next seven-day UTC window.</p>
                     </div>
                     @if (upcomingAppointments().status === 'ready') {
@@ -493,41 +522,6 @@
           }
         </section>
       }
-      <section class="dashboard-page__section" aria-labelledby="quick-actions-title">
-        <div class="dashboard-page__section-heading">
-          <div>
-            <h2 id="quick-actions-title">Quick actions</h2>
-            <p>Open an existing CareTrack workflow.</p>
-          </div>
-        </div>
-
-        <ct-surface padding="md">
-          <nav class="dashboard-page__quick-actions" aria-label="Dashboard quick actions">
-            <a *ctHasRole="[roles.clinician, roles.referralCoordinator]" routerLink="/patients/new">
-              <i class="ph ph-user-plus" aria-hidden="true"></i>
-              Register patient
-            </a>
-            <a
-              *ctHasRole="[roles.clinician, roles.referralCoordinator]"
-              routerLink="/referrals/new"
-            >
-              <i class="ph ph-plus" aria-hidden="true"></i>
-              Create referral
-            </a>
-            @if (audience() === 'clinician') {
-              <a *ctHasRole="clinicianRole" routerLink="/appointments">
-                <i class="ph ph-calendar-dots" aria-hidden="true"></i>
-                View appointments
-              </a>
-            } @else {
-              <a *ctHasRole="coordinatorRole" routerLink="/referrals">
-                <i class="ph ph-files" aria-hidden="true"></i>
-                View referrals
-              </a>
-            }
-          </nav>
-        </ct-surface>
-      </section>
     }
   }
 </div>

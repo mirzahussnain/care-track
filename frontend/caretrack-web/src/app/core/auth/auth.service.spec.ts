@@ -1,44 +1,23 @@
-import {
-  TestBed,
-} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {
-  AccountInfo,
-} from '@azure/msal-browser';
+import { AccountInfo } from '@azure/msal-browser';
 
-import {
-  MsalService,
-} from '@azure/msal-angular';
+import { MsalService } from '@azure/msal-angular';
 
-import {
-  Subject,
-  of,
-  throwError,
-} from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
-import {
-  environment,
-} from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
-import {
-  AuthenticatedUser,
-  CARETRACK_ROLES,
-} from './auth.models';
+import { AuthenticatedUser, CARETRACK_ROLES } from './auth.models';
 
-import {
-  AuthService,
-} from './auth.service';
+import { AuthService } from './auth.service';
 
-import {
-  CurrentUserApiService,
-} from './current-user-api.service';
+import { CurrentUserApiService } from './current-user-api.service';
 
 describe('AuthService', () => {
   let activeAccount: AccountInfo | null;
 
-  const getActiveAccount = vi.fn(
-    () => activeAccount
-  );
+  const getActiveAccount = vi.fn(() => activeAccount);
 
   const logoutRedirect = vi.fn();
   const getCurrentUser = vi.fn();
@@ -75,18 +54,14 @@ describe('AuthService', () => {
     id: 'caretrack-user-1',
     name: 'Test Clinician',
     username: 'clinician@example.com',
-    roles: [
-      CARETRACK_ROLES.clinician,
-    ],
+    roles: [CARETRACK_ROLES.clinician],
   };
 
   const administratorUser: AuthenticatedUser = {
     id: 'caretrack-user-2',
     name: 'Test Administrator',
     username: 'administrator@example.com',
-    roles: [
-      CARETRACK_ROLES.administrator,
-    ],
+    roles: [CARETRACK_ROLES.administrator],
   };
 
   beforeEach(() => {
@@ -159,9 +134,7 @@ describe('AuthService', () => {
     expect(service.isLoading()).toBe(false);
     expect(service.currentUser()).toEqual(clinicianUser);
     expect(service.isAuthenticated()).toBe(true);
-    expect(service.roles()).toEqual([
-      CARETRACK_ROLES.clinician,
-    ]);
+    expect(service.roles()).toEqual([CARETRACK_ROLES.clinician]);
   });
 
   it('checks roles returned by the API', () => {
@@ -171,13 +144,9 @@ describe('AuthService', () => {
 
     service.loadCurrentUser();
 
-    expect(
-      service.hasRole(CARETRACK_ROLES.clinician)
-    ).toBe(true);
+    expect(service.hasRole(CARETRACK_ROLES.clinician)).toBe(true);
 
-    expect(
-      service.hasRole(CARETRACK_ROLES.administrator)
-    ).toBe(false);
+    expect(service.hasRole(CARETRACK_ROLES.administrator)).toBe(false);
   });
 
   it('sets error and clears stale user and role state when loading fails', () => {
@@ -187,9 +156,7 @@ describe('AuthService', () => {
     service.loadCurrentUser();
 
     activeAccount = administratorAccount;
-    getCurrentUser.mockReturnValueOnce(
-      throwError(() => new Error('Current user request failed'))
-    );
+    getCurrentUser.mockReturnValueOnce(throwError(() => new Error('Current user request failed')));
 
     service.loadCurrentUser();
 
@@ -304,18 +271,13 @@ describe('AuthService', () => {
 
     expect(getCurrentUser).toHaveBeenCalledTimes(2);
     expect(service.currentUser()).toEqual(administratorUser);
-    expect(service.roles()).toEqual([
-      CARETRACK_ROLES.administrator,
-    ]);
+    expect(service.roles()).toEqual([CARETRACK_ROLES.administrator]);
   });
 
   it('supports multiple roles returned by the API', () => {
     const multiRoleUser: AuthenticatedUser = {
       ...clinicianUser,
-      roles: [
-        CARETRACK_ROLES.clinician,
-        CARETRACK_ROLES.referralCoordinator,
-      ],
+      roles: [CARETRACK_ROLES.clinician, CARETRACK_ROLES.referralCoordinator],
     };
 
     activeAccount = clinicianAccount;
@@ -324,9 +286,7 @@ describe('AuthService', () => {
     service.loadCurrentUser();
 
     expect(service.roles()).toEqual(multiRoleUser.roles);
-    expect(
-      service.hasRole(CARETRACK_ROLES.referralCoordinator)
-    ).toBe(true);
+    expect(service.hasRole(CARETRACK_ROLES.referralCoordinator)).toBe(true);
   });
 
   it('supports an authenticated user with zero roles', () => {
@@ -373,8 +333,7 @@ describe('AuthService', () => {
     expect(logoutRedirect).toHaveBeenCalledOnce();
     expect(logoutRedirect).toHaveBeenCalledWith({
       account: clinicianAccount,
-      postLogoutRedirectUri:
-        `${environment.auth.redirectUri}/auth/sign-in`,
+      postLogoutRedirectUri: `${environment.auth.redirectUri}/auth/sign-in`,
     });
   });
 
@@ -386,8 +345,7 @@ describe('AuthService', () => {
     expect(service.status()).toBe('idle');
     expect(logoutRedirect).toHaveBeenCalledWith({
       account: undefined,
-      postLogoutRedirectUri:
-        `${environment.auth.redirectUri}/auth/sign-in`,
+      postLogoutRedirectUri: `${environment.auth.redirectUri}/auth/sign-in`,
     });
   });
 });

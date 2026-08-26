@@ -81,9 +81,7 @@ describe('PatientApiService', () => {
         pageSize: 5,
       })
       .subscribe();
-    const request = http.expectOne(
-      (candidate) => candidate.url === `${baseUrl}/referral-lookup`,
-    );
+    const request = http.expectOne((candidate) => candidate.url === `${baseUrl}/referral-lookup`);
     expect(request.request.method).toBe('GET');
     expect(request.request.params.get('search')).toBe('Khan');
     expect(request.request.params.get('page')).toBe('2');

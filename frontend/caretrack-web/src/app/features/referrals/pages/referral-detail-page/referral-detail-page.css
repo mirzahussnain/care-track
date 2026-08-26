@@ -44,19 +44,19 @@
 
 .referral-detail-page__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 1.5rem;
 }
 
 .referral-detail-page__main {
   display: grid;
+  min-width: 0;
   gap: 1.5rem;
 }
 
 .referral-detail-page__actions {
-  position: sticky;
-  top: 1.5rem;
+  min-width: 0;
 }
 
 .referral-detail-page section,
@@ -130,8 +130,9 @@
 
 .referral-detail-page__narrative p,
 .referral-detail-page__history p {
-  white-space: pre-wrap;
   color: var(--ct-text-secondary);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .referral-detail-page__history {
@@ -220,10 +221,6 @@
 @media (max-width: 64rem) {
   .referral-detail-page__layout {
     grid-template-columns: 1fr;
-  }
-
-  .referral-detail-page__actions {
-    position: static;
   }
 
   .referral-detail-page__metadata {

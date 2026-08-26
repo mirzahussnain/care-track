@@ -22,7 +22,6 @@ import {
   StatusChip,
   Surface,
 } from '../../../design-system/components';
-import { PageHeader } from '../../../design-system/patterns';
 import { PagedResult } from '../../../shared/models/paged-result.model';
 import { AppointmentApiService } from '../../appointments/data-access/appointment-api.service';
 import { formatAppointmentUtc } from '../../appointments/models/appointment-datetime';
@@ -74,7 +73,6 @@ const DASHBOARD_LIST_SIZE = 5;
     DatePipe,
     EmptyState,
     HasRoleDirective,
-    PageHeader,
     RouterLink,
     Skeleton,
     StatusChip,
@@ -100,6 +98,28 @@ export class DashboardPage {
   readonly clinicianRole = CARETRACK_ROLES.clinician;
   readonly coordinatorRole = CARETRACK_ROLES.referralCoordinator;
 
+  readonly displayName = computed(() => this.authService.currentUser()?.name.trim() ?? '');
+  readonly greeting = this.localGreeting();
+  readonly welcomeTitle = computed(() => {
+    const name = this.displayName();
+    return name ? this.greeting + ', ' + name : this.greeting;
+  });
+  readonly audienceRoleLabel = computed(() => {
+    switch (this.audience()) {
+      case 'clinician':
+        return 'Clinician Workspace';
+      case 'coordinator':
+        return 'Referral Coordinator Workspace';
+      case 'administrator':
+        return 'Administrator Workspace';
+      case 'unsupported':
+        return 'CareTrack Workspace';
+      case 'auth-error':
+        return 'Access unavailable';
+      default:
+        return 'Preparing Workspace';
+    }
+  });
   readonly audience = computed<DashboardAudience>(() => {
     const authStatus = this.authService.status();
     if (authStatus === 'idle' || authStatus === 'loading') return 'loading';
@@ -213,6 +233,12 @@ export class DashboardPage {
     return ['/appointments', id];
   }
 
+  private localGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  }
   private handleAudienceChange(audience: DashboardAudience): void {
     if (audience === this.loadedAudience) return;
 

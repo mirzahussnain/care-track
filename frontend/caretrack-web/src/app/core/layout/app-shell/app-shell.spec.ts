@@ -1,61 +1,47 @@
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import {
-  provideRouter,
-} from '@angular/router';
-
-import {
-  signal,
-} from '@angular/core';
-
-import {
-  AuthService,
-} from '../../auth/auth.service';
-
-import {
-  CARETRACK_ROLES,
-  CareTrackRole,
-} from '../../auth/auth.models';
-
+import { AuthenticatedUser, CARETRACK_ROLES, CareTrackRole } from '../../auth/auth.models';
+import { AuthService } from '../../auth/auth.service';
 import { AppShell } from './app-shell';
 
 describe('AppShell', () => {
   let component: AppShell;
   let fixture: ComponentFixture<AppShell>;
-  const rolesSignal =
-  signal<readonly string[]>([
-    CARETRACK_ROLES.clinician,
-  ]);
+  const rolesSignal = signal<readonly string[]>([CARETRACK_ROLES.clinician]);
+  const currentUserSignal = signal<AuthenticatedUser | null>({
+    id: 'user-1',
+    name: 'Amina Khan',
+    username: 'amina.khan@example.test',
+    roles: [CARETRACK_ROLES.clinician],
+  });
+  const signOut = vi.fn();
 
-const authServiceMock = {
-  roles:
-    rolesSignal.asReadonly(),
-
-  hasRole: (
-    role: CareTrackRole
-  ) =>
-    rolesSignal()
-      .includes(role),
-};
+  const authServiceMock = {
+    currentUser: currentUserSignal.asReadonly(),
+    roles: rolesSignal.asReadonly(),
+    hasRole: (role: CareTrackRole) => rolesSignal().includes(role),
+    signOut,
+  };
 
   beforeEach(async () => {
+    rolesSignal.set([CARETRACK_ROLES.clinician]);
+    signOut.mockReset();
+
     await TestBed.configureTestingModule({
       imports: [AppShell],
       providers: [
         provideRouter([]),
         {
-  provide: AuthService,
-  useValue: authServiceMock,
-},
+          provide: AuthService,
+          useValue: authServiceMock,
+        },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppShell);
     component = fixture.componentInstance;
-
     fixture.detectChanges();
   });
 
@@ -64,80 +50,67 @@ const authServiceMock = {
   });
 
   it('starts with the default area label', () => {
-    expect(component.areaLabel()).toBe(
-      'Dashboard'
-    );
+    expect(component.areaLabel()).toBe('Dashboard');
   });
 
   it('toggles sidebar state', () => {
-    expect(
-      component.sidebarCollapsed()
-    ).toBe(false);
-
+    expect(component.sidebarCollapsed()).toBe(false);
     component.toggleSidebar();
-
-    expect(
-      component.sidebarCollapsed()
-    ).toBe(true);
+    expect(component.sidebarCollapsed()).toBe(true);
   });
 
   it('opens and closes mobile navigation', () => {
-  expect(
-    component.mobileNavigationOpen()
-  ).toBe(false);
+    expect(component.mobileNavigationOpen()).toBe(false);
+    component.openMobileNavigation();
+    expect(component.mobileNavigationOpen()).toBe(true);
+    component.closeMobileNavigation();
+    expect(component.mobileNavigationOpen()).toBe(false);
+  });
 
-  component.openMobileNavigation();
+  it('closes mobile navigation on Escape', () => {
+    component.openMobileNavigation();
+    component.onEscape();
+    expect(component.mobileNavigationOpen()).toBe(false);
+  });
 
-  expect(
-    component.mobileNavigationOpen()
-  ).toBe(true);
+  it('renders the mobile navigation drawer when opened', () => {
+    component.openMobileNavigation();
+    fixture.detectChanges();
 
-  component.closeMobileNavigation();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[role="dialog"]')).not.toBeNull();
+  });
 
-  expect(
-    component.mobileNavigationOpen()
-  ).toBe(false);
-});
+  it('removes the mobile navigation drawer when closed', () => {
+    component.openMobileNavigation();
+    fixture.detectChanges();
+    component.closeMobileNavigation();
+    fixture.detectChanges();
 
-it('closes mobile navigation on Escape', () => {
-  component.openMobileNavigation();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[role="dialog"]')).toBeNull();
+  });
 
-  component.onEscape();
+  it('shows account context and delegates Sign Out to the existing auth service', () => {
+    const element = fixture.nativeElement as HTMLElement;
 
-  expect(
-    component.mobileNavigationOpen()
-  ).toBe(false);
-});
+    expect(element.textContent).toContain('Amina Khan');
+    expect(element.textContent).toContain('Clinician');
 
-it('renders the mobile navigation drawer when opened', () => {
-  component.openMobileNavigation();
+    element.querySelector<HTMLButtonElement>('[data-testid="topbar-sign-out"]')?.click();
 
-  fixture.detectChanges();
+    expect(signOut).toHaveBeenCalledOnce();
+  });
 
-  const element =
-    fixture.nativeElement as HTMLElement;
+  it('keeps Sign Out reachable from mobile navigation and closes the drawer', () => {
+    component.openMobileNavigation();
+    fixture.detectChanges();
 
-  expect(
-    element.querySelector(
-      '[role="dialog"]'
-    )
-  ).not.toBeNull();
-});
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('[data-testid="mobile-sign-out"]')?.click();
+    fixture.detectChanges();
 
-it('removes the mobile navigation drawer when closed', () => {
-  component.openMobileNavigation();
-  fixture.detectChanges();
-
-  component.closeMobileNavigation();
-  fixture.detectChanges();
-
-  const element =
-    fixture.nativeElement as HTMLElement;
-
-  expect(
-    element.querySelector(
-      '[role="dialog"]'
-    )
-  ).toBeNull();
-});
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(component.mobileNavigationOpen()).toBe(false);
+  });
 });

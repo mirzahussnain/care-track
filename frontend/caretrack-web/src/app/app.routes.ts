@@ -94,17 +94,17 @@ export const routes: Routes = [
       {
         path: 'appointments/new',
         loadComponent: () =>
-          import(
-            './features/appointments/pages/create-appointment-page/create-appointment-page'
-          ).then((m) => m.CreateAppointmentPage),
+          import('./features/appointments/pages/create-appointment-page/create-appointment-page').then(
+            (m) => m.CreateAppointmentPage,
+          ),
         data: { areaLabel: 'Appointments' },
       },
       {
         path: 'appointments/:id',
         loadComponent: () =>
-          import(
-            './features/appointments/pages/appointment-detail-page/appointment-detail-page'
-          ).then((m) => m.AppointmentDetailPage),
+          import('./features/appointments/pages/appointment-detail-page/appointment-detail-page').then(
+            (m) => m.AppointmentDetailPage,
+          ),
         data: { areaLabel: 'Appointments' },
       },
       {

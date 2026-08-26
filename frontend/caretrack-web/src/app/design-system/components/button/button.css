@@ -1,5 +1,36 @@
+:host {
+  display: inline-flex;
+}
+
+:host(.block) {
+  display: block;
+}
+
+:host(.w-full) .ct-button {
+  width: 100%;
+}
+
 .ct-button {
+  border: 1px solid transparent;
   border-radius: var(--ct-radius-md);
+  cursor: pointer;
+}
+
+.ct-button:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--ct-surface),
+    0 0 0 5px var(--ct-focus);
+}
+
+.ct-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ct-button:disabled {
+  border-color: var(--ct-border);
+  background: var(--ct-surface-muted);
+  color: var(--ct-text-muted);
+  cursor: not-allowed;
 }
 
 .ct-button--sm {
@@ -25,18 +56,24 @@
   color: var(--ct-text-inverse);
 }
 
-.ct-button--primary:hover:not(:disabled) {
+.ct-button--primary:hover:not(:disabled),
+.ct-button--primary:active:not(:disabled) {
   background: var(--ct-primary-hover);
 }
 
 .ct-button--secondary {
-  border: 1px solid var(--ct-border);
+  border-color: var(--ct-border);
   background: var(--ct-surface);
   color: var(--ct-text);
 }
 
 .ct-button--secondary:hover:not(:disabled) {
+  border-color: var(--ct-border-strong);
   background: var(--ct-surface-muted);
+}
+
+.ct-button--secondary:active:not(:disabled) {
+  background: var(--ct-surface-subtle);
 }
 
 .ct-button--ghost {
@@ -49,11 +86,38 @@
   color: var(--ct-text);
 }
 
+.ct-button--success {
+  border-color: var(--ct-success);
+  background: var(--ct-success);
+  color: var(--ct-text-inverse);
+}
+
+.ct-button--success:hover:not(:disabled),
+.ct-button--success:active:not(:disabled) {
+  border-color: var(--ct-success-strong);
+  background: var(--ct-success-strong);
+}
+
+.ct-button--warning {
+  border-color: var(--ct-warning);
+  background: var(--ct-warning);
+  color: var(--ct-text-inverse);
+}
+
+.ct-button--warning:hover:not(:disabled),
+.ct-button--warning:active:not(:disabled) {
+  border-color: var(--ct-warning-strong);
+  background: var(--ct-warning-strong);
+}
+
 .ct-button--danger {
+  border-color: var(--ct-danger);
   background: var(--ct-danger);
   color: var(--ct-text-inverse);
 }
 
-.ct-button--danger:hover:not(:disabled) {
+.ct-button--danger:hover:not(:disabled),
+.ct-button--danger:active:not(:disabled) {
+  border-color: var(--ct-danger-strong);
   background: var(--ct-danger-strong);
 }

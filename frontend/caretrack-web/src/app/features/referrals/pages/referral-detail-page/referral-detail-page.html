@@ -62,7 +62,9 @@
           <p>{{ error.message }}</p>
         </div>
         @if (error.kind === 'concurrency' || error.kind === 'workflow') {
-          <ct-button variant="secondary" size="sm" (click)="loadDetail()">Reload referral</ct-button>
+          <ct-button variant="secondary" size="sm" (click)="loadDetail()"
+            >Reload referral</ct-button
+          >
         }
       </div>
     }
@@ -73,7 +75,7 @@
           <section aria-labelledby="referral-summary-title">
             <div class="referral-detail-page__section-heading">
               <div>
-                <h2 id="referral-summary-title">Referral summary</h2>
+                <h2 id="referral-summary-title">Referral Summary</h2>
                 <p>Current operational state and referral information.</p>
               </div>
               <div class="referral-detail-page__chips">
@@ -118,54 +120,24 @@
             </dl>
 
             <div class="referral-detail-page__narrative">
-              <h3>Reason for referral</h3>
+              <h3>Reason for Referral</h3>
               <p>{{ referral.reason }}</p>
             </div>
 
             @if (referral.triageNote) {
               <div class="referral-detail-page__narrative">
-                <h3>Triage assessment</h3>
+                <h3>Triage Assessment</h3>
                 <p>{{ referral.triageNote }}</p>
               </div>
             }
-          </section>
-        </ct-surface>
-
-        <ct-surface>
-          <section aria-labelledby="referral-history-title">
-            <div class="referral-detail-page__section-heading">
-              <div>
-                <h2 id="referral-history-title">Referral history</h2>
-                <p>Recorded workflow events in chronological order.</p>
-              </div>
-            </div>
-            <ol class="referral-detail-page__history">
-              @for (entry of history(); track entry.id) {
-                <li>
-                  <div class="referral-detail-page__history-marker" aria-hidden="true"></div>
-                  <div>
-                    <strong>{{ historyLabel(entry) }}</strong>
-                    <time [attr.datetime]="entry.occurredAt">
-                      {{ entry.occurredAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC
-                    </time>
-                    @if (entry.assignedTo) {
-                      <p>Team: {{ entry.assignedTo }}</p>
-                    }
-                    @if (entry.triageNote) {
-                      <p>{{ entry.triageNote }}</p>
-                    }
-                  </div>
-                </li>
-              }
-            </ol>
           </section>
         </ct-surface>
       </div>
 
       @if (canManageReferrals()) {
         <aside class="referral-detail-page__actions" aria-labelledby="workflow-actions-title">
-          <ct-surface>
-            <h2 id="workflow-actions-title">Workflow actions</h2>
+          <ct-surface class="ct-workflow-surface">
+            <h2 id="workflow-actions-title">Workflow Actions</h2>
             <p class="referral-detail-page__action-intro">
               Actions shown here are relevant to the current server state.
             </p>
@@ -199,7 +171,7 @@
               </ct-button>
             } @else if (referral.status === statuses.awaitingTriage) {
               <form [formGroup]="triageForm" (ngSubmit)="recordTriageAssessment()">
-                <h3>Record triage assessment</h3>
+                <h3>Record Triage Assessment</h3>
                 <ct-form-field label="Priority" forId="triage-priority">
                   <select id="triage-priority" formControlName="priority">
                     @for (priority of priorities; track priority) {
@@ -240,6 +212,7 @@
 
               <div class="referral-detail-page__decision-actions">
                 <ct-button
+                  variant="success"
                   [loading]="activeAction() === 'accept'"
                   [disabled]="!!activeAction()"
                   (click)="acceptReferral()"
@@ -247,15 +220,19 @@
                   Accept referral
                 </ct-button>
                 <ct-button
-                  variant="secondary"
+                  variant="warning"
                   [loading]="activeAction() === 'request-information'"
                   [disabled]="!!activeAction()"
                   (click)="requestMoreInformation()"
                 >
-                  Request information
+                  Request more information
                 </ct-button>
                 @if (confirmingReject()) {
-                  <div class="referral-detail-page__reject-confirmation" role="group" aria-label="Confirm referral rejection">
+                  <div
+                    class="referral-detail-page__reject-confirmation"
+                    role="group"
+                    aria-label="Confirm referral rejection"
+                  >
                     <p>Rejecting ends the active referral workflow.</p>
                     <div>
                       <ct-button
@@ -277,7 +254,7 @@
                   </div>
                 } @else {
                   <ct-button
-                    variant="ghost"
+                    variant="danger"
                     [disabled]="!!activeAction()"
                     (click)="confirmingReject.set(true)"
                   >
@@ -301,7 +278,11 @@
                 (ngSubmit)="assignReferral(referral.status === statuses.assigned)"
               >
                 <h3>
-                  {{ referral.status === statuses.assigned ? 'Reassign clinical team' : 'Assign clinical team' }}
+                  {{
+                    referral.status === statuses.assigned
+                      ? 'Reassign Clinical Team'
+                      : 'Assign Clinical Team'
+                  }}
                 </h3>
                 <ct-form-field
                   label="Clinical team"
@@ -323,19 +304,21 @@
                 </ct-form-field>
                 <ct-button
                   type="submit"
-                  [loading]="
-                    activeAction() === 'assign' || activeAction() === 'reassign'
-                  "
+                  [loading]="activeAction() === 'assign' || activeAction() === 'reassign'"
                   [disabled]="!!activeAction()"
                 >
-                  {{ referral.status === statuses.assigned ? 'Reassign referral' : 'Assign referral' }}
+                  {{
+                    referral.status === statuses.assigned ? 'Reassign referral' : 'Assign referral'
+                  }}
                 </ct-button>
               </form>
             } @else if (referral.status === statuses.inProgress) {
               <p class="referral-detail-page__precondition-note">
-                Completion requires a completed appointment and no active appointments. The server verifies these conditions.
+                Completion requires a completed appointment and no active appointments. The server
+                verifies these conditions.
               </p>
               <ct-button
+                variant="success"
                 [loading]="activeAction() === 'complete'"
                 [disabled]="!!activeAction()"
                 (click)="completeReferral()"
@@ -350,6 +333,38 @@
           </ct-surface>
         </aside>
       }
+
+      <div class="referral-detail-page__main">
+        <ct-surface>
+          <section aria-labelledby="referral-history-title">
+            <div class="referral-detail-page__section-heading">
+              <div>
+                <h2 id="referral-history-title">Referral History</h2>
+                <p>Recorded workflow events in chronological order.</p>
+              </div>
+            </div>
+            <ol class="referral-detail-page__history">
+              @for (entry of history(); track entry.id) {
+                <li>
+                  <div class="referral-detail-page__history-marker" aria-hidden="true"></div>
+                  <div>
+                    <strong>{{ historyLabel(entry) }}</strong>
+                    <time [attr.datetime]="entry.occurredAt">
+                      {{ entry.occurredAt | date: 'dd MMM yyyy, HH:mm' : 'UTC' }} UTC
+                    </time>
+                    @if (entry.assignedTo) {
+                      <p>Team: {{ entry.assignedTo }}</p>
+                    }
+                    @if (entry.triageNote) {
+                      <p>{{ entry.triageNote }}</p>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+          </section>
+        </ct-surface>
+      </div>
     </div>
   }
 </div>

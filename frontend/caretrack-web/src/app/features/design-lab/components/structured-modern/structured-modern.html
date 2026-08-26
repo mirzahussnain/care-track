@@ -3,12 +3,19 @@
 
   <div class="sm-app">
     <header class="sm-topbar">
-      <a class="sm-brand" href="#structured-modern" aria-label="CareTrack home"><span aria-hidden="true">CT</span><strong>CareTrack</strong><small>Clinical operations</small></a>
+      <a class="sm-brand" href="#structured-modern" aria-label="CareTrack home"
+        ><span aria-hidden="true">CT</span><strong>CareTrack</strong
+        ><small>Clinical operations</small></a
+      >
       <nav aria-label="Structured Modern primary navigation">
         <a href="#structured-modern"><i class="ph ph-house" aria-hidden="true"></i>Dashboard</a>
         <a href="#structured-modern"><i class="ph ph-user" aria-hidden="true"></i>Patients</a>
-        <a class="active" href="#structured-modern" aria-current="page"><i class="ph-bold ph-git-pull-request" aria-hidden="true"></i>Referrals</a>
-        <a href="#structured-modern"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Appointments</a>
+        <a class="active" href="#structured-modern" aria-current="page"
+          ><i class="ph-bold ph-git-pull-request" aria-hidden="true"></i>Referrals</a
+        >
+        <a href="#structured-modern"
+          ><i class="ph ph-calendar-blank" aria-hidden="true"></i>Appointments</a
+        >
       </nav>
       <p class="sm-user"><span>RP</span><strong>Rina Patel</strong></p>
     </header>
@@ -16,45 +23,114 @@
     <div class="sm-main">
       <header class="sm-page-header">
         <div>
-          <p><span>Thursday, 20 August</span><i aria-hidden="true"></i>Referral coordination workspace</p>
+          <p>
+            <span>Thursday, 20 August</span><i aria-hidden="true"></i>Referral coordination
+            workspace
+          </p>
           <h2 id="structured-modern-title">Today’s care operations</h2>
         </div>
         <div class="sm-actions">
-          <button class="secondary" type="button"><i class="ph ph-calendar-blank" aria-hidden="true"></i>View schedule</button>
-          <button class="primary" type="button">Review next referral<i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+          <button class="secondary" type="button">
+            <i class="ph ph-calendar-blank" aria-hidden="true"></i>View schedule
+          </button>
+          <button class="primary" type="button">
+            Review next referral<i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </button>
         </div>
       </header>
 
       <section class="sm-patient" aria-labelledby="sm-patient-name">
-        <div class="sm-patient-title"><i class="ph ph-identification-badge" aria-hidden="true"></i><div><span>Active patient</span><h3 id="sm-patient-name">Amara Okafor</h3></div></div>
+        <div class="sm-patient-title">
+          <i class="ph ph-identification-badge" aria-hidden="true"></i>
+          <div>
+            <span>Active patient</span>
+            <h3 id="sm-patient-name">Amara Okafor</h3>
+          </div>
+        </div>
         <dl>
-          <div><dt>Patient reference</dt><dd>CT-20481</dd></div>
-          <div><dt>Date of birth</dt><dd>14 February 1986 · 40 years</dd></div>
-          <div><dt>Referral</dt><dd>Respiratory medicine</dd></div>
-          <div><dt>Referred by</dt><dd>Riverside Medical Centre</dd></div>
+          <div>
+            <dt>Patient reference</dt>
+            <dd>CT-20481</dd>
+          </div>
+          <div>
+            <dt>Date of birth</dt>
+            <dd>14 February 1986 · 40 years</dd>
+          </div>
+          <div>
+            <dt>Referral</dt>
+            <dd>Respiratory medicine</dd>
+          </div>
+          <div>
+            <dt>Referred by</dt>
+            <dd>Riverside Medical Centre</dd>
+          </div>
         </dl>
-        <span class="sm-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span>
+        <span class="sm-status warning"
+          ><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span
+        >
       </section>
 
       <section class="sm-referrals" aria-labelledby="sm-referral-title">
         <header class="sm-section-title">
-          <div><p>Referral workload</p><h3 id="sm-referral-title">Work requiring attention</h3></div>
+          <div>
+            <p>Referral workload</p>
+            <h3 id="sm-referral-title">Work requiring attention</h3>
+          </div>
           <span>37 referrals in view</span>
         </header>
         <dl class="sm-metrics">
-          <div><dt>Awaiting triage</dt><dd><span>12</span><small>Review queue</small></dd></div>
-          <div><dt>Need assignment</dt><dd><span>4</span><small>Coordinator action</small></dd></div>
-          <div class="urgent"><dt><i class="ph-fill ph-warning" aria-hidden="true"></i>Overdue</dt><dd><span>3</span><small>Needs attention</small></dd></div>
-          <div><dt>Accepted this week</dt><dd><span>18</span><small>Progressing</small></dd></div>
+          <div>
+            <dt>Awaiting triage</dt>
+            <dd><span>12</span><small>Review queue</small></dd>
+          </div>
+          <div>
+            <dt>Need assignment</dt>
+            <dd><span>4</span><small>Coordinator action</small></dd>
+          </div>
+          <div class="urgent">
+            <dt><i class="ph-fill ph-warning" aria-hidden="true"></i>Overdue</dt>
+            <dd><span>3</span><small>Needs attention</small></dd>
+          </div>
+          <div>
+            <dt>Accepted this week</dt>
+            <dd><span>18</span><small>Progressing</small></dd>
+          </div>
         </dl>
 
         <div class="sm-table-wrap">
           <table>
-            <caption class="sr-only">Referral status examples</caption>
-            <thead><tr><th scope="col">Status</th><th scope="col">Patient</th><th scope="col">Referral</th><th scope="col">Updated</th></tr></thead>
+            <caption class="sr-only">
+              Referral status examples
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Status</th>
+                <th scope="col">Patient</th>
+                <th scope="col">Referral</th>
+                <th scope="col">Updated</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td><span class="sm-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span></td><td><strong>Amara Okafor</strong></td><td>Respiratory medicine<small>Received 09:12</small></td><td><time datetime="2026-08-20T09:12">Today</time></td></tr>
-              <tr><td><span class="sm-status success"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Accepted</span></td><td><strong>Leon Evans</strong></td><td>Cardiology<small>Reviewed by Dr Shah</small></td><td><time datetime="2026-08-19">Yesterday</time></td></tr>
+              <tr>
+                <td>
+                  <span class="sm-status warning"
+                    ><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span
+                  >
+                </td>
+                <td><strong>Amara Okafor</strong></td>
+                <td>Respiratory medicine<small>Received 09:12</small></td>
+                <td><time datetime="2026-08-20T09:12">Today</time></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="sm-status success"
+                    ><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Accepted</span
+                  >
+                </td>
+                <td><strong>Leon Evans</strong></td>
+                <td>Cardiology<small>Reviewed by Dr Shah</small></td>
+                <td><time datetime="2026-08-19">Yesterday</time></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -62,19 +138,49 @@
 
       <aside class="sm-appointments" aria-labelledby="sm-appointment-title">
         <header class="sm-section-title">
-          <div><p>Appointment summary</p><h3 id="sm-appointment-title">Today’s flow</h3></div>
+          <div>
+            <p>Appointment summary</p>
+            <h3 id="sm-appointment-title">Today’s flow</h3>
+          </div>
           <time datetime="2026-08-20T10:18">10:18</time>
         </header>
         <dl class="sm-appointment-list">
-          <div><dt>Scheduled today</dt><dd>8</dd></div>
-          <div><dt>Checked in</dt><dd>2</dd></div>
-          <div><dt>In progress</dt><dd>1</dd></div>
-          <div><dt>Next appointment</dt><dd>10:30</dd></div>
+          <div>
+            <dt>Scheduled today</dt>
+            <dd>8</dd>
+          </div>
+          <div>
+            <dt>Checked in</dt>
+            <dd>2</dd>
+          </div>
+          <div>
+            <dt>In progress</dt>
+            <dd>1</dd>
+          </div>
+          <div>
+            <dt>Next appointment</dt>
+            <dd>10:30</dd>
+          </div>
         </dl>
         <ol class="sm-flow" aria-label="Appointment status examples">
-          <li><span class="sm-flow-line" aria-hidden="true"></span><span class="sm-status neutral"><i class="ph-fill ph-calendar-check" aria-hidden="true"></i>Scheduled</span></li>
-          <li><span class="sm-flow-line" aria-hidden="true"></span><span class="sm-status info"><i class="ph-fill ph-sign-in" aria-hidden="true"></i>Checked in</span></li>
-          <li><span class="sm-flow-line" aria-hidden="true"></span><span class="sm-status progress"><i class="ph-fill ph-stethoscope" aria-hidden="true"></i>In progress</span></li>
+          <li>
+            <span class="sm-flow-line" aria-hidden="true"></span
+            ><span class="sm-status neutral"
+              ><i class="ph-fill ph-calendar-check" aria-hidden="true"></i>Scheduled</span
+            >
+          </li>
+          <li>
+            <span class="sm-flow-line" aria-hidden="true"></span
+            ><span class="sm-status info"
+              ><i class="ph-fill ph-sign-in" aria-hidden="true"></i>Checked in</span
+            >
+          </li>
+          <li>
+            <span class="sm-flow-line" aria-hidden="true"></span
+            ><span class="sm-status progress"
+              ><i class="ph-fill ph-stethoscope" aria-hidden="true"></i>In progress</span
+            >
+          </li>
         </ol>
       </aside>
     </div>

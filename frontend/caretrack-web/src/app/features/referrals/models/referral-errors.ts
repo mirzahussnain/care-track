@@ -3,13 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ProblemDetails } from './referral.models';
 
 export type ReferralCommandError =
-  | 'validation'
-  | 'forbidden'
-  | 'not-found'
-  | 'workflow'
-  | 'conflict'
-  | 'concurrency'
-  | 'generic';
+  'validation' | 'forbidden' | 'not-found' | 'workflow' | 'conflict' | 'concurrency' | 'generic';
 
 export interface ReferralErrorMessage {
   readonly kind: ReferralCommandError;
@@ -34,7 +28,8 @@ export function referralErrorMessage(
   if (error.status === 409 && problem?.title === 'Concurrency Conflict') {
     return {
       kind: 'concurrency',
-      message: problem.detail || 'This record changed while you were working. Reload and try again.',
+      message:
+        problem.detail || 'This record changed while you were working. Reload and try again.',
     };
   }
   if (error.status === 409 && problem?.title === 'Invalid State Transition') {
@@ -44,7 +39,10 @@ export function referralErrorMessage(
     };
   }
   if (error.status === 409) {
-    return { kind: 'conflict', message: problem?.detail || 'The request conflicts with current data.' };
+    return {
+      kind: 'conflict',
+      message: problem?.detail || 'The request conflicts with current data.',
+    };
   }
 
   return { kind: 'generic', message: fallback };

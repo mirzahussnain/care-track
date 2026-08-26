@@ -84,11 +84,11 @@ describe('CreatePatientPage', () => {
     setValidForm();
     fixture.componentInstance.submit();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Patient registered');
+    expect(fixture.nativeElement.textContent).toContain('Patient Registered');
     expect(fixture.nativeElement.textContent).toContain('Amina Khan');
     fixture.componentInstance.registerAnother();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Patient identity');
+    expect(fixture.nativeElement.textContent).toContain('Patient Identity');
     expect(fixture.componentInstance.form.controls.patientReference.value).toBe('');
   });
 

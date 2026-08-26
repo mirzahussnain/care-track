@@ -10,24 +10,16 @@ import { AuthService } from '../../auth/auth.service';
   styleUrl: './app-sidebar.css',
 })
 export class AppSidebar {
-private readonly authService = inject(AuthService);
+  private readonly authService = inject(AuthService);
   readonly navigation = input.required<readonly ShellNavigationItem[]>();
   readonly showBrand = input(true);
   readonly showCollapseControl = input(true);
-  readonly collapsed=input(false);
-  readonly collapseToggle=output<void>();
+  readonly collapsed = input(false);
+  readonly collapseToggle = output<void>();
   readonly navigationSelected = output<void>();
-  readonly visibleNavigation =
-    computed(() =>
-      this.navigation().filter(
-        item =>
-          !item.roles ||
-          item.roles.some(
-            role =>
-              this.authService.hasRole(
-                role
-              )
-          )
-      )
-    );
+  readonly visibleNavigation = computed(() =>
+    this.navigation().filter(
+      (item) => !item.roles || item.roles.some((role) => this.authService.hasRole(role)),
+    ),
+  );
 }

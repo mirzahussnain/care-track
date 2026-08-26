@@ -77,7 +77,9 @@
   background: var(--ct-surface);
   color: var(--ct-text);
   text-align: left;
-  transition: border-color var(--ct-duration-fast), background var(--ct-duration-fast);
+  transition:
+    border-color var(--ct-duration-fast),
+    background var(--ct-duration-fast);
 }
 
 .patient-selector__results button:hover {

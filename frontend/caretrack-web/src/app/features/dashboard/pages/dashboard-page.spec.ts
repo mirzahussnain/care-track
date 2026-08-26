@@ -78,6 +78,12 @@ describe('DashboardPage', () => {
   let fixture: ComponentFixture<DashboardPage>;
   const authStatus = signal<AuthLoadStatus>('ready');
   const roles = signal<readonly string[]>([CARETRACK_ROLES.clinician]);
+  const currentUser = signal({
+    id: '55555555-5555-5555-5555-555555555555',
+    name: 'Amina Khan',
+    username: 'amina@example.test',
+    roles: [CARETRACK_ROLES.clinician],
+  });
 
   const searchPatients =
     vi.fn<(query: PatientSearchQuery) => ReturnType<PatientApiService['searchPatients']>>();
@@ -93,12 +99,19 @@ describe('DashboardPage', () => {
   const authServiceMock = {
     status: authStatus.asReadonly(),
     roles: roles.asReadonly(),
+    currentUser: currentUser.asReadonly(),
     hasRole: (role: CareTrackRole) => roles().includes(role),
   };
 
   beforeEach(async () => {
     authStatus.set('ready');
     roles.set([CARETRACK_ROLES.clinician]);
+    currentUser.set({
+      id: '55555555-5555-5555-5555-555555555555',
+      name: 'Amina Khan',
+      username: 'amina@example.test',
+      roles: [CARETRACK_ROLES.clinician],
+    });
     searchPatients.mockReset().mockReturnValue(of(page([], 12, 1)));
     searchReferrals.mockReset().mockImplementation((query) => {
       const count = query.status === REFERRAL_STATUSES.awaitingTriage ? 4 : 2;
@@ -211,7 +224,7 @@ describe('DashboardPage', () => {
     expect(component.audience()).toBe('clinician');
     expect(searchPatients).toHaveBeenCalledTimes(1);
     expect(searchAppointments).toHaveBeenCalledTimes(2);
-    expect(text()).toContain('Appointment activity');
+    expect(text()).toContain('Appointment Activity');
   });
 
   it('loads only four referral requests for a referral coordinator', () => {
@@ -233,7 +246,7 @@ describe('DashboardPage', () => {
     expect(text()).toContain('Register patient');
     expect(text()).toContain('Create referral');
     expect(text()).toContain('View referrals');
-    expect(text()).not.toContain('Appointment activity');
+    expect(text()).not.toContain('Appointment Activity');
     expect(getReferralPatientSummary).not.toHaveBeenCalled();
     expect(getReferral).not.toHaveBeenCalled();
   });
@@ -246,8 +259,8 @@ describe('DashboardPage', () => {
     expect(searchPatients).not.toHaveBeenCalled();
     expect(searchReferrals).not.toHaveBeenCalled();
     expect(searchAppointments).not.toHaveBeenCalled();
-    expect(text()).toContain('Administrator workspace');
-    expect(text()).not.toContain('Operational summary');
+    expect(text()).toContain('Administrator Workspace');
+    expect(text()).not.toContain('Operational Summary');
   });
   it('renders total counts, operational rows, status labels, and detail links', () => {
     searchPatients.mockReturnValue(of(page([patient], 27, 1)));
@@ -315,7 +328,7 @@ describe('DashboardPage', () => {
     createDashboard();
 
     expect(text()).toContain('Awaiting-triage queue unavailable');
-    expect(text()).toContain('Appointment activity');
+    expect(text()).toContain('Appointment Activity');
     expect(text()).toContain('APT-UPCOMING-001');
   });
 
@@ -325,7 +338,7 @@ describe('DashboardPage', () => {
 
     expect(text()).toContain('Referral workload is unavailable');
     expect(text()).not.toContain('Awaiting-triage queue unavailable');
-    expect(text()).toContain('Appointment activity');
+    expect(text()).toContain('Appointment Activity');
   });
 
   it('keeps other sections usable when the patient count fails', () => {
@@ -391,11 +404,68 @@ describe('DashboardPage', () => {
     expect(patientsPending.observed).toBe(false);
     expect(referralsPending.observed).toBe(false);
     expect(appointmentsPending.observed).toBe(false);
-    expect(text()).toContain('Administrator workspace');
+    expect(text()).toContain('Administrator Workspace');
     expect(text()).not.toContain('REF-ATTENTION-001');
     expect(text()).not.toContain('APT-UPCOMING-001');
 
     appointmentsPending.next(page([appointment], 50, 5));
     expect(component.upcomingAppointments()).toEqual({ status: 'idle', data: null });
+  });
+
+  it('uses only the trimmed current-user name in the local-time greeting', () => {
+    currentUser.update((user) => ({ ...user, name: '  Amina Khan  ' }));
+    const component = createDashboard();
+
+    expect(component.displayName()).toBe('Amina Khan');
+    expect(component.welcomeTitle()).toMatch(/^Good (Morning|Afternoon|Evening), Amina Khan$/);
+  });
+
+  it('omits punctuation when the current-user name is blank', () => {
+    currentUser.update((user) => ({
+      ...user,
+      name: '   ',
+      username: 'must-not-be-used@example.test',
+    }));
+    const component = createDashboard();
+
+    expect(component.displayName()).toBe('');
+    expect(component.welcomeTitle()).toMatch(/^Good (Morning|Afternoon|Evening)$/);
+    expect(component.welcomeTitle()).not.toContain(',');
+    expect(component.welcomeTitle()).not.toContain('must-not-be-used');
+  });
+
+  it('issues exactly five, four, or zero dashboard requests by audience', () => {
+    createDashboard();
+    expect(
+      searchPatients.mock.calls.length +
+        searchReferrals.mock.calls.length +
+        searchAppointments.mock.calls.length,
+    ).toBe(5);
+
+    fixture.destroy();
+    searchPatients.mockClear();
+    searchReferrals.mockClear();
+    searchAppointments.mockClear();
+    roles.set([CARETRACK_ROLES.referralCoordinator]);
+    createDashboard();
+    expect(
+      searchPatients.mock.calls.length +
+        searchReferrals.mock.calls.length +
+        searchAppointments.mock.calls.length,
+    ).toBe(4);
+
+    fixture.destroy();
+    searchPatients.mockClear();
+    searchReferrals.mockClear();
+    searchAppointments.mockClear();
+    roles.set([CARETRACK_ROLES.administrator]);
+    createDashboard();
+    expect(
+      searchPatients.mock.calls.length +
+        searchReferrals.mock.calls.length +
+        searchAppointments.mock.calls.length,
+    ).toBe(0);
+    expect(text()).not.toContain('Register patient');
+    expect(text()).not.toContain('Create referral');
   });
 });

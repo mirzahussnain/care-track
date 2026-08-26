@@ -37,7 +37,9 @@ describe('ClinicalNotesSection', () => {
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
 
-    expect(text.indexOf('First synthetic note.')).toBeLessThan(text.indexOf('Second synthetic note.'));
+    expect(text.indexOf('First synthetic note.')).toBeLessThan(
+      text.indexOf('Second synthetic note.'),
+    );
     expect(text).toContain('Dr Amina Khan');
     expect(text).toContain('Author ID: 22222222-2222-2222-2222-222222222222');
     expect(text).toContain('Updated');
@@ -74,14 +76,16 @@ describe('ClinicalNotesSection', () => {
   it('shows loading, empty, and independent retryable error states', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[aria-label="Loading clinical notes"]')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Loading clinical notes"]'),
+    ).not.toBeNull();
 
     fixture.componentRef.setInput('loading', false);
     fixture.componentRef.setInput('notes', []);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('No Clinical Notes recorded');
+    expect(fixture.nativeElement.textContent).toContain('No clinical notes recorded');
 
-    fixture.componentRef.setInput('loadError', 'Clinical Notes could not be loaded.');
+    fixture.componentRef.setInput('loadError', 'Clinical notes could not be loaded.');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Try again');
   });

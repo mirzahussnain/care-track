@@ -17,14 +17,13 @@
 
 .appointment-detail-page__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 1.5rem;
 }
 
 .appointment-detail-page__actions {
-  position: sticky;
-  top: 1.5rem;
+  min-width: 0;
 }
 
 .appointment-detail-page__actions h2,
@@ -127,10 +126,6 @@
 @media (max-width: 64rem) {
   .appointment-detail-page__layout {
     grid-template-columns: 1fr;
-  }
-
-  .appointment-detail-page__actions {
-    position: static;
   }
 }
 

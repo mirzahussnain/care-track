@@ -1,145 +1,102 @@
 <a
   href="#main-content"
-  class="
-    fixed left-2 top-2 z-50
-    -translate-y-[150%]
-    rounded-ct-md
-    bg-ct-surface
-    px-3.5 py-2.5
-    font-semibold
-    text-ct-primary-strong
-    no-underline
-    transition-transform
-    duration-150
-    ease-ct-standard
-    focus:translate-y-0
-  "
+  class="fixed left-2 top-2 z-50 -translate-y-[150%] rounded-ct-md bg-ct-surface px-3.5 py-2.5 font-semibold text-ct-primary-strong no-underline transition-transform duration-150 ease-ct-standard focus:translate-y-0"
 >
   Skip to main content
 </a>
 
 <div
   class="grid min-h-screen bg-ct-bg transition-[grid-template-columns] duration-[var(--ct-duration-panel)] ease-ct-standard grid-cols-1 md:grid-cols-[72px_minmax(0,1fr)]"
-[class.lg:grid-cols-[240px_minmax(0,1fr)]]="!sidebarCollapsed()"
+  [class.lg:grid-cols-[240px_minmax(0,1fr)]]="!sidebarCollapsed()"
   [class.lg:grid-cols-[72px_minmax(0,1fr)]]="sidebarCollapsed()"
 >
-<div class="hidden md:block">
-  <app-sidebar
-    [navigation]="navigation"
-    [collapsed]="sidebarCollapsed()"
-     [showBrand]="true"
+  <div class="hidden md:block">
+    <app-sidebar
+      [navigation]="navigation"
+      [collapsed]="sidebarCollapsed()"
+      [showBrand]="true"
       [showCollapseControl]="true"
-    (collapseToggle)="toggleSidebar()"
-    (navigationSelected)="closeMobileNavigation()"
-  />
-</div>
-@if (mobileNavigationOpen()) {
-  <div
-    class="
-      fixed inset-0 z-40
-      bg-black/35
-      md:hidden
-    "
-    aria-hidden="true"
-    (click)="closeMobileNavigation()"
-  ></div>
-
-  <aside
-    class="
-      fixed inset-y-0 left-0 z-50
-      w-[304px]
-      max-w-[calc(100vw-48px)]
-      border-r border-ct-border
-      bg-ct-primary-strong
-      text-ct-text-inverse
-      md:hidden
-    "
-    role="dialog"
-    aria-modal="true"
-    aria-label="Primary navigation"
-  >
+      (collapseToggle)="toggleSidebar()"
+      (navigationSelected)="closeMobileNavigation()"
+    />
+  </div>
+  @if (mobileNavigationOpen()) {
     <div
-      class="
-        flex min-h-16 items-center
-        justify-between
-        border-b border-white/10
-        px-4
-      "
+      class="fixed inset-0 z-40 bg-black/35 md:hidden"
+      aria-hidden="true"
+      (click)="closeMobileNavigation()"
+    ></div>
+
+    <aside
+      class="fixed inset-y-0 left-0 z-50 flex w-[304px] max-w-[calc(100vw-48px)] flex-col border-r border-ct-border bg-ct-primary-strong text-ct-text-inverse md:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Primary navigation"
     >
-      <div class="flex items-center gap-3">
-        <div
-          class="
-            grid size-8 shrink-0 place-items-center
-            rounded-ct-md
-            border border-white/30
-            text-xs font-bold
-          "
-          aria-hidden="true"
+      <div class="flex min-h-16 items-center justify-between border-b border-white/10 px-4">
+        <div class="flex items-center gap-3">
+          <div class="app-shell__mobile-brand-mark">
+            <img src="/brand/caretrack-symbol.svg" alt="" />
+          </div>
+
+          <div>
+            <strong class="block text-sm font-semibold"> CareTrack </strong>
+
+            <span class="block text-xs text-white/70"> Clinical operations </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="grid size-11 place-items-center rounded-ct-md text-white/75 transition-colors duration-150 ease-ct-standard hover:bg-white/10 hover:text-white"
+          aria-label="Close navigation"
+          (click)="closeMobileNavigation()"
         >
-          CT
-        </div>
-
-        <div>
-          <strong class="block text-sm font-semibold">
-            CareTrack
-          </strong>
-
-          <span class="block text-xs text-white/70">
-            Clinical operations
-          </span>
-        </div>
+          <i class="ph ph-x text-xl" aria-hidden="true"></i>
+        </button>
       </div>
 
-      <button
-        type="button"
-        class="
-          grid size-11 place-items-center
-          rounded-ct-md
-          text-white/75
-          transition-colors
-          duration-150
-          ease-ct-standard
-          hover:bg-white/10
-          hover:text-white
-        "
-        aria-label="Close navigation"
-        (click)="closeMobileNavigation()"
-      >
-        <i
-          class="ph ph-x text-xl"
-          aria-hidden="true"
-        ></i>
-      </button>
-    </div>
+      <div class="min-h-0 flex-1 overflow-y-auto pt-2">
+        <app-sidebar
+          [navigation]="navigation"
+          [collapsed]="false"
+          [showBrand]="false"
+          [showCollapseControl]="false"
+          (navigationSelected)="closeMobileNavigation()"
+        />
+      </div>
 
-    <div class="pt-2">
-      <app-sidebar
-        [navigation]="navigation"
-        [collapsed]="false"
-        [showBrand]="false"
-        [showCollapseControl]="false"
-        (navigationSelected)="closeMobileNavigation()"
-      />
-    </div>
-  </aside>
-}
+      <div class="border-t border-white/10 p-4">
+        <div class="mb-3 min-w-0">
+          <strong class="block truncate text-sm font-semibold">{{ accountName() }}</strong>
+          <span class="block truncate text-xs text-white/70">{{ accountRoleLabel() }}</span>
+        </div>
+        <button
+          type="button"
+          data-testid="mobile-sign-out"
+          class="flex min-h-11 w-full items-center justify-center gap-2 rounded-ct-md border border-white/20 px-3 text-sm font-semibold text-white transition-colors duration-150 ease-ct-standard hover:bg-white/10"
+          (click)="signOut()"
+        >
+          <i class="ph ph-sign-out" aria-hidden="true"></i>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+  }
   <div class="min-h-screen min-w-0">
-    <app-topbar 
-    [areaLabel]="areaLabel()"
-    (mobileMenuOpen)="openMobileNavigation()"
+    <app-topbar
+      [areaLabel]="areaLabel()"
+      [accountName]="accountName()"
+      [accountRoleLabel]="accountRoleLabel()"
+      (mobileMenuOpen)="openMobileNavigation()"
+      (signOut)="signOut()"
     />
 
-   <main
-  id="main-content"
-  tabindex="-1"
-  class="
-    min-w-0
-    px-4 pb-8 pt-5
-    md:px-6
-    lg:px-8 lg:pb-10 lg:pt-6
-    2xl:px-10
-  "
->
+    <main
+      id="main-content"
+      tabindex="-1"
+      class="min-w-0 px-4 pb-8 pt-5 md:px-6 lg:px-8 lg:pb-10 lg:pt-6 2xl:px-10"
+    >
       <router-outlet />
     </main>
   </div>

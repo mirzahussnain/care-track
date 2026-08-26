@@ -48,7 +48,9 @@ describe('ReferralPatientSelector', () => {
 
   it('supersedes an older request when paging', () => {
     const first$ = new Subject<PagedResult<ReferralPatientSummary>>();
-    searchReferralPatients.mockReturnValueOnce(first$).mockReturnValueOnce(of({ ...result, page: 2 }));
+    searchReferralPatients
+      .mockReturnValueOnce(first$)
+      .mockReturnValueOnce(of({ ...result, page: 2 }));
     fixture.componentInstance.submitSearch();
 
     fixture.componentInstance.changePage(2);

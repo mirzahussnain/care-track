@@ -1,26 +1,12 @@
-import {
-  TestBed,
-} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {
-  provideRouter,
-  Router,
-} from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
-import {
-  MsalBroadcastService,
-  MsalService,
-} from '@azure/msal-angular';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 
-import {
-  AccountInfo,
-  AuthenticationResult,
-  InteractionStatus,
-} from '@azure/msal-browser';
+import { AccountInfo, AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
 
-import {
-  Subject,
-} from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { App } from './app';
 import { AuthService } from './core/auth/auth.service';
@@ -31,19 +17,13 @@ describe('App', () => {
   let redirectResult$: Subject<AuthenticationResult | null>;
   let interactionStatus$: Subject<InteractionStatus>;
 
-  const getActiveAccount = vi.fn(
-    () => activeAccount
-  );
+  const getActiveAccount = vi.fn(() => activeAccount);
 
-  const getAllAccounts = vi.fn(
-    () => cachedAccounts
-  );
+  const getAllAccounts = vi.fn(() => cachedAccounts);
 
-  const setActiveAccount = vi.fn(
-    (account: AccountInfo | null) => {
-      activeAccount = account;
-    }
-  );
+  const setActiveAccount = vi.fn((account: AccountInfo | null) => {
+    activeAccount = account;
+  });
 
   const handleRedirectObservable = vi.fn();
   const loadCurrentUser = vi.fn();
@@ -83,10 +63,8 @@ describe('App', () => {
   beforeEach(async () => {
     activeAccount = null;
     cachedAccounts = [];
-    redirectResult$ =
-      new Subject<AuthenticationResult | null>();
-    interactionStatus$ =
-      new Subject<InteractionStatus>();
+    redirectResult$ = new Subject<AuthenticationResult | null>();
+    interactionStatus$ = new Subject<InteractionStatus>();
 
     getActiveAccount.mockClear();
     getAllAccounts.mockClear();
@@ -122,9 +100,7 @@ describe('App', () => {
     TestBed.createComponent(App);
   }
 
-  function redirectResult(
-    account: AccountInfo
-  ): AuthenticationResult {
+  function redirectResult(account: AccountInfo): AuthenticationResult {
     return {
       account,
     } as AuthenticationResult;
@@ -138,9 +114,7 @@ describe('App', () => {
 
   it('establishes the redirect account then loads the CareTrack user', () => {
     const router = TestBed.inject(Router);
-    const navigate = vi
-      .spyOn(router, 'navigate')
-      .mockResolvedValue(true);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     createApp();
 
     redirectResult$.next(redirectResult(firstAccount));
@@ -174,10 +148,7 @@ describe('App', () => {
   });
 
   it('does not select or load when multiple cached accounts exist', () => {
-    cachedAccounts = [
-      firstAccount,
-      secondAccount,
-    ];
+    cachedAccounts = [firstAccount, secondAccount];
     createApp();
 
     interactionStatus$.next(InteractionStatus.None);
@@ -198,9 +169,7 @@ describe('App', () => {
 
   it('does not duplicate loading or navigation for repeated MSAL None events', () => {
     const router = TestBed.inject(Router);
-    const navigate = vi
-      .spyOn(router, 'navigate')
-      .mockResolvedValue(true);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     createApp();
 
     redirectResult$.next(redirectResult(firstAccount));

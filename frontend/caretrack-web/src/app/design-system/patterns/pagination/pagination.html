@@ -1,6 +1,7 @@
 <nav class="ct-pagination" [attr.aria-label]="ariaLabel()">
   <p class="ct-pagination__summary" aria-live="polite">
-    Showing {{ firstResult() }}–{{ lastResult() }} of {{ totalCount() }}
+    Showing {{ firstResult() }}–{{ lastResult() }} of {{ totalCount() }} · Page {{ page() }} of
+    {{ totalPages() || 1 }}
   </p>
   <div class="ct-pagination__controls">
     <button

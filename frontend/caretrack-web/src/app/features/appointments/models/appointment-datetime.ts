@@ -1,8 +1,7 @@
 import { formatDate } from '@angular/common';
 
 const OFFSET_SUFFIX = /(z|[+-]\d{2}:\d{2})$/i;
-const UTC_INPUT_PATTERN =
-  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/;
+const UTC_INPUT_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/;
 
 /**
  * Phase 6G convention: offset-less backend appointment values are interpreted as UTC.

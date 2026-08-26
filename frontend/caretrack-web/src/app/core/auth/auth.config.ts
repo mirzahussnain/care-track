@@ -19,13 +19,11 @@ const msalConfiguration: Configuration = {
   auth: {
     clientId: environment.auth.clientId,
 
-    authority:
-      `https://login.microsoftonline.com/${environment.auth.tenantId}`,
+    authority: `https://login.microsoftonline.com/${environment.auth.tenantId}`,
 
     redirectUri: environment.auth.redirectUri,
 
-    postLogoutRedirectUri:
-      environment.auth.redirectUri,
+    postLogoutRedirectUri: environment.auth.redirectUri,
   },
 
   cache: {
@@ -34,35 +32,23 @@ const msalConfiguration: Configuration = {
 };
 
 export function msalInstanceFactory() {
-  return new PublicClientApplication(
-    msalConfiguration
-  );
+  return new PublicClientApplication(msalConfiguration);
 }
 
-export function msalGuardConfigurationFactory():
-  MsalGuardConfiguration {
+export function msalGuardConfigurationFactory(): MsalGuardConfiguration {
   return {
     interactionType: InteractionType.Redirect,
 
     authRequest: {
-      scopes: [
-        environment.auth.apiScope,
-      ],
+      scopes: [environment.auth.apiScope],
     },
   };
 }
 
-export function msalInterceptorConfigurationFactory():
-  MsalInterceptorConfiguration {
+export function msalInterceptorConfigurationFactory(): MsalInterceptorConfiguration {
+  const protectedResourceMap = new Map<string, string[]>();
 
-  const protectedResourceMap =new Map<string, string[]>();
-
-  protectedResourceMap.set(
-    `${environment.apiBaseUrl}/*`,
-    [
-      environment.auth.apiScope,
-    ]
-  );
+  protectedResourceMap.set(`${environment.apiBaseUrl}/*`, [environment.auth.apiScope]);
 
   return {
     interactionType: InteractionType.Redirect,
@@ -77,12 +63,10 @@ export const msalProviders = [
   },
   {
     provide: MSAL_GUARD_CONFIG,
-    useFactory:
-      msalGuardConfigurationFactory,
+    useFactory: msalGuardConfigurationFactory,
   },
   {
     provide: MSAL_INTERCEPTOR_CONFIG,
-    useFactory:
-      msalInterceptorConfigurationFactory,
+    useFactory: msalInterceptorConfigurationFactory,
   },
 ];

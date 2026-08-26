@@ -73,3 +73,14 @@
     flex-direction: row;
   }
 }
+
+@media (max-width: 479px) {
+  .ct-pagination__pages {
+    display: none;
+  }
+
+  .ct-pagination__button--wide {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

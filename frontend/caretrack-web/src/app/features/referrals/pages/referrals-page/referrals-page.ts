@@ -103,6 +103,7 @@ export class ReferralsPage {
   readonly result = signal<PagedResult<Referral> | null>(null);
   readonly loading = signal(true);
   readonly error = signal<ListError>(null);
+  readonly filtersExpanded = signal(false);
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -115,17 +116,17 @@ export class ReferralsPage {
 
   applyFilters(): void {
     const filters = this.readFilters();
-    if (
-      filters.createdFrom &&
-      filters.createdTo &&
-      filters.createdFrom > filters.createdTo
-    ) {
+    if (filters.createdFrom && filters.createdTo && filters.createdFrom > filters.createdTo) {
       this.error.set('validation');
       return;
     }
     this.appliedFilters.set(filters);
     this.page.set(1);
     this.loadReferrals();
+  }
+
+  toggleFilters(): void {
+    this.filtersExpanded.update((expanded) => !expanded);
   }
 
   resetFilters(): void {
@@ -214,11 +215,7 @@ export class ReferralsPage {
         error: (error: HttpErrorResponse) => {
           this.result.set(null);
           this.error.set(
-            error.status === 403
-              ? 'forbidden'
-              : error.status === 400
-                ? 'validation'
-                : 'generic',
+            error.status === 403 ? 'forbidden' : error.status === 400 ? 'validation' : 'generic',
           );
           this.loading.set(false);
         },

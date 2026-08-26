@@ -7,8 +7,12 @@
   border-radius: var(--ct-radius-lg);
 }
 
-.ct-surface--default { background: var(--ct-surface); }
-.ct-surface--subtle { background: var(--ct-surface-subtle); }
+.ct-surface--default {
+  background: var(--ct-surface);
+}
+.ct-surface--subtle {
+  background: var(--ct-surface-subtle);
+}
 
 .ct-surface--elevated {
   border-color: var(--ct-border-strong);
@@ -16,7 +20,15 @@
   box-shadow: var(--ct-shadow-xs);
 }
 
-.ct-surface--padding-none { padding: 0; }
-.ct-surface--padding-sm { padding: 0.75rem; }
-.ct-surface--padding-md { padding: 1rem; }
-.ct-surface--padding-lg { padding: 1.5rem; }
+.ct-surface--padding-none {
+  padding: 0;
+}
+.ct-surface--padding-sm {
+  padding: 0.75rem;
+}
+.ct-surface--padding-md {
+  padding: 1rem;
+}
+.ct-surface--padding-lg {
+  padding: 1.5rem;
+}

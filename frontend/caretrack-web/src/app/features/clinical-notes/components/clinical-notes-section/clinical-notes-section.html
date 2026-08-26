@@ -14,15 +14,17 @@
       </div>
     } @else if (loadError()) {
       <ct-empty-state
-        title="Clinical Notes could not be loaded"
+        title="Clinical notes could not be loaded"
         [description]="loadError() ?? ''"
         icon="ph-warning-circle"
       >
-        <ct-button variant="secondary" size="sm" (click)="retryRequested.emit()">Try again</ct-button>
+        <ct-button variant="secondary" size="sm" (click)="retryRequested.emit()"
+          >Try again</ct-button
+        >
       </ct-empty-state>
     } @else if (notes().length === 0) {
       <ct-empty-state
-        title="No Clinical Notes recorded"
+        title="No clinical notes recorded"
         description="Add the first note for this appointment below."
         icon="ph-note-blank"
       />
@@ -44,7 +46,9 @@
                   }
                 </div>
                 @if (editingId() !== note.id) {
-                  <ct-button variant="ghost" size="sm" (click)="beginEdit(note)">Edit note</ct-button>
+                  <ct-button variant="ghost" size="sm" (click)="beginEdit(note)"
+                    >Edit note</ct-button
+                  >
                 }
               </header>
 
@@ -95,7 +99,12 @@
   </ct-surface>
 
   <ct-surface>
-    <form class="clinical-notes__create" [formGroup]="createForm" (ngSubmit)="createNote()" novalidate>
+    <form
+      class="clinical-notes__create"
+      [formGroup]="createForm"
+      (ngSubmit)="createNote()"
+      novalidate
+    >
       <div>
         <h3>Add Clinical Note</h3>
         <p>The author is derived from your authenticated account.</p>
@@ -119,7 +128,7 @@
       }
       <div class="clinical-notes__form-actions">
         <ct-button type="submit" [loading]="creating()" [disabled]="creating() || !!updatingId()">
-          Add Clinical Note
+          Add clinical note
         </ct-button>
       </div>
     </form>

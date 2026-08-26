@@ -7,3 +7,21 @@
 .is-active .active-marker {
   display: block;
 }
+
+.app-sidebar__brand-mark {
+  display: grid;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  place-items: center;
+  padding: 0.25rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-surface);
+}
+
+.app-sidebar__brand-mark img {
+  display: block;
+  width: 1.75rem;
+  height: auto;
+}

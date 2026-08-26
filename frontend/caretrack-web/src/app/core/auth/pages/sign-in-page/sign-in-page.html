@@ -1,67 +1,24 @@
-<div
-  class="
-    grid min-h-screen place-items-center
-    bg-ct-bg
-    px-4 py-8
-  "
->
+<div class="sign-in-page grid min-h-screen place-items-center px-4 py-8">
   <main
-    class="
-      w-full max-w-md
-      rounded-ct-lg
-      border border-ct-border
-      bg-ct-surface
-      p-6
-      shadow-[var(--ct-shadow-xs)]
-      sm:p-8
-    "
+    class="sign-in-page__card w-full max-w-md rounded-ct-lg border border-ct-border bg-ct-surface p-6 text-center sm:p-8"
   >
-    <div class="mb-8">
-      <div
-        class="
-          mb-5 grid size-10 place-items-center
-          rounded-ct-md
-          bg-ct-primary-strong
-          text-xs font-bold
-          text-ct-text-inverse
-        "
-        aria-hidden="true"
-      >
-        CT
-      </div>
-
-      <h1
-        class="
-          text-xl font-semibold
-          tracking-tight
-          text-ct-text
-        "
-      >
-        Sign in to CareTrack
-      </h1>
-
-      <p
-        class="
-          mt-2 text-sm
-          leading-6
-          text-ct-text-secondary
-        "
-      >
-        Continue with your authorised Microsoft account
-        to access the clinical workspace.
-      </p>
+    <div class="sign-in-page__brand">
+      <img src="/brand/caretrack-symbol.svg" alt="" />
+      <h1>CareTrack</h1>
+      <p class="sign-in-page__descriptor">Clinical Referral &amp; Workflow Management</p>
     </div>
+
+    <p class="sign-in-page__supporting-copy">
+      Continue with your authorised Microsoft account to access the clinical workspace.
+    </p>
 
     <ct-button
       class="block w-full"
+      [loading]="interactionInProgress()"
       [disabled]="!canSignIn()"
       (click)="signIn()"
     >
-      <i
-        class="ph ph-microsoft-logo"
-        aria-hidden="true"
-      ></i>
-
+      <i class="ph ph-microsoft-logo" aria-hidden="true"></i>
       Sign in with Microsoft
     </ct-button>
   </main>

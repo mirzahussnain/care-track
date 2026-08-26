@@ -15,11 +15,7 @@ import {
   Surface,
 } from '../../../../design-system';
 
-type DesignDirection =
-  | 'quiet'
-  | 'editorial'
-  | 'structured';
-
+type DesignDirection = 'quiet' | 'editorial' | 'structured';
 
 @Component({
   selector: 'app-design-lab-page',
@@ -41,12 +37,9 @@ type DesignDirection =
   styleUrl: './design-lab-page.css',
 })
 export class DesignLabPage {
-    readonly activeDirection =
-    signal<DesignDirection>('quiet');
+  readonly activeDirection = signal<DesignDirection>('quiet');
 
-  selectDirection(
-    direction: DesignDirection,
-  ): void {
+  selectDirection(direction: DesignDirection): void {
     this.activeDirection.set(direction);
   }
 }

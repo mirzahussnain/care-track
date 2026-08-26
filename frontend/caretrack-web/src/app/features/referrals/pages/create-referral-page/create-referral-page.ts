@@ -123,11 +123,7 @@ export class CreateReferralPage {
     return referralPriorityLabel(priority);
   }
 
-  errorFor(
-    control: FormControl<string>,
-    label: string,
-    maximum?: number,
-  ): string | undefined {
+  errorFor(control: FormControl<string>, label: string, maximum?: number): string | undefined {
     if (!(control.touched || this.submitted())) {
       return undefined;
     }

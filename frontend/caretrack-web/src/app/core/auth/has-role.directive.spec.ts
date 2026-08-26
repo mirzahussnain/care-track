@@ -1,203 +1,97 @@
-import {
-  Component,
-  signal,
-} from '@angular/core';
+import { Component, signal } from '@angular/core';
 
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  AuthService,
-} from './auth.service';
+import { AuthService } from './auth.service';
 
-import {
-  CARETRACK_ROLES,
-  CareTrackRole,
-} from './auth.models';
+import { CARETRACK_ROLES, CareTrackRole } from './auth.models';
 
-import {
-  HasRoleDirective,
-} from './has-role.directive';
+import { HasRoleDirective } from './has-role.directive';
 
 @Component({
-  imports: [
-    HasRoleDirective,
-  ],
+  imports: [HasRoleDirective],
   template: `
-    <p
-      *ctHasRole="
-        roles.clinician
-      "
-    >
-      Clinician content
-    </p>
+    <p *ctHasRole="roles.clinician">Clinician content</p>
 
-    <p
-      *ctHasRole="[
-        roles.clinician,
-        roles.referralCoordinator
-      ]"
-    >
-      Shared content
-    </p>
+    <p *ctHasRole="[roles.clinician, roles.referralCoordinator]">Shared content</p>
   `,
 })
 class TestHostComponent {
-  readonly roles =
-    CARETRACK_ROLES;
+  readonly roles = CARETRACK_ROLES;
 }
 
-describe(
-  'HasRoleDirective',
-  () => {
-    let fixture:
-      ComponentFixture<
-        TestHostComponent
-      >;
+describe('HasRoleDirective', () => {
+  let fixture: ComponentFixture<TestHostComponent>;
 
-    const rolesSignal =
-      signal<
-        readonly CareTrackRole[]
-      >([]);
+  const rolesSignal = signal<readonly CareTrackRole[]>([]);
 
-    const authServiceMock = {
-      hasRole: (
-        role: CareTrackRole
-      ) =>
-        rolesSignal()
-          .includes(role),
-    };
+  const authServiceMock = {
+    hasRole: (role: CareTrackRole) => rolesSignal().includes(role),
+  };
 
-    beforeEach(async () => {
-      rolesSignal.set([]);
+  beforeEach(async () => {
+    rolesSignal.set([]);
 
-      await TestBed
-        .configureTestingModule({
-          imports: [
-            TestHostComponent,
-          ],
+    await TestBed.configureTestingModule({
+      imports: [TestHostComponent],
 
-          providers: [
-            {
-              provide:
-                AuthService,
+      providers: [
+        {
+          provide: AuthService,
 
-              useValue:
-                authServiceMock,
-            },
-          ],
-        })
-        .compileComponents();
+          useValue: authServiceMock,
+        },
+      ],
+    }).compileComponents();
 
-      fixture =
-        TestBed.createComponent(
-          TestHostComponent
-        );
+    fixture = TestBed.createComponent(TestHostComponent);
 
-      fixture.detectChanges();
-    });
+    fixture.detectChanges();
+  });
 
-    it(
-      'hides role-protected content when the user has no matching role',
-      () => {
-        const text =
-          fixture.nativeElement
-            .textContent;
+  it('hides role-protected content when the user has no matching role', () => {
+    const text = fixture.nativeElement.textContent;
 
-        expect(text)
-          .not.toContain(
-            'Clinician content'
-          );
+    expect(text).not.toContain('Clinician content');
 
-        expect(text)
-          .not.toContain(
-            'Shared content'
-          );
-      }
-    );
+    expect(text).not.toContain('Shared content');
+  });
 
-    it(
-      'shows clinician-only content for a clinician',
-      () => {
-        rolesSignal.set([
-          CARETRACK_ROLES
-            .clinician,
-        ]);
+  it('shows clinician-only content for a clinician', () => {
+    rolesSignal.set([CARETRACK_ROLES.clinician]);
 
-        fixture.detectChanges();
+    fixture.detectChanges();
 
-        const text =
-          fixture.nativeElement
-            .textContent;
+    const text = fixture.nativeElement.textContent;
 
-        expect(text)
-          .toContain(
-            'Clinician content'
-          );
+    expect(text).toContain('Clinician content');
 
-        expect(text)
-          .toContain(
-            'Shared content'
-          );
-      }
-    );
+    expect(text).toContain('Shared content');
+  });
 
-    it(
-      'shows shared content but not clinician-only content for a referral coordinator',
-      () => {
-        rolesSignal.set([
-          CARETRACK_ROLES
-            .referralCoordinator,
-        ]);
+  it('shows shared content but not clinician-only content for a referral coordinator', () => {
+    rolesSignal.set([CARETRACK_ROLES.referralCoordinator]);
 
-        fixture.detectChanges();
+    fixture.detectChanges();
 
-        const text =
-          fixture.nativeElement
-            .textContent;
+    const text = fixture.nativeElement.textContent;
 
-        expect(text)
-          .not.toContain(
-            'Clinician content'
-          );
+    expect(text).not.toContain('Clinician content');
 
-        expect(text)
-          .toContain(
-            'Shared content'
-          );
-      }
-    );
+    expect(text).toContain('Shared content');
+  });
 
-    it(
-      'reacts when roles change',
-      () => {
-        let text =
-          fixture.nativeElement
-            .textContent;
+  it('reacts when roles change', () => {
+    let text = fixture.nativeElement.textContent;
 
-        expect(text)
-          .not.toContain(
-            'Clinician content'
-          );
+    expect(text).not.toContain('Clinician content');
 
-        rolesSignal.set([
-          CARETRACK_ROLES
-            .clinician,
-        ]);
+    rolesSignal.set([CARETRACK_ROLES.clinician]);
 
-        fixture.detectChanges();
+    fixture.detectChanges();
 
-        text =
-          fixture.nativeElement
-            .textContent;
+    text = fixture.nativeElement.textContent;
 
-        expect(text)
-          .toContain(
-            'Clinician content'
-          );
-      }
-    );
-  }
-);
+    expect(text).toContain('Clinician content');
+  });
+});

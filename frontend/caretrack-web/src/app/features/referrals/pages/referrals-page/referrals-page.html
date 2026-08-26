@@ -15,7 +15,21 @@
 
   <ct-surface padding="none">
     <ct-data-toolbar>
+      <button
+        ctToolbarPrimary
+        type="button"
+        class="referrals-page__filter-toggle"
+        aria-label="Toggle referral filters"
+        aria-controls="referral-filters"
+        [attr.aria-expanded]="filtersExpanded()"
+        (click)="toggleFilters()"
+      >
+        <i class="ph ph-funnel" aria-hidden="true"></i>
+      </button>
+
       <form
+        id="referral-filters"
+        [class.referrals-page__filters--expanded]="filtersExpanded()"
         ctToolbarPrimary
         class="referrals-page__filters"
         [formGroup]="filters"
@@ -121,7 +135,7 @@
         </ct-empty-state>
       } @else {
         <div class="referrals-page__table-wrap">
-          <table>
+          <table class="ct-data-table">
             <thead>
               <tr>
                 <th scope="col">Reference</th>
@@ -135,22 +149,26 @@
             <tbody>
               @for (referral of referrals.items; track referral.id) {
                 <tr>
-                  <td><strong>{{ referral.referralReference }}</strong></td>
-                  <td>
+                  <td data-label="Reference">
+                    <strong>{{ referral.referralReference }}</strong>
+                  </td>
+                  <td data-label="Priority">
                     <ct-status-chip [tone]="priorityTone(referral.priority)">
                       {{ priorityLabel(referral.priority) }}
                     </ct-status-chip>
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <ct-status-chip [tone]="statusTone(referral.status)">
                       {{ statusLabel(referral.status) }}
                     </ct-status-chip>
                   </td>
-                  <td>{{ referral.createdAt | date: 'dd MMM yyyy' : 'UTC' }}</td>
-                  <td>{{ referral.assignedTo || 'Not assigned' }}</td>
-                  <td>
+                  <td data-label="Created">
+                    {{ referral.createdAt | date: 'dd MMM yyyy' : 'UTC' }}
+                  </td>
+                  <td data-label="Assigned team">{{ referral.assignedTo || 'Not assigned' }}</td>
+                  <td data-label="Actions">
                     <a [routerLink]="['/referrals', referral.id]">
-                      View referral
+                      View
                       <span class="sr-only"> {{ referral.referralReference }}</span>
                     </a>
                   </td>

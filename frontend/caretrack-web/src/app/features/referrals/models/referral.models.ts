@@ -14,16 +14,14 @@ export const REFERRAL_STATUSES = {
   cancelled: 10,
 } as const;
 
-export type ReferralStatus =
-  (typeof REFERRAL_STATUSES)[keyof typeof REFERRAL_STATUSES];
+export type ReferralStatus = (typeof REFERRAL_STATUSES)[keyof typeof REFERRAL_STATUSES];
 
 export const REFERRAL_PRIORITIES = {
   routine: 0,
   urgent: 1,
 } as const;
 
-export type ReferralPriority =
-  (typeof REFERRAL_PRIORITIES)[keyof typeof REFERRAL_PRIORITIES];
+export type ReferralPriority = (typeof REFERRAL_PRIORITIES)[keyof typeof REFERRAL_PRIORITIES];
 
 export const REFERRAL_HISTORY_EVENT_TYPES = {
   created: 0,
@@ -45,11 +43,7 @@ export type ReferralHistoryEventType =
   (typeof REFERRAL_HISTORY_EVENT_TYPES)[keyof typeof REFERRAL_HISTORY_EVENT_TYPES];
 
 export type ReferralSortField =
-  | 'createdAt'
-  | 'updatedAt'
-  | 'priority'
-  | 'status'
-  | 'referralReference';
+  'createdAt' | 'updatedAt' | 'priority' | 'status' | 'referralReference';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -118,24 +112,23 @@ export interface ProblemDetails {
   readonly detail?: string;
 }
 
-const STATUS_PRESENTATION: Readonly<
-  Record<ReferralStatus, { label: string; tone: SemanticTone }>
-> = {
-  [REFERRAL_STATUSES.draft]: { label: 'Draft', tone: 'neutral' },
-  [REFERRAL_STATUSES.submitted]: { label: 'Submitted', tone: 'info' },
-  [REFERRAL_STATUSES.awaitingTriage]: { label: 'Awaiting triage', tone: 'warning' },
-  [REFERRAL_STATUSES.moreInformationRequired]: {
-    label: 'More information required',
-    tone: 'warning',
-  },
-  [REFERRAL_STATUSES.accepted]: { label: 'Accepted', tone: 'success' },
-  [REFERRAL_STATUSES.assigned]: { label: 'Assigned', tone: 'info' },
-  [REFERRAL_STATUSES.scheduled]: { label: 'Scheduled', tone: 'info' },
-  [REFERRAL_STATUSES.inProgress]: { label: 'In progress', tone: 'info' },
-  [REFERRAL_STATUSES.completed]: { label: 'Completed', tone: 'success' },
-  [REFERRAL_STATUSES.rejected]: { label: 'Rejected', tone: 'danger' },
-  [REFERRAL_STATUSES.cancelled]: { label: 'Cancelled', tone: 'danger' },
-};
+const STATUS_PRESENTATION: Readonly<Record<ReferralStatus, { label: string; tone: SemanticTone }>> =
+  {
+    [REFERRAL_STATUSES.draft]: { label: 'Draft', tone: 'neutral' },
+    [REFERRAL_STATUSES.submitted]: { label: 'Submitted', tone: 'info' },
+    [REFERRAL_STATUSES.awaitingTriage]: { label: 'Awaiting triage', tone: 'warning' },
+    [REFERRAL_STATUSES.moreInformationRequired]: {
+      label: 'More information required',
+      tone: 'warning',
+    },
+    [REFERRAL_STATUSES.accepted]: { label: 'Accepted', tone: 'success' },
+    [REFERRAL_STATUSES.assigned]: { label: 'Assigned', tone: 'info' },
+    [REFERRAL_STATUSES.scheduled]: { label: 'Scheduled', tone: 'info' },
+    [REFERRAL_STATUSES.inProgress]: { label: 'In progress', tone: 'info' },
+    [REFERRAL_STATUSES.completed]: { label: 'Completed', tone: 'success' },
+    [REFERRAL_STATUSES.rejected]: { label: 'Rejected', tone: 'danger' },
+    [REFERRAL_STATUSES.cancelled]: { label: 'Cancelled', tone: 'danger' },
+  };
 
 const HISTORY_LABELS: Readonly<Record<ReferralHistoryEventType, string>> = {
   [REFERRAL_HISTORY_EVENT_TYPES.created]: 'Referral created',

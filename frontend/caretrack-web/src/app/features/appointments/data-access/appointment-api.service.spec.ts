@@ -3,11 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../../environments/environment';
-import {
-  APPOINTMENT_STATUSES,
-  APPOINTMENT_TYPES,
-  Appointment,
-} from '../models/appointment.models';
+import { APPOINTMENT_STATUSES, APPOINTMENT_TYPES, Appointment } from '../models/appointment.models';
 import { AppointmentApiService } from './appointment-api.service';
 
 describe('AppointmentApiService', () => {
@@ -44,19 +40,21 @@ describe('AppointmentApiService', () => {
   afterEach(() => http.verify());
 
   it('searches with exact filters, numeric enums, UTC values, sorting, and paging', () => {
-    service.searchAppointments({
-      patientId: appointment.patientId,
-      referralId: appointment.referralId,
-      status: APPOINTMENT_STATUSES.scheduled,
-      appointmentType: APPOINTMENT_TYPES.consultation,
-      location: ' Clinic A ',
-      scheduledFrom: '2026-09-01T00:00:00.000Z',
-      scheduledTo: '2026-09-02T00:00:00.000Z',
-      page: 2,
-      pageSize: 20,
-      sortBy: 'scheduledStart',
-      sortDirection: 'desc',
-    }).subscribe();
+    service
+      .searchAppointments({
+        patientId: appointment.patientId,
+        referralId: appointment.referralId,
+        status: APPOINTMENT_STATUSES.scheduled,
+        appointmentType: APPOINTMENT_TYPES.consultation,
+        location: ' Clinic A ',
+        scheduledFrom: '2026-09-01T00:00:00.000Z',
+        scheduledTo: '2026-09-02T00:00:00.000Z',
+        page: 2,
+        pageSize: 20,
+        sortBy: 'scheduledStart',
+        sortDirection: 'desc',
+      })
+      .subscribe();
 
     const request = http.expectOne((candidate) => candidate.url === baseUrl);
     expect(request.request.method).toBe('GET');
@@ -75,12 +73,14 @@ describe('AppointmentApiService', () => {
   });
 
   it('omits optional search filters', () => {
-    service.searchAppointments({
-      page: 1,
-      pageSize: 20,
-      sortBy: 'scheduledStart',
-      sortDirection: 'asc',
-    }).subscribe();
+    service
+      .searchAppointments({
+        page: 1,
+        pageSize: 20,
+        sortBy: 'scheduledStart',
+        sortDirection: 'asc',
+      })
+      .subscribe();
 
     const request = http.expectOne((candidate) => candidate.url === baseUrl);
     expect(request.request.params.has('patientId')).toBe(false);

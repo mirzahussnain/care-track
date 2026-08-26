@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.sign-in-page {
+  background-color: #eef6fb;
+  background-image:
+    linear-gradient(rgb(239 247 252 / 18%), rgb(239 247 252 / 18%)),
+    url('/images/caretrack-sign-in-background.webp');
+  background-position: center;
+  background-size: cover;
+}
+
+.sign-in-page__card {
+  box-shadow: 0 1.25rem 4rem rgb(35 64 88 / 16%);
+}
+
+.sign-in-page__brand {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+}
+
+.sign-in-page__brand img {
+  display: block;
+  width: auto;
+  height: 4.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sign-in-page__brand h1 {
+  color: var(--ct-primary-strong);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sign-in-page__descriptor {
+  color: var(--ct-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.sign-in-page__supporting-copy {
+  margin-block: 1.25rem 1.5rem;
+  color: var(--ct-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .sign-in-page {
+    background-position: 58% center;
+  }
+
+  .sign-in-page__brand img {
+    height: 4rem;
+  }
+}

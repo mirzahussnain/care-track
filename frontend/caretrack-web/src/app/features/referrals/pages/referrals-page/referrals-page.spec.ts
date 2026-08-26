@@ -32,7 +32,11 @@ describe('ReferralsPage', () => {
     assignedAt: '2026-08-25T10:10:00Z',
   };
   const result: PagedResult<Referral> = {
-    items: [referral], page: 1, pageSize: 20, totalCount: 1, totalPages: 1,
+    items: [referral],
+    page: 1,
+    pageSize: 20,
+    totalCount: 1,
+    totalPages: 1,
   };
 
   beforeEach(async () => {
@@ -126,6 +130,23 @@ describe('ReferralsPage', () => {
     fixture.componentInstance.applyFilters();
 
     expect(response$.observed).toBe(false);
+  });
+
+  it('toggles the mobile referral filters from the filter button', () => {
+    fixture.detectChanges();
+    const toggle = fixture.nativeElement.querySelector(
+      '.referrals-page__filter-toggle',
+    ) as HTMLButtonElement;
+    const filters = fixture.nativeElement.querySelector('.referrals-page__filters') as HTMLElement;
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(filters.classList.contains('referrals-page__filters--expanded')).toBe(false);
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(filters.classList.contains('referrals-page__filters--expanded')).toBe(true);
   });
 
   it('treats 403 as a capability state and hides creation from Administrator', () => {

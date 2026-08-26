@@ -41,9 +41,15 @@ describe('CreateReferralPage', () => {
   beforeEach(async () => {
     createReferral.mockReset();
     roles = [CARETRACK_ROLES.referralCoordinator];
-    searchReferralPatients.mockReset().mockReturnValue(of({
-      items: [], page: 1, pageSize: 5, totalCount: 0, totalPages: 0,
-    }));
+    searchReferralPatients.mockReset().mockReturnValue(
+      of({
+        items: [],
+        page: 1,
+        pageSize: 5,
+        totalCount: 0,
+        totalPages: 0,
+      }),
+    );
     await TestBed.configureTestingModule({
       imports: [CreateReferralPage],
       providers: [
@@ -127,7 +133,9 @@ describe('CreateReferralPage', () => {
     roles = [CARETRACK_ROLES.administrator];
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Referral management is not available for your role');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Referral management is not available for your role',
+    );
     expect(fixture.nativeElement.querySelector('form')).toBeNull();
   });
 });

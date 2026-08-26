@@ -1,4 +1,4 @@
-import { CARETRACK_ROLES, CareTrackRole } from "../auth/auth.models";
+import { CARETRACK_ROLES, CareTrackRole } from '../auth/auth.models';
 
 export interface ShellNavigationItem {
   label: string;
@@ -16,34 +16,26 @@ export const SHELL_NAVIGATION: readonly ShellNavigationItem[] = [
     exact: true,
   },
   {
-      label: 'Patients',
-      route: '/patients',
-      icon: 'ph-users',
-      exact: false,
-      roles: [
-        CARETRACK_ROLES.clinician,
-        CARETRACK_ROLES.referralCoordinator,
-      ],
-    },
+    label: 'Patients',
+    route: '/patients',
+    icon: 'ph-users',
+    exact: false,
+    roles: [CARETRACK_ROLES.clinician, CARETRACK_ROLES.referralCoordinator],
+  },
 
-    {
-      label: 'Referrals',
-      route: '/referrals',
-      icon: 'ph-files',
-      exact: false,
-      roles: [
-        CARETRACK_ROLES.clinician,
-        CARETRACK_ROLES.referralCoordinator,
-      ],
-    },
+  {
+    label: 'Referrals',
+    route: '/referrals',
+    icon: 'ph-files',
+    exact: false,
+    roles: [CARETRACK_ROLES.clinician, CARETRACK_ROLES.referralCoordinator],
+  },
 
-    {
-      label: 'Appointments',
-      route: '/appointments',
-      icon: 'ph-calendar-dots',
-      exact: false,
-      roles: [
-        CARETRACK_ROLES.clinician,
-      ],
-    },
+  {
+    label: 'Appointments',
+    route: '/appointments',
+    icon: 'ph-calendar-dots',
+    exact: false,
+    roles: [CARETRACK_ROLES.clinician],
+  },
 ];

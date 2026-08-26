@@ -3,15 +3,9 @@ export type { ButtonSize, ButtonVariant } from './button/button';
 export { EmptyState } from './empty-state/empty-state';
 export { FormField } from './form-field/form-field';
 export { IconButton } from './icon-button/icon-button';
-export type {
-  IconButtonSize,
-  IconButtonVariant,
-} from './icon-button/icon-button';
+export type { IconButtonSize, IconButtonVariant } from './icon-button/icon-button';
 export { Skeleton } from './skeleton/skeleton';
 export type { SkeletonVariant } from './skeleton/skeleton';
 export { StatusChip } from './status-chip/status-chip';
 export { Surface } from './surface/surface';
-export type {
-  SurfacePadding,
-  SurfaceVariant,
-} from './surface/surface';
+export type { SurfacePadding, SurfaceVariant } from './surface/surface';

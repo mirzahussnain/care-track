@@ -6,7 +6,21 @@
 
   <ct-surface padding="none">
     <ct-data-toolbar>
+      <button
+        ctToolbarPrimary
+        type="button"
+        class="appointments-page__filter-toggle"
+        aria-label="Toggle appointment filters"
+        aria-controls="appointment-filters"
+        [attr.aria-expanded]="filtersExpanded()"
+        (click)="toggleFilters()"
+      >
+        <i class="ph ph-funnel" aria-hidden="true"></i>
+      </button>
+
       <form
+        id="appointment-filters"
+        [class.appointments-page__filters--expanded]="filtersExpanded()"
         ctToolbarPrimary
         class="appointments-page__filters"
         [formGroup]="filters"
@@ -36,13 +50,19 @@
         </ct-form-field>
 
         <ct-form-field label="Scheduled from (UTC)" forId="appointment-scheduled-from">
-          <input id="appointment-scheduled-from" type="datetime-local" formControlName="scheduledFrom" />
+          <input
+            id="appointment-scheduled-from"
+            type="datetime-local"
+            formControlName="scheduledFrom"
+          />
         </ct-form-field>
 
         <ct-form-field
           label="Scheduled to (UTC)"
           forId="appointment-scheduled-to"
-          [error]="filters.hasError('appointmentRange') ? 'The end must be after the start.' : undefined"
+          [error]="
+            filters.hasError('appointmentRange') ? 'The end must be after the start.' : undefined
+          "
         >
           <input
             id="appointment-scheduled-to"
@@ -110,7 +130,11 @@
       @if (appointments.totalCount === 0) {
         <ct-empty-state
           [title]="isFiltered() ? 'No appointments matched these filters' : 'No appointments yet'"
-          [description]="isFiltered() ? 'Reset the filters to review all appointments.' : 'Appointments are scheduled from eligible referrals.'"
+          [description]="
+            isFiltered()
+              ? 'Reset the filters to review all appointments.'
+              : 'Appointments are scheduled from eligible referrals.'
+          "
           icon="ph-calendar-dots"
         >
           @if (isFiltered()) {
@@ -121,7 +145,7 @@
         </ct-empty-state>
       } @else {
         <div class="appointments-page__table-wrap">
-          <table>
+          <table class="ct-data-table">
             <thead>
               <tr>
                 <th scope="col">Appointment</th>
@@ -136,35 +160,47 @@
             <tbody>
               @for (appointment of appointments.items; track appointment.id) {
                 <tr>
-                  <td><strong>{{ appointment.appointmentReference }}</strong></td>
-                  <td><time [attr.datetime]="appointment.scheduledStart">{{ utc(appointment.scheduledStart) }}</time></td>
-                  <td>
+                  <td data-label="Reference">
+                    <strong>{{ appointment.appointmentReference }}</strong>
+                  </td>
+                  <td data-label="Scheduled (UTC)">
+                    <time [attr.datetime]="appointment.scheduledStart">{{
+                      utc(appointment.scheduledStart)
+                    }}</time>
+                  </td>
+                  <td data-label="Patient">
                     @if (patientFor(appointment.patientId); as patient) {
-                      <strong>{{ patient.fullName }}</strong>
-                      <span>{{ patient.patientReference }}</span>
+                      <span class="appointments-page__cell-value">
+                        <strong>{{ patient.fullName }}</strong>
+                        <span>{{ patient.patientReference }}</span>
+                      </span>
                     } @else {
                       <span>Unavailable</span>
                     }
                   </td>
-                  <td>
+                  <td data-label="Referral">
                     @if (referralFor(appointment.referralId); as referral) {
-                      <a [routerLink]="['/referrals', referral.id]">{{ referral.referralReference }}</a>
+                      <a [routerLink]="['/referrals', referral.id]">{{
+                        referral.referralReference
+                      }}</a>
                     } @else {
                       <span>Unavailable</span>
                     }
                   </td>
-                  <td>
-                    <strong>{{ typeLabel(appointment.appointmentType) }}</strong>
-                    <span>{{ appointment.location }}</span>
+                  <td data-label="Type and location">
+                    <span class="appointments-page__cell-value">
+                      <strong>{{ typeLabel(appointment.appointmentType) }}</strong>
+                      <span>{{ appointment.location }}</span>
+                    </span>
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <ct-status-chip [tone]="statusTone(appointment.status)">
                       {{ statusLabel(appointment.status) }}
                     </ct-status-chip>
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <a [routerLink]="['/appointments', appointment.id]">
-                      View appointment
+                      View
                       <span class="sr-only"> {{ appointment.appointmentReference }}</span>
                     </a>
                   </td>

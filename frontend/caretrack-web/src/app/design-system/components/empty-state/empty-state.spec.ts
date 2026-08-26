@@ -24,8 +24,9 @@ describe('EmptyState', () => {
     expect(fixture.nativeElement.querySelector('.ct-empty-state__description')).toBeNull();
     fixture.componentRef.setInput('description', 'Adjust the current filters.');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.ct-empty-state__description')?.textContent)
-      .toContain('Adjust the current filters.');
+    expect(
+      fixture.nativeElement.querySelector('.ct-empty-state__description')?.textContent,
+    ).toContain('Adjust the current filters.');
   });
 
   it('renders an optional decorative icon', () => {

@@ -7,7 +7,13 @@ import { Observable, Subscription, forkJoin } from 'rxjs';
 import { CARETRACK_ROLES } from '../../../../core/auth/auth.models';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { HasRoleDirective } from '../../../../core/auth/has-role.directive';
-import { Button, EmptyState, Skeleton, StatusChip, Surface } from '../../../../design-system/components';
+import {
+  Button,
+  EmptyState,
+  Skeleton,
+  StatusChip,
+  Surface,
+} from '../../../../design-system/components';
 import { PageHeader, PatientIdentityBanner } from '../../../../design-system/patterns';
 import {
   ClinicalNotesSection,
@@ -24,10 +30,7 @@ import {
   referralStatusTone,
 } from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
-import {
-  AppointmentErrorMessage,
-  appointmentErrorMessage,
-} from '../../models/appointment-errors';
+import { AppointmentErrorMessage, appointmentErrorMessage } from '../../models/appointment-errors';
 import { formatAppointmentUtc } from '../../models/appointment-datetime';
 import {
   APPOINTMENT_STATUSES,
@@ -183,7 +186,7 @@ export class AppointmentDetailPage {
         },
         error: (error: HttpErrorResponse) => {
           this.notesLoading.set(false);
-          this.notesError.set(this.noteErrorMessage(error, 'Clinical Notes could not be loaded.'));
+          this.notesError.set(this.noteErrorMessage(error, 'Clinical notes could not be loaded.'));
         },
       });
   }
@@ -203,7 +206,9 @@ export class AppointmentDetailPage {
         },
         error: (error: HttpErrorResponse) => {
           this.creatingNote.set(false);
-          this.noteMutationError.set(this.noteErrorMessage(error, 'The Clinical Note could not be added.'));
+          this.noteMutationError.set(
+            this.noteErrorMessage(error, 'The Clinical Note could not be added.'),
+          );
         },
       });
   }
@@ -217,7 +222,9 @@ export class AppointmentDetailPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
-          this.notes.update((notes) => notes.map((note) => (note.id === updated.id ? updated : note)));
+          this.notes.update((notes) =>
+            notes.map((note) => (note.id === updated.id ? updated : note)),
+          );
           this.updatingNoteId.set(null);
           this.noteSaveVersion.update((version) => version + 1);
         },
@@ -274,7 +281,10 @@ export class AppointmentDetailPage {
       error: (error: HttpErrorResponse) => {
         this.activeAction.set(null);
         this.commandError.set(
-          appointmentErrorMessage(error, 'The appointment action could not be completed. Try again.'),
+          appointmentErrorMessage(
+            error,
+            'The appointment action could not be completed. Try again.',
+          ),
         );
       },
     });

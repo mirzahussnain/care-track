@@ -11,9 +11,7 @@ describe('appointment UTC convention', () => {
   });
 
   it('interprets offset-less backend appointment values as UTC', () => {
-    expect(normalizeAppointmentDateTime('2026-09-01T09:30:00')).toBe(
-      '2026-09-01T09:30:00Z',
-    );
+    expect(normalizeAppointmentDateTime('2026-09-01T09:30:00')).toBe('2026-09-01T09:30:00Z');
     expect(normalizeAppointmentDateTime('2026-09-01T09:30:00+01:00')).toBe(
       '2026-09-01T09:30:00+01:00',
     );

@@ -143,6 +143,19 @@ describe('ReferralDetailPage', () => {
     expect(fixture.nativeElement.textContent).toContain('Submit referral');
   });
 
+  it('keeps workflow actions and Referral History as ordered document-flow siblings', () => {
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const layout = element.querySelector('.referral-detail-page__layout') as HTMLElement;
+    const workflow = element.querySelector('.referral-detail-page__actions') as HTMLElement;
+    const historyTitle = element.querySelector('#referral-history-title') as HTMLElement;
+    const children = Array.from(layout.children);
+
+    expect(workflow.parentElement).toBe(layout);
+    expect(children.indexOf(workflow)).toBe(1);
+    expect(children[2].contains(historyTitle)).toBe(true);
+  });
   it('hides all workflow actions from Administrator without adding a bypass', () => {
     roles = [CARETRACK_ROLES.administrator];
     fixture.detectChanges();
@@ -162,9 +175,15 @@ describe('ReferralDetailPage', () => {
     expect(link).toBeDefined();
     expect(link?.getAttribute('href')).toContain('/appointments/new');
     expect(link?.getAttribute('href')).toContain(`referralId=${referralId}`);
-    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.scheduled)).toBe(true);
-    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.inProgress)).toBe(true);
-    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.completed)).toBe(false);
+    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.scheduled)).toBe(
+      true,
+    );
+    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.inProgress)).toBe(
+      true,
+    );
+    expect(fixture.componentInstance.canScheduleAppointment(REFERRAL_STATUSES.completed)).toBe(
+      false,
+    );
   });
 
   it('shows only awaiting-triage decisions and sends a numeric triage assessment', () => {
@@ -175,7 +194,10 @@ describe('ReferralDetailPage', () => {
       triageNote: 'Review promptly',
     };
     recordTriageAssessment.mockReturnValue(of(assessed));
-    fixture.componentInstance.referral.set({ ...referral, status: REFERRAL_STATUSES.awaitingTriage });
+    fixture.componentInstance.referral.set({
+      ...referral,
+      status: REFERRAL_STATUSES.awaitingTriage,
+    });
     fixture.componentInstance.triageForm.setValue({
       priority: REFERRAL_PRIORITIES.urgent,
       note: ' Review promptly ',
@@ -183,7 +205,7 @@ describe('ReferralDetailPage', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Accept referral');
-    expect(fixture.nativeElement.textContent).toContain('Request information');
+    expect(fixture.nativeElement.textContent).toContain('Request more information');
     expect(fixture.nativeElement.textContent).not.toContain('Assign clinical team');
     fixture.componentInstance.recordTriageAssessment();
 
@@ -242,7 +264,9 @@ describe('ReferralDetailPage', () => {
   it('refetches the referral and history after successful completion', () => {
     completeReferral.mockReturnValue(of(void 0));
     fixture.componentInstance.referral.set({ ...referral, status: REFERRAL_STATUSES.inProgress });
-    getReferral.mockClear().mockReturnValue(of({ ...referral, status: REFERRAL_STATUSES.completed }));
+    getReferral
+      .mockClear()
+      .mockReturnValue(of({ ...referral, status: REFERRAL_STATUSES.completed }));
     getHistory.mockClear().mockReturnValue(of(history));
 
     fixture.componentInstance.completeReferral();
@@ -251,5 +275,22 @@ describe('ReferralDetailPage', () => {
     expect(getReferral).toHaveBeenCalledWith(referralId);
     expect(getHistory).toHaveBeenCalledWith(referralId);
     expect(fixture.componentInstance.referral()?.status).toBe(REFERRAL_STATUSES.completed);
+  });
+
+  it('maps awaiting-triage decisions to success, warning, and danger variants', () => {
+    fixture.componentInstance.referral.set({
+      ...referral,
+      status: REFERRAL_STATUSES.awaitingTriage,
+    });
+    fixture.detectChanges();
+
+    const buttonFor = (label: string): HTMLButtonElement =>
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes(label),
+      ) as HTMLButtonElement;
+
+    expect(buttonFor('Accept referral').classList).toContain('ct-button--success');
+    expect(buttonFor('Request more information').classList).toContain('ct-button--warning');
+    expect(buttonFor('Reject referral').classList).toContain('ct-button--danger');
   });
 });

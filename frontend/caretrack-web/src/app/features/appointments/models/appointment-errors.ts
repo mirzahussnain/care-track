@@ -32,13 +32,19 @@ export function appointmentErrorMessage(
   const detail = problem.detail?.toLowerCase() ?? '';
 
   if (error.status === 401) {
-    return { kind: 'authentication', message: 'Your session could not be verified. Sign in again.' };
+    return {
+      kind: 'authentication',
+      message: 'Your session could not be verified. Sign in again.',
+    };
   }
   if (error.status === 403) {
     return { kind: 'forbidden', message: 'Your role does not permit this appointment action.' };
   }
   if (error.status === 404) {
-    return { kind: 'not-found', message: 'The requested appointment or related record was not found.' };
+    return {
+      kind: 'not-found',
+      message: 'The requested appointment or related record was not found.',
+    };
   }
   if (error.status === 400) {
     return { kind: 'validation', message: 'Check the appointment information and try again.' };
@@ -47,7 +53,8 @@ export function appointmentErrorMessage(
     if (detail.includes('overlapping appointment')) {
       return {
         kind: 'overlap',
-        message: 'The patient already has an overlapping appointment. Change the time and try again.',
+        message:
+          'The patient already has an overlapping appointment. Change the time and try again.',
       };
     }
     if (detail.includes('appointment reference') && detail.includes('already exists')) {
@@ -65,10 +72,14 @@ export function appointmentErrorMessage(
     if (title === 'invalid state transition') {
       return {
         kind: 'workflow',
-        message: 'The appointment changed and this action is no longer valid. Reload the appointment.',
+        message:
+          'The appointment changed and this action is no longer valid. Reload the appointment.',
       };
     }
-    return { kind: 'conflict', message: 'The appointment could not be changed because of a conflict.' };
+    return {
+      kind: 'conflict',
+      message: 'The appointment could not be changed because of a conflict.',
+    };
   }
 
   return { kind: 'generic', message: fallback };

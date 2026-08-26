@@ -24,6 +24,10 @@
   gap: 0.75rem;
 }
 
+.referrals-page__filter-toggle {
+  display: none;
+}
+
 .referrals-page__filter-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -89,12 +93,52 @@
 }
 
 @media (max-width: 48rem) {
+  .referrals-page__filter-toggle {
+    display: inline-grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid var(--ct-border-strong);
+    border-radius: var(--ct-radius-md);
+    background: var(--ct-surface);
+    color: var(--ct-text-secondary);
+    font-size: 1.125rem;
+  }
+
+  .referrals-page__filter-toggle:hover {
+    background: var(--ct-surface-muted);
+    color: var(--ct-text);
+  }
+
+  .referrals-page__filter-toggle:focus-visible {
+    outline: 3px solid var(--ct-focus);
+    outline-offset: 2px;
+  }
+
   .referrals-page__filters {
+    display: none;
     grid-template-columns: 1fr;
+  }
+
+  .referrals-page__filters--expanded {
+    display: grid;
   }
 
   .referrals-page__filter-actions {
     grid-column: auto;
     justify-content: flex-start;
+  }
+
+  .referrals-page__table-wrap {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .referrals-page table {
+    min-width: 0;
+  }
+
+  .referrals-page td {
+    max-width: 100%;
   }
 }

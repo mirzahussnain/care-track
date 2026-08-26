@@ -11,8 +11,12 @@
       <nav aria-label="Quiet Clinical primary navigation">
         <a href="#quiet-clinical"><i class="ph ph-house" aria-hidden="true"></i>Dashboard</a>
         <a href="#quiet-clinical"><i class="ph ph-user" aria-hidden="true"></i>Patients</a>
-        <a class="active" href="#quiet-clinical" aria-current="page"><i class="ph-bold ph-git-pull-request" aria-hidden="true"></i>Referrals</a>
-        <a href="#quiet-clinical"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Appointments</a>
+        <a class="active" href="#quiet-clinical" aria-current="page"
+          ><i class="ph-bold ph-git-pull-request" aria-hidden="true"></i>Referrals</a
+        >
+        <a href="#quiet-clinical"
+          ><i class="ph ph-calendar-blank" aria-hidden="true"></i>Appointments</a
+        >
       </nav>
 
       <p class="qc-user"><span>RP</span><strong>Rina Patel</strong></p>
@@ -26,64 +30,135 @@
           <span>Referral coordination workspace</span>
         </div>
         <div class="qc-actions">
-          <button class="secondary" type="button"><i class="ph ph-calendar-blank" aria-hidden="true"></i>View schedule</button>
-          <button class="primary" type="button">Review next referral<i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+          <button class="secondary" type="button">
+            <i class="ph ph-calendar-blank" aria-hidden="true"></i>View schedule
+          </button>
+          <button class="primary" type="button">
+            Review next referral<i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </button>
         </div>
       </header>
 
       <section class="qc-patient" aria-labelledby="qc-patient-name">
         <div class="qc-patient-main">
           <i class="ph ph-identification-card" aria-hidden="true"></i>
-          <div><span>Active patient</span><h3 id="qc-patient-name">Amara Okafor</h3></div>
+          <div>
+            <span>Active patient</span>
+            <h3 id="qc-patient-name">Amara Okafor</h3>
+          </div>
         </div>
         <dl>
-          <div><dt>Patient reference</dt><dd>CT-20481</dd></div>
-          <div><dt>Date of birth</dt><dd>14 February 1986 · 40 years</dd></div>
-          <div><dt>Referral</dt><dd>Respiratory medicine</dd></div>
-          <div><dt>Referred by</dt><dd>Riverside Medical Centre</dd></div>
+          <div>
+            <dt>Patient reference</dt>
+            <dd>CT-20481</dd>
+          </div>
+          <div>
+            <dt>Date of birth</dt>
+            <dd>14 February 1986 · 40 years</dd>
+          </div>
+          <div>
+            <dt>Referral</dt>
+            <dd>Respiratory medicine</dd>
+          </div>
+          <div>
+            <dt>Referred by</dt>
+            <dd>Riverside Medical Centre</dd>
+          </div>
         </dl>
-        <span class="qc-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span>
+        <span class="qc-status warning"
+          ><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span
+        >
       </section>
 
       <div class="qc-workspace">
         <section class="qc-referrals" aria-labelledby="qc-referral-title">
           <div class="qc-section-heading">
-            <div><p>Referral workload</p><h3 id="qc-referral-title">Work requiring attention</h3></div>
+            <div>
+              <p>Referral workload</p>
+              <h3 id="qc-referral-title">Work requiring attention</h3>
+            </div>
             <span>37 referrals in view</span>
           </div>
 
           <dl class="qc-metrics">
-            <div><dt>Awaiting triage</dt><dd>12</dd></div>
-            <div><dt>Need assignment</dt><dd>4</dd></div>
-            <div class="urgent"><dt><i class="ph-fill ph-warning" aria-hidden="true"></i>Overdue</dt><dd>3</dd></div>
-            <div><dt>Accepted this week</dt><dd>18</dd></div>
+            <div>
+              <dt>Awaiting triage</dt>
+              <dd>12</dd>
+            </div>
+            <div>
+              <dt>Need assignment</dt>
+              <dd>4</dd>
+            </div>
+            <div class="urgent">
+              <dt><i class="ph-fill ph-warning" aria-hidden="true"></i>Overdue</dt>
+              <dd>3</dd>
+            </div>
+            <div>
+              <dt>Accepted this week</dt>
+              <dd>18</dd>
+            </div>
           </dl>
 
           <div class="qc-list" role="list" aria-label="Referral status examples">
-            <div role="listitem"><span class="qc-status warning"><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span><p><strong>Amara Okafor</strong><small>Respiratory medicine · received 09:12</small></p><time datetime="2026-08-20T09:12">Today</time></div>
-            <div role="listitem"><span class="qc-status success"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Accepted</span><p><strong>Leon Evans</strong><small>Cardiology · reviewed by Dr Shah</small></p><time datetime="2026-08-19">Yesterday</time></div>
+            <div role="listitem">
+              <span class="qc-status warning"
+                ><i class="ph-fill ph-clock" aria-hidden="true"></i>Awaiting triage</span
+              >
+              <p>
+                <strong>Amara Okafor</strong><small>Respiratory medicine · received 09:12</small>
+              </p>
+              <time datetime="2026-08-20T09:12">Today</time>
+            </div>
+            <div role="listitem">
+              <span class="qc-status success"
+                ><i class="ph-fill ph-check-circle" aria-hidden="true"></i>Accepted</span
+              >
+              <p><strong>Leon Evans</strong><small>Cardiology · reviewed by Dr Shah</small></p>
+              <time datetime="2026-08-19">Yesterday</time>
+            </div>
           </div>
         </section>
 
         <aside class="qc-appointments" aria-labelledby="qc-appointment-title">
           <div class="qc-section-heading">
-            <div><p>Appointment summary</p><h3 id="qc-appointment-title">Today’s flow</h3></div>
+            <div>
+              <p>Appointment summary</p>
+              <h3 id="qc-appointment-title">Today’s flow</h3>
+            </div>
             <time datetime="2026-08-20T10:18">10:18</time>
           </div>
 
           <dl class="qc-appointment-counts">
-            <div><dt>Scheduled today</dt><dd>8</dd></div>
-            <div><dt>Checked in</dt><dd>2</dd></div>
-            <div><dt>In progress</dt><dd>1</dd></div>
-            <div><dt>Next appointment</dt><dd>10:30</dd></div>
+            <div>
+              <dt>Scheduled today</dt>
+              <dd>8</dd>
+            </div>
+            <div>
+              <dt>Checked in</dt>
+              <dd>2</dd>
+            </div>
+            <div>
+              <dt>In progress</dt>
+              <dd>1</dd>
+            </div>
+            <div>
+              <dt>Next appointment</dt>
+              <dd>10:30</dd>
+            </div>
           </dl>
 
           <div class="qc-flow" aria-label="Appointment status examples">
-            <span class="qc-status neutral"><i class="ph-fill ph-calendar-check" aria-hidden="true"></i>Scheduled</span>
+            <span class="qc-status neutral"
+              ><i class="ph-fill ph-calendar-check" aria-hidden="true"></i>Scheduled</span
+            >
             <i class="ph ph-caret-right" aria-hidden="true"></i>
-            <span class="qc-status info"><i class="ph-fill ph-sign-in" aria-hidden="true"></i>Checked in</span>
+            <span class="qc-status info"
+              ><i class="ph-fill ph-sign-in" aria-hidden="true"></i>Checked in</span
+            >
             <i class="ph ph-caret-right" aria-hidden="true"></i>
-            <span class="qc-status progress"><i class="ph-fill ph-stethoscope" aria-hidden="true"></i>In progress</span>
+            <span class="qc-status progress"
+              ><i class="ph-fill ph-stethoscope" aria-hidden="true"></i>In progress</span
+            >
           </div>
         </aside>
       </div>

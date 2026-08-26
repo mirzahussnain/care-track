@@ -1,11 +1,5 @@
 <div
-  class="
-    min-h-full w-full
-    border-r border-ct-border
-    bg-ct-primary-strong
-    px-3 py-4
-    text-ct-text-inverse
-  "
+  class="min-h-full w-full border-r border-ct-border bg-ct-primary-strong px-3 py-4 text-ct-text-inverse"
 >
   @if (showBrand()) {
     <div
@@ -14,55 +8,26 @@
       [class.gap-3]="!collapsed()"
       [class.px-2]="!collapsed()"
     >
-      <div
-        class="
-          grid size-8 shrink-0 place-items-center
-          rounded-ct-md
-          border border-white/30
-          text-xs font-bold
-        "
-        aria-hidden="true"
-      >
-        CT
+      <div class="app-sidebar__brand-mark">
+        <img src="/brand/caretrack-symbol.svg" [attr.alt]="collapsed() ? 'CareTrack' : ''" />
       </div>
 
       @if (!collapsed()) {
         <div class="min-w-0">
-          <strong class="block text-[0.9375rem] font-semibold">
-            CareTrack
-          </strong>
+          <strong class="block text-[0.9375rem] font-semibold"> CareTrack </strong>
 
-          <span class="block text-xs text-white/70">
-            Clinical operations
-          </span>
+          <span class="block text-xs text-white/70"> Clinical operations </span>
         </div>
       }
     </div>
   }
 
   @if (showCollapseControl()) {
-    <div
-      class="mb-5 flex"
-      [class.justify-center]="collapsed()"
-      [class.justify-end]="!collapsed()"
-    >
+    <div class="mb-5 flex" [class.justify-center]="collapsed()" [class.justify-end]="!collapsed()">
       <button
         type="button"
-        class="
-          grid size-9 shrink-0 place-items-center
-          rounded-ct-md
-          text-white/70
-          transition-colors
-          duration-150
-          ease-ct-standard
-          hover:bg-white/10
-          hover:text-white
-        "
-        [attr.aria-label]="
-          collapsed()
-            ? 'Expand navigation'
-            : 'Collapse navigation'
-        "
+        class="grid size-9 shrink-0 place-items-center rounded-ct-md text-white/70 transition-colors duration-150 ease-ct-standard hover:bg-white/10 hover:text-white"
+        [attr.aria-label]="collapsed() ? 'Expand navigation' : 'Collapse navigation'"
         [attr.aria-expanded]="!collapsed()"
         aria-controls="primary-navigation"
         (click)="collapseToggle.emit()"
@@ -77,10 +42,7 @@
     </div>
   }
 
-  <nav
-    id="primary-navigation"
-    aria-label="Primary navigation"
-  >
+  <nav id="primary-navigation" aria-label="Primary navigation">
     <ul class="grid list-none gap-1 p-0">
       @for (item of visibleNavigation(); track item.route) {
         <li>
@@ -89,19 +51,8 @@
             routerLinkActive="is-active"
             [routerLinkActiveOptions]="{ exact: item.exact }"
             #routeActive="routerLinkActive"
-            [attr.aria-current]="
-              routeActive.isActive ? 'page' : null
-            "
-            class="
-              group relative flex min-h-11 items-center
-              rounded-ct-sm
-              text-white/80 no-underline
-              transition-colors
-              duration-150
-              ease-ct-standard
-              hover:bg-white/10
-              hover:text-white
-            "
+            [attr.aria-current]="routeActive.isActive ? 'page' : null"
+            class="group relative flex min-h-11 items-center rounded-ct-sm text-white/80 no-underline transition-colors duration-150 ease-ct-standard hover:bg-white/10 hover:text-white"
             [class.justify-center]="collapsed()"
             [class.w-12]="collapsed()"
             [class.mx-auto]="collapsed()"
@@ -110,20 +61,11 @@
             (click)="navigationSelected.emit()"
           >
             <span
-              class="
-                active-marker
-                absolute left-0 hidden
-                h-5 w-[3px]
-                rounded-full
-                bg-ct-primary
-              "
+              class="active-marker absolute left-0 hidden h-5 w-[3px] rounded-full bg-ct-primary"
               aria-hidden="true"
             ></span>
 
-            <i
-              [class]="'ph text-xl ' + item.icon"
-              aria-hidden="true"
-            ></i>
+            <i [class]="'ph text-xl ' + item.icon" aria-hidden="true"></i>
 
             @if (!collapsed()) {
               <span>{{ item.label }}</span>

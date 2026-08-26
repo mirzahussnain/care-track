@@ -1,35 +1,20 @@
-import {
-  HttpClient,
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {
-  inject,
-  Injectable,
-} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
-import {
-  Observable,
-} from 'rxjs';
+import { Observable } from 'rxjs';
 
-import {
-  environment,
-} from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
-import {
-  AuthenticatedUser,
-} from './auth.models';
+import { AuthenticatedUser } from './auth.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CurrentUserApiService {
-  private readonly http =
-    inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  getCurrentUser():
-    Observable<AuthenticatedUser> {
-    return this.http.get<AuthenticatedUser>(
-      `${environment.apiBaseUrl}/api/me`
-    );
+  getCurrentUser(): Observable<AuthenticatedUser> {
+    return this.http.get<AuthenticatedUser>(`${environment.apiBaseUrl}/api/me`);
   }
 }

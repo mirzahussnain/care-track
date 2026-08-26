@@ -47,9 +47,7 @@ describe('app routes', () => {
       'referrals/:id',
     ]);
     expect(referralRoutes?.every((route) => route.loadComponent)).toBe(true);
-    expect(referralRoutes?.every((route) => route.data?.['areaLabel'] === 'Referrals')).toBe(
-      true,
-    );
+    expect(referralRoutes?.every((route) => route.data?.['areaLabel'] === 'Referrals')).toBe(true);
   });
 
   it('orders the static Referrals create route before referral detail', () => {
@@ -71,9 +69,9 @@ describe('app routes', () => {
       'appointments/:id',
     ]);
     expect(appointmentRoutes?.every((route) => route.loadComponent)).toBe(true);
-    expect(
-      appointmentRoutes?.every((route) => route.data?.['areaLabel'] === 'Appointments'),
-    ).toBe(true);
+    expect(appointmentRoutes?.every((route) => route.data?.['areaLabel'] === 'Appointments')).toBe(
+      true,
+    );
   });
 
   it('orders the static Appointment create route before appointment detail', () => {

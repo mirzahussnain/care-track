@@ -106,6 +106,7 @@ export class AppointmentsPage {
   readonly referralLookup = signal<ReferralLookup>({});
   readonly loading = signal(true);
   readonly error = signal<ListError>(null);
+  readonly filtersExpanded = signal(false);
 
   constructor() {
     this.destroyRef.onDestroy(() => this.requestSubscription?.unsubscribe());
@@ -121,6 +122,10 @@ export class AppointmentsPage {
     this.appliedFilters.set(this.readFilters());
     this.page.set(1);
     this.loadAppointments();
+  }
+
+  toggleFilters(): void {
+    this.filtersExpanded.update((expanded) => !expanded);
   }
 
   resetFilters(): void {
@@ -259,11 +264,7 @@ export class AppointmentsPage {
           this.patientLookup.set({});
           this.referralLookup.set({});
           this.error.set(
-            error.status === 403
-              ? 'forbidden'
-              : error.status === 400
-                ? 'validation'
-                : 'generic',
+            error.status === 403 ? 'forbidden' : error.status === 400 ? 'validation' : 'generic',
           );
           this.loading.set(false);
         },

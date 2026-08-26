@@ -5,11 +5,7 @@ export interface AuthenticatedUser {
   readonly roles: readonly string[];
 }
 
-export type AuthLoadStatus =
-  | 'idle'
-  | 'loading'
-  | 'ready'
-  | 'error';
+export type AuthLoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 export const CARETRACK_ROLES = {
   clinician: 'Clinician',
@@ -17,7 +13,4 @@ export const CARETRACK_ROLES = {
   administrator: 'Administrator',
 } as const;
 
-export type CareTrackRole =
-  typeof CARETRACK_ROLES[
-    keyof typeof CARETRACK_ROLES
-  ];
+export type CareTrackRole = (typeof CARETRACK_ROLES)[keyof typeof CARETRACK_ROLES];

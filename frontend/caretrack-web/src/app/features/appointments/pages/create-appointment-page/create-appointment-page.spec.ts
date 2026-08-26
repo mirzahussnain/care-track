@@ -8,7 +8,11 @@ import { CARETRACK_ROLES, CareTrackRole } from '../../../../core/auth/auth.model
 import { AuthService } from '../../../../core/auth/auth.service';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
-import { REFERRAL_PRIORITIES, REFERRAL_STATUSES, Referral } from '../../../referrals/models/referral.models';
+import {
+  REFERRAL_PRIORITIES,
+  REFERRAL_STATUSES,
+  Referral,
+} from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import {
   APPOINTMENT_STATUSES,
@@ -64,7 +68,12 @@ describe('CreateAppointmentPage', () => {
     roles.set([CARETRACK_ROLES.referralCoordinator]);
     getReferral.mockReset().mockReturnValue(of(referral));
     getReferralPatientSummary.mockReset().mockReturnValue(
-      of({ id: patientId, patientReference: 'PAT-001', fullName: 'Amina Khan', dateOfBirth: '1988-04-12' }),
+      of({
+        id: patientId,
+        patientReference: 'PAT-001',
+        fullName: 'Amina Khan',
+        dateOfBirth: '1988-04-12',
+      }),
     );
     createAppointment.mockReset().mockReturnValue(of(appointment));
 
@@ -137,7 +146,7 @@ describe('CreateAppointmentPage', () => {
     fixture.detectChanges();
 
     expect(navigate).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('Appointment scheduled');
+    expect(fixture.nativeElement.textContent).toContain('Appointment Scheduled');
     expect(fixture.nativeElement.textContent).toContain('require the Clinician role');
   });
 
@@ -163,7 +172,10 @@ describe('CreateAppointmentPage', () => {
         () =>
           new HttpErrorResponse({
             status: 409,
-            error: { title: 'Conflict', detail: 'The patient already has an overlapping appointment.' },
+            error: {
+              title: 'Conflict',
+              detail: 'The patient already has an overlapping appointment.',
+            },
           }),
       ),
     );
@@ -182,13 +194,13 @@ describe('CreateAppointmentPage', () => {
     expect(createAppointment).toHaveBeenCalledOnce();
   });
 
-  it.each([
-    REFERRAL_STATUSES.scheduled,
-    REFERRAL_STATUSES.inProgress,
-  ])('accepts verified schedulable referral status %s', (status) => {
-    getReferral.mockReturnValue(of({ ...referral, status }));
-    fixture.componentInstance.loadContext();
+  it.each([REFERRAL_STATUSES.scheduled, REFERRAL_STATUSES.inProgress])(
+    'accepts verified schedulable referral status %s',
+    (status) => {
+      getReferral.mockReturnValue(of({ ...referral, status }));
+      fixture.componentInstance.loadContext();
 
-    expect(fixture.componentInstance.contextError()).toBeNull();
-  });
+      expect(fixture.componentInstance.contextError()).toBeNull();
+    },
+  );
 });

@@ -54,9 +54,7 @@ export class ReferralApiService {
   }
 
   getHistory(id: string): Observable<readonly ReferralHistoryEntry[]> {
-    return this.http.get<readonly ReferralHistoryEntry[]>(
-      `${this.referralsUrl}/${id}/history`,
-    );
+    return this.http.get<readonly ReferralHistoryEntry[]>(`${this.referralsUrl}/${id}/history`);
   }
 
   getAssignmentTargets(): Observable<ReferralAssignmentTargetsResponse> {
@@ -89,14 +87,8 @@ export class ReferralApiService {
     return this.postTransition(id, 'resubmit');
   }
 
-  recordTriageAssessment(
-    id: string,
-    request: RecordTriageAssessmentRequest,
-  ): Observable<Referral> {
-    return this.http.post<Referral>(
-      `${this.referralsUrl}/${id}/triage-assessment`,
-      request,
-    );
+  recordTriageAssessment(id: string, request: RecordTriageAssessmentRequest): Observable<Referral> {
+    return this.http.post<Referral>(`${this.referralsUrl}/${id}/triage-assessment`, request);
   }
 
   assignReferral(id: string, request: AssignReferralRequest): Observable<Referral> {

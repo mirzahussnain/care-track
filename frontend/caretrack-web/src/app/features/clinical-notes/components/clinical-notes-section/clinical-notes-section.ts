@@ -2,7 +2,13 @@ import { DatePipe } from '@angular/common';
 import { Component, effect, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { Button, EmptyState, FormField, Skeleton, Surface } from '../../../../design-system/components';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Skeleton,
+  Surface,
+} from '../../../../design-system/components';
 import { ClinicalNote } from '../../models/clinical-note.models';
 
 export interface UpdateClinicalNoteEvent {
@@ -94,7 +100,8 @@ export class ClinicalNotesSection {
 
   contentError(control: FormControl<string>, submitted: boolean): string | undefined {
     if (!(control.touched || submitted)) return undefined;
-    if (control.hasError('required') || !control.value.trim()) return 'Clinical note content is required.';
+    if (control.hasError('required') || !control.value.trim())
+      return 'Clinical note content is required.';
     return control.hasError('maxlength')
       ? 'Clinical note content cannot exceed 5,000 characters.'
       : undefined;

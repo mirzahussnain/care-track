@@ -7,7 +7,13 @@ import { forkJoin, of, switchMap } from 'rxjs';
 
 import { CARETRACK_ROLES } from '../../../../core/auth/auth.models';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { Button, EmptyState, FormField, Skeleton, Surface } from '../../../../design-system/components';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Skeleton,
+  Surface,
+} from '../../../../design-system/components';
 import { PageHeader, PatientIdentityBanner } from '../../../../design-system/patterns';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralPatientSummary } from '../../../patients/models/patient.models';
@@ -24,7 +30,8 @@ import {
   appointmentTypeLabel,
 } from '../../models/appointment.models';
 
-type ContextError = 'missing-referral' | 'forbidden' | 'not-found' | 'unschedulable' | 'generic' | null;
+type ContextError =
+  'missing-referral' | 'forbidden' | 'not-found' | 'unschedulable' | 'generic' | null;
 
 @Component({
   selector: 'app-create-appointment-page',
@@ -59,9 +66,7 @@ export class CreateAppointmentPage {
       this.authService.hasRole(CARETRACK_ROLES.clinician) ||
       this.authService.hasRole(CARETRACK_ROLES.referralCoordinator),
   );
-  readonly canReadAppointment = computed(() =>
-    this.authService.hasRole(CARETRACK_ROLES.clinician),
-  );
+  readonly canReadAppointment = computed(() => this.authService.hasRole(CARETRACK_ROLES.clinician));
   readonly referral = signal<Referral | null>(null);
   readonly patient = signal<ReferralPatientSummary | null>(null);
   readonly createdAppointment = signal<Appointment | null>(null);
@@ -141,7 +146,13 @@ export class CreateAppointmentPage {
     this.submitted.set(true);
     this.errorMessage.set(null);
     const referral = this.referral();
-    if (!referral || !this.patient() || this.contextError() || this.form.invalid || this.submitting()) {
+    if (
+      !referral ||
+      !this.patient() ||
+      this.contextError() ||
+      this.form.invalid ||
+      this.submitting()
+    ) {
       this.form.markAllAsTouched();
       return;
     }

@@ -1,8 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type SurfaceVariant = 'default' | 'subtle' | 'elevated';
 export type SurfacePadding = 'none' | 'sm' | 'md' | 'lg';
