@@ -60,6 +60,54 @@ export const routes: Routes = [
         data: { areaLabel: 'Patients' },
       },
       {
+        path: 'referrals',
+        loadComponent: () =>
+          import('./features/referrals/pages/referrals-page/referrals-page').then(
+            (m) => m.ReferralsPage,
+          ),
+        data: { areaLabel: 'Referrals' },
+      },
+      {
+        path: 'referrals/new',
+        loadComponent: () =>
+          import('./features/referrals/pages/create-referral-page/create-referral-page').then(
+            (m) => m.CreateReferralPage,
+          ),
+        data: { areaLabel: 'Referrals' },
+      },
+      {
+        path: 'referrals/:id',
+        loadComponent: () =>
+          import('./features/referrals/pages/referral-detail-page/referral-detail-page').then(
+            (m) => m.ReferralDetailPage,
+          ),
+        data: { areaLabel: 'Referrals' },
+      },
+      {
+        path: 'appointments',
+        loadComponent: () =>
+          import('./features/appointments/pages/appointments-page/appointments-page').then(
+            (m) => m.AppointmentsPage,
+          ),
+        data: { areaLabel: 'Appointments' },
+      },
+      {
+        path: 'appointments/new',
+        loadComponent: () =>
+          import(
+            './features/appointments/pages/create-appointment-page/create-appointment-page'
+          ).then((m) => m.CreateAppointmentPage),
+        data: { areaLabel: 'Appointments' },
+      },
+      {
+        path: 'appointments/:id',
+        loadComponent: () =>
+          import(
+            './features/appointments/pages/appointment-detail-page/appointment-detail-page'
+          ).then((m) => m.AppointmentDetailPage),
+        data: { areaLabel: 'Appointments' },
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard',

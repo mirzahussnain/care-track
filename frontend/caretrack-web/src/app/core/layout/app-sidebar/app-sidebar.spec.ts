@@ -91,17 +91,6 @@ describe('AppSidebar', () => {
         exact: false,
         roles: [
           CARETRACK_ROLES.clinician,
-          CARETRACK_ROLES.referralCoordinator,
-        ],
-      },
-
-      {
-        label: 'Clinical Notes',
-        route: '/clinical-notes',
-        icon: 'ph-note',
-        exact: false,
-        roles: [
-          CARETRACK_ROLES.clinician,
         ],
       },
     ];
@@ -201,14 +190,10 @@ describe('AppSidebar', () => {
       'Appointments'
     );
 
-    expect(
-      element.textContent
-    ).toContain(
-      'Clinical Notes'
-    );
+    expect(element.textContent).not.toContain('Clinical Notes');
   });
 
-  it('hides clinical notes for a referral coordinator', () => {
+  it('hides Clinician-only appointments and contextual Clinical Notes for a referral coordinator', () => {
     rolesSignal.set([
       CARETRACK_ROLES
         .referralCoordinator,
@@ -239,7 +224,7 @@ describe('AppSidebar', () => {
 
     expect(
       element.textContent
-    ).toContain(
+    ).not.toContain(
       'Appointments'
     );
 

@@ -9,6 +9,19 @@ export interface Patient {
   readonly rowVersion: string;
 }
 
+export interface ReferralPatientSummary {
+  readonly id: string;
+  readonly patientReference: string;
+  readonly fullName: string;
+  readonly dateOfBirth: string;
+}
+
+export interface ReferralPatientSearchQuery {
+  readonly search?: string;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
 export type PatientSortField = 'lastName' | 'firstName' | 'patientReference' | 'createdAt';
 
 export type SortDirection = 'asc' | 'desc';

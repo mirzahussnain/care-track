@@ -44,17 +44,6 @@ export const SHELL_NAVIGATION: readonly ShellNavigationItem[] = [
       exact: false,
       roles: [
         CARETRACK_ROLES.clinician,
-        CARETRACK_ROLES.referralCoordinator,
-      ],
-    },
-
-    {
-      label: 'Clinical Notes',
-      route: '/clinical-notes',
-      icon: 'ph-note',
-      exact: false,
-      roles: [
-        CARETRACK_ROLES.clinician,
       ],
     },
 ];

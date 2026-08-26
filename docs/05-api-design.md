@@ -11,6 +11,8 @@ Business endpoints use explicit named authorization policies. Errors are returne
 |---|---|---|
 | GET | `/api/patients` | `ClinicianAccess` |
 | GET | `/api/patients/{id}` | `ClinicianAccess` |
+| GET | `/api/patients/referral-lookup` | `ReferralManagement` |
+| GET | `/api/patients/{id}/referral-summary` | `ReferralManagement` |
 | POST | `/api/patients` | `ReferralManagement` |
 | PUT | `/api/patients/{id}` | `ReferralManagement` |
 
@@ -30,8 +32,28 @@ Business endpoints use explicit named authorization policies. Errors are returne
 | POST | `/api/referrals/{id}/reassign` | `ReferralManagement` |
 | POST | `/api/referrals/{id}/complete` | `ReferralManagement` |
 | GET | `/api/referrals/{id}/history` | `ReferralManagement` |
+| GET | `/api/referrals/assignment-targets` | `ReferralManagement` |
 | GET | `/api/referrals` | `ReferralManagement` |
 | GET | `/api/referrals/{id}` | `ReferralManagement` |
+
+### Referral frontend prerequisite contracts
+
+`GET /api/patients/referral-lookup` accepts `search`, `page` (default `1`), and `pageSize` (default `20`). It uses fixed `lastName asc` ordering and returns the standard paging metadata with patient items limited to:
+
+```json
+{
+  "id": "guid",
+  "patientReference": "PAT-001",
+  "fullName": "Amina Khan",
+  "dateOfBirth": "1988-04-12"
+}
+```
+
+`GET /api/patients/{id}/referral-summary` returns the same four-field item. The existing full patient GET/search routes remain protected by `ClinicianAccess`.
+
+`GET /api/referrals/assignment-targets` returns `{ "items": ["Cardiology Team A"] }`. Values come from the ordered `ReferralAssignment:Targets` configuration array. Startup trims values and rejects an empty list, blank values, values over 200 characters, and case-insensitive duplicates. Assign/reassign trims the submitted name, matches it case-insensitively, persists the exact canonical configured value, and returns `400 Bad Request` for an unavailable value. These values are clinical-team names, not user identities or Entra object IDs; there is no persistent team directory.
+
+Referral status, priority, and history-event enums continue to serialize as numbers. Workflow mutation remains endpoint-specific; there is no generic status mutation or cancellation endpoint.
 
 ## Appointments
 

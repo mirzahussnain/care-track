@@ -8,6 +8,8 @@ import {
   CreatePatientRequest,
   Patient,
   PatientSearchQuery,
+  ReferralPatientSearchQuery,
+  ReferralPatientSummary,
   UpdatePatientRequest,
 } from '../models/patient.models';
 
@@ -33,6 +35,30 @@ export class PatientApiService {
 
   getPatient(id: string): Observable<Patient> {
     return this.http.get<Patient>(`${this.patientsUrl}/${id}`);
+  }
+
+  searchReferralPatients(
+    query: ReferralPatientSearchQuery,
+  ): Observable<PagedResult<ReferralPatientSummary>> {
+    let params = new HttpParams()
+      .set('page', query.page)
+      .set('pageSize', query.pageSize);
+
+    const search = query.search?.trim();
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    return this.http.get<PagedResult<ReferralPatientSummary>>(
+      `${this.patientsUrl}/referral-lookup`,
+      { params },
+    );
+  }
+
+  getReferralPatientSummary(id: string): Observable<ReferralPatientSummary> {
+    return this.http.get<ReferralPatientSummary>(
+      `${this.patientsUrl}/${id}/referral-summary`,
+    );
   }
 
   createPatient(request: CreatePatientRequest): Observable<Patient> {

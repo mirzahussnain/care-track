@@ -73,6 +73,39 @@ describe('PatientApiService', () => {
     request.flush(patient);
   });
 
+  it('searches referral-safe patient summaries through the dedicated route', () => {
+    service
+      .searchReferralPatients({
+        search: ' Khan ',
+        page: 2,
+        pageSize: 5,
+      })
+      .subscribe();
+    const request = http.expectOne(
+      (candidate) => candidate.url === `${baseUrl}/referral-lookup`,
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('search')).toBe('Khan');
+    expect(request.request.params.get('page')).toBe('2');
+    expect(request.request.params.get('pageSize')).toBe('5');
+    request.flush({ items: [], page: 2, pageSize: 5, totalCount: 0, totalPages: 0 });
+  });
+
+  it('gets a referral-safe patient summary without using full patient detail', () => {
+    const summary = {
+      id: patient.id,
+      patientReference: patient.patientReference,
+      fullName: patient.fullName,
+      dateOfBirth: patient.dateOfBirth,
+    };
+    service
+      .getReferralPatientSummary(patient.id)
+      .subscribe((value) => expect(value).toEqual(summary));
+    const request = http.expectOne(`${baseUrl}/${patient.id}/referral-summary`);
+    expect(request.request.method).toBe('GET');
+    request.flush(summary);
+  });
+
   it('creates a patient with the exact request body', () => {
     const body = {
       patientReference: 'PAT-001',

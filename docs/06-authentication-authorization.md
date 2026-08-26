@@ -3,7 +3,7 @@
 ## Current Status
 Microsoft Entra ID authentication and CareTrack authorization are implemented for the backend.
 
-The Angular/MSAL client remains planned for Phase 6.
+The Angular client uses MSAL for authentication and its existing HTTP interceptor for protected API calls.
 
 ## Identity Provider
 CareTrack uses Microsoft Entra ID as the identity provider.
@@ -48,6 +48,7 @@ Requires:
 
 Used for:
 - patient create/update
+- reduced patient lookup and identity summaries used by referral workflows
 - referral management
 - appointment creation/scheduling
 
@@ -119,6 +120,8 @@ This allows tests to model:
 The real production authorization policies remain in use during integration tests.
 
 `factory.CreateClient()` intentionally remains anonymous. Authenticated tests explicitly use the dedicated authenticated-client helper.
+
+The referral-safe patient lookup/detail endpoints use `ReferralManagement`; this does not broaden `ClinicianAccess` on the existing full patient GET/search endpoints. `Administrator` has no referral or clinical bypass.
 
 ## Real Entra Verification
 Manual verification has confirmed:
