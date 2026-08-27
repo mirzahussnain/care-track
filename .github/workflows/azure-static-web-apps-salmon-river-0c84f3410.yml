@@ -33,6 +33,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/caretrack-web/package-lock.json
 
+      - name: Clean previous build output
+        run: rm -rf frontend/caretrack-web/dist
+
       - name: Install dependencies
         working-directory: frontend/caretrack-web
         run: npm ci
@@ -46,6 +49,38 @@ jobs:
           test -f frontend/caretrack-web/dist/caretrack-web/browser/index.html
           test -f frontend/caretrack-web/dist/caretrack-web/browser/staticwebapp.config.json
 
+      - name: Verify referenced assets exist
+        shell: bash
+        run: |
+          cd frontend/caretrack-web/dist/caretrack-web/browser
+
+          echo "Checking files referenced by index.html..."
+
+          assets=$(grep -oE '(src|href)="[^"]+\.(js|css)"' index.html \
+            | sed -E 's/.*="([^"]+)"/\1/' \
+            | sed 's|^\./||' \
+            | sed 's|^/||')
+
+          for file in $assets; do
+            if [ ! -f "$file" ]; then
+              echo "Missing referenced asset: $file"
+              exit 1
+            fi
+
+            echo "Found: $file"
+          done
+
+          echo "All index.html assets are present."
+
+      - name: Show deployment artifact
+        run: |
+          echo "Deployment artifact contents:"
+          find frontend/caretrack-web/dist/caretrack-web/browser \
+            -maxdepth 1 \
+            -type f \
+            -printf "%f\n" \
+            | sort
+
       - name: Verify deployment secret is available
         env:
           SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CARETRACK }}
@@ -54,6 +89,7 @@ jobs:
             echo "Static Web Apps deployment token secret is missing."
             exit 1
           fi
+
           echo "Static Web Apps deployment token secret is present."
 
       - name: Deploy to Azure Static Web Apps
