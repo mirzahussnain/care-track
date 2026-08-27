@@ -64,3 +64,9 @@ tmp/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Private certificates / Azure publishing credentials
+*.pfx
+*.p12
+*.pem
+*.PublishSettings
