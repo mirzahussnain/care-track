@@ -7,6 +7,7 @@
         <span><strong>CareTrack</strong><small>Clinical operations</small></span>
       </a>
       <div class="landing-page__desktop-nav">
+        <a href="#interactive-demo">Interactive Demo</a>
         <a href="#overview">Overview</a><a href="#features">Features</a>
         <a href="#workflow">Workflow</a><a href="#engineering">Engineering</a>
       </div>
@@ -35,6 +36,7 @@
     </nav>
     @if (mobileMenuOpen()) {
       <div id="public-mobile-menu" class="landing-page__mobile-menu">
+        <a href="#interactive-demo" (click)="closeMobileMenu()">Interactive Demo</a>
         <a href="#overview" (click)="closeMobileMenu()">Overview</a>
         <a href="#features" (click)="closeMobileMenu()">Features</a>
         <a href="#workflow" (click)="closeMobileMenu()">Workflow</a>
@@ -148,6 +150,63 @@
           verification</span
         >
         <span><i class="ph ph-flask" aria-hidden="true"></i>Synthetic portfolio data</span>
+      </div>
+    </section>
+    <section
+      id="interactive-demo"
+      class="landing-page__section landing-page__demo-section"
+      aria-labelledby="interactive-demo-title"
+    >
+      <div class="landing-page__container">
+        <div class="landing-page__demo-heading" data-landing-reveal>
+          <div class="landing-page__section-heading">
+            <p class="landing-page__eyebrow">Interactive Demo</p>
+            <h2 id="interactive-demo-title">Choose a Real Workflow Perspective</h2>
+            <p>
+              Launch CareTrack with a recruiter-ready account and explore the same deterministic
+              synthetic workspace from two policy-accurate roles.
+            </p>
+          </div>
+          <div class="landing-page__demo-warning" role="note">
+            <i class="ph ph-users-three" aria-hidden="true"></i>
+            <p>
+              <strong>Shared synthetic environment</strong>
+              Changes are visible to other demo visitors and may be reset without notice. Never
+              enter real patient or personal information.
+            </p>
+          </div>
+        </div>
+        <div class="landing-page__demo-grid" data-landing-reveal>
+          @for (account of interactiveDemoAccounts; track account.id) {
+            <article class="landing-page__demo-card">
+              <div class="landing-page__demo-card-header">
+                <i class="ph {{ account.icon }}" aria-hidden="true"></i>
+                <div>
+                  <p>{{ account.role }}</p>
+                  <h3>{{ account.roleLabel }}</h3>
+                </div>
+              </div>
+              <p class="landing-page__demo-summary">{{ account.summary }}</p>
+              <ul>
+                @for (capability of account.capabilities; track capability) {
+                  <li><i class="ph ph-check" aria-hidden="true"></i>{{ capability }}</li>
+                }
+              </ul>
+              <p class="landing-page__demo-boundary">
+                <i class="ph ph-shield-check" aria-hidden="true"></i>{{ account.boundary }}
+              </p>
+              <button
+                type="button"
+                class="landing-page__button landing-page__button--primary landing-page__demo-launch"
+                [attr.data-demo-launch]="account.id"
+                (click)="openDemoDialog(account, $event)"
+              >
+                Launch {{ account.roleLabel }} Demo
+                <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+              </button>
+            </article>
+          }
+        </div>
       </div>
     </section>
     <section id="overview" class="landing-page__section landing-page__gallery-section">
@@ -390,57 +449,6 @@
         </div>
       </div>
     </section>
-    <section
-      class="landing-page__section landing-page__roles-section"
-      aria-labelledby="roles-title"
-    >
-      <div class="landing-page__container">
-        <div class="landing-page__section-heading" data-landing-reveal>
-          <p class="landing-page__eyebrow">Role Boundaries</p>
-          <h2 id="roles-title">Access Shaped Around Responsibility</h2>
-          <p>
-            Roles define permitted work; Administrator does not create an automatic clinical bypass.
-          </p>
-        </div>
-        <div class="landing-page__roles" data-landing-reveal>
-          <article>
-            <div>
-              <i class="ph ph-stethoscope" aria-hidden="true"></i>
-              <h3>Clinician</h3>
-            </div>
-            <ul>
-              <li>Patient records</li>
-              <li>Referrals</li>
-              <li>Appointments</li>
-              <li>Clinical Notes</li>
-            </ul>
-          </article>
-          <article class="landing-page__role-card--featured">
-            <div>
-              <i class="ph ph-arrows-split" aria-hidden="true"></i>
-              <h3>Referral Coordinator</h3>
-            </div>
-            <ul>
-              <li>Patient registration</li>
-              <li>Referral workflow</li>
-              <li>Permitted assignment</li>
-              <li>Permitted scheduling</li>
-            </ul>
-          </article>
-          <article>
-            <div>
-              <i class="ph ph-gear-six" aria-hidden="true"></i>
-              <h3>Administrator</h3>
-            </div>
-            <ul>
-              <li>Safe workspace boundary</li>
-              <li>No implicit clinical access</li>
-              <li>No automatic role bypass</li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
     <section id="engineering" class="landing-page__section landing-page__engineering-section">
       <div class="landing-page__container">
         <div class="landing-page__engineering-intro" data-landing-reveal>
@@ -501,6 +509,113 @@
       </div>
     </section>
   </main>
+  <dialog
+    #demoDialog
+    class="landing-page__demo-dialog"
+    aria-labelledby="demo-dialog-title"
+    aria-describedby="demo-dialog-description"
+    (close)="onDemoDialogClosed()"
+    (click)="onDemoDialogBackdropClick($event)"
+  >
+    @if (selectedDemoAccount(); as account) {
+      <div class="landing-page__demo-dialog-panel">
+        <header>
+          <div class="landing-page__demo-dialog-icon">
+            <i class="ph {{ account.icon }}" aria-hidden="true"></i>
+          </div>
+          <div>
+            <p>Launch Interactive Demo</p>
+            <h2 id="demo-dialog-title">{{ account.roleLabel }}</h2>
+          </div>
+          <button
+            type="button"
+            class="landing-page__dialog-close"
+            data-demo-dialog-close
+            aria-label="Close demo account dialog"
+            (click)="closeDemoDialog()"
+          >
+            <i class="ph ph-x" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div id="demo-dialog-description" class="landing-page__dialog-warning" role="note">
+          <i class="ph ph-warning-circle" aria-hidden="true"></i>
+          <p>
+            This account uses a shared synthetic environment. Do not enter real patient, clinical,
+            or personal information.
+          </p>
+        </div>
+        <div class="landing-page__credential-list">
+          <div class="landing-page__credential-field">
+            <label for="demo-account-email">Email</label>
+            <div>
+              <input
+                id="demo-account-email"
+                type="email"
+                autocomplete="username"
+                readonly
+                [value]="account.email"
+              />
+              <button
+                type="button"
+                aria-label="Copy demo account email"
+                (click)="copyCredential('Email', account.email)"
+              >
+                <i class="ph ph-copy" aria-hidden="true"></i><span>Copy</span>
+              </button>
+            </div>
+          </div>
+          <div class="landing-page__credential-field">
+            <label for="demo-account-password">Password</label>
+            <div>
+              <input
+                id="demo-account-password"
+                [type]="passwordVisible() ? 'text' : 'password'"
+                autocomplete="current-password"
+                readonly
+                [value]="account.password"
+              />
+              <button
+                type="button"
+                [attr.aria-label]="
+                  passwordVisible() ? 'Hide demo account password' : 'Show demo account password'
+                "
+                [attr.aria-pressed]="passwordVisible()"
+                (click)="togglePasswordVisibility()"
+              >
+                <i
+                  class="ph"
+                  [class.ph-eye]="!passwordVisible()"
+                  [class.ph-eye-slash]="passwordVisible()"
+                  aria-hidden="true"
+                ></i>
+                <span>{{ passwordVisible() ? 'Hide' : 'Show' }}</span>
+              </button>
+              <button
+                type="button"
+                aria-label="Copy demo account password"
+                (click)="copyCredential('Password', account.password)"
+              >
+                <i class="ph ph-copy" aria-hidden="true"></i><span>Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="landing-page__copy-status" aria-live="polite">{{ credentialCopyStatus() }}</p>
+        <footer>
+          <button type="button" class="landing-page__dialog-cancel" (click)="closeDemoDialog()">
+            Cancel
+          </button>
+          <a
+            class="landing-page__button landing-page__button--primary"
+            routerLink="/auth/sign-in"
+            (click)="continueToSignIn()"
+          >
+            Continue to sign in<i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </a>
+        </footer>
+      </div>
+    }
+  </dialog>
   <footer class="landing-page__footer">
     <div class="landing-page__footer-grid">
       <div class="landing-page__footer-brand">
@@ -518,6 +633,7 @@
       </div>
       <nav aria-label="Product links">
         <h2>Product</h2>
+        <a href="#interactive-demo">Interactive Demo</a>
         <a href="#overview">Overview</a><a href="#features">Features</a>
         <a href="#workflow">Workflow</a><a href="#engineering">Engineering</a>
       </nav>

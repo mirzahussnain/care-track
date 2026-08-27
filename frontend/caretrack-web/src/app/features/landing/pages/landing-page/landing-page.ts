@@ -7,10 +7,20 @@ import {
   HostListener,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
+
+import {
+  INTERACTIVE_DEMO_ACCOUNTS,
+  InteractiveDemoAccount,
+} from '../../demo/interactive-demo.config';
+import {
+  buttonFromEvent,
+  restoreFocusIfAvailable,
+} from '../../../../shared/utils/focus-management';
 
 interface ProductDemo {
   readonly label: string;
@@ -42,12 +52,18 @@ export class LandingPage implements AfterViewInit {
   private readonly msalService = inject(MsalService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly demoDialog = viewChild<ElementRef<HTMLDialogElement>>('demoDialog');
+  private demoDialogTrigger: HTMLButtonElement | null = null;
 
   readonly mobileMenuOpen = signal(false);
   readonly selectedDemoIndex = signal(0);
+  readonly selectedDemoAccount = signal<InteractiveDemoAccount | null>(null);
+  readonly passwordVisible = signal(false);
+  readonly credentialCopyStatus = signal('');
   readonly headerElevated = signal(false);
   readonly currentYear = new Date().getFullYear();
   readonly authCta: LandingAuthCta = this.resolveAuthCta();
+  readonly interactiveDemoAccounts = INTERACTIVE_DEMO_ACCOUNTS;
 
   readonly demos: readonly ProductDemo[] = [
     {
@@ -170,8 +186,70 @@ export class LandingPage implements AfterViewInit {
     this.mobileMenuOpen.set(false);
   }
 
+  openDemoDialog(account: InteractiveDemoAccount, event: MouseEvent): void {
+    const dialog = this.demoDialog()?.nativeElement;
+    if (!dialog) {
+      return;
+    }
+
+    this.demoDialogTrigger = buttonFromEvent(event);
+    this.selectedDemoAccount.set(account);
+    this.passwordVisible.set(false);
+    this.credentialCopyStatus.set('');
+    dialog.showModal();
+
+    queueMicrotask(() => {
+      dialog.querySelector<HTMLButtonElement>('[data-demo-dialog-close]')?.focus();
+    });
+  }
+
+  closeDemoDialog(): void {
+    const dialog = this.demoDialog()?.nativeElement;
+    if (dialog?.open) {
+      dialog.close();
+    }
+  }
+
+  onDemoDialogClosed(): void {
+    this.selectedDemoAccount.set(null);
+    this.passwordVisible.set(false);
+    this.credentialCopyStatus.set('');
+    restoreFocusIfAvailable(this.demoDialogTrigger);
+    this.demoDialogTrigger = null;
+  }
+
+  onDemoDialogBackdropClick(event: MouseEvent): void {
+    if (event.target === this.demoDialog()?.nativeElement) {
+      this.closeDemoDialog();
+    }
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.update((visible) => !visible);
+  }
+
+  async copyCredential(label: 'Email' | 'Password', value: string): Promise<void> {
+    try {
+      await globalThis.navigator.clipboard.writeText(value);
+      this.credentialCopyStatus.set(`${label} copied.`);
+    } catch {
+      this.credentialCopyStatus.set(
+        `Unable to copy ${label.toLowerCase()}. Select and copy it manually.`,
+      );
+    }
+  }
+
+  continueToSignIn(): void {
+    this.closeDemoDialog();
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.demoDialog()?.nativeElement.open) {
+      this.closeDemoDialog();
+      return;
+    }
+
     this.closeMobileMenu();
   }
 

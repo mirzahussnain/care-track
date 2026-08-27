@@ -20,7 +20,7 @@ export const SHELL_NAVIGATION: readonly ShellNavigationItem[] = [
     route: '/patients',
     icon: 'ph-users',
     exact: false,
-    roles: [CARETRACK_ROLES.clinician, CARETRACK_ROLES.referralCoordinator],
+    roles: [CARETRACK_ROLES.clinician],
   },
 
   {

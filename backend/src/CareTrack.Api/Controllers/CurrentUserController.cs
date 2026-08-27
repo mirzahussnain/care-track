@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CareTrack.Api.Authorization;
 using CareTrack.Api.Contracts.CurrentUser;
+using CareTrack.Api.Identity;
 using CareTrack.Application.Common.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,8 @@ namespace CareTrack.Api.Controllers;
 [Route("api/me")]
 [Authorize(Policy = CareTrackPolicies.ApiAccess)]
 public sealed class CurrentUserController(
-    ICurrentUser currentUser)
+    ICurrentUser currentUser,
+    IDemoAccountDirectory demoAccountDirectory)
     : ControllerBase
 {
   [HttpGet]
@@ -42,6 +44,7 @@ public sealed class CurrentUserController(
             currentUser.UserId,
             name,
             username,
-            roles));
+            roles,
+            demoAccountDirectory.Contains(currentUser.UserId)));
   }
 }

@@ -62,6 +62,46 @@ public sealed class CurrentUserEndpointsTests
     Assert.Contains(
         "Clinician",
         result.Roles);
+
+    Assert.False(result.IsDemoAccount);
+  }
+
+  [Theory]
+  [InlineData("20b23d69-e106-4b0e-96ff-8a60018232a1", "Clinician")]
+  [InlineData("3ab16ad9-5920-4082-b96d-4a967439240a", "ReferralCoordinator")]
+  public async Task GetMe_WithRegisteredDemoObjectId_ReturnsPresentationMetadata(
+      string objectId,
+      string role)
+  {
+    // Arrange
+    using var client =
+        TestAuthenticatedClient.CreateWithIdentity(
+            _factory,
+            objectId,
+            "access_as_user",
+            "Demo User",
+            "demo@example.test",
+            role);
+
+    // Act
+    var response =
+        await client.GetAsync("/api/me");
+
+    // Assert
+    Assert.Equal(
+        HttpStatusCode.OK,
+        response.StatusCode);
+
+    var result =
+        await response.Content
+            .ReadFromJsonAsync<
+                CurrentUserResponse>();
+
+    Assert.NotNull(result);
+    Assert.True(result.IsDemoAccount);
+    Assert.Contains(
+        role,
+        result.Roles);
   }
 
   [Fact]

@@ -4,4 +4,5 @@ public sealed record CurrentUserResponse(
     string Id,
     string Name,
     string Username,
-    IReadOnlyCollection<string> Roles);
+    IReadOnlyCollection<string> Roles,
+    bool IsDemoAccount);

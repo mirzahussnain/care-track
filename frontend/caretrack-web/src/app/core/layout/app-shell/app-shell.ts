@@ -24,6 +24,7 @@ export class AppShell {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
 
+  readonly isDemoAccount = computed(() => this.authService.currentUser()?.isDemoAccount === true);
   readonly accountName = computed(() => {
     const user = this.authService.currentUser();
     return user?.name.trim() || user?.username.trim() || 'Signed-in user';

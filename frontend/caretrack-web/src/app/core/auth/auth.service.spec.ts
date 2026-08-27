@@ -55,6 +55,7 @@ describe('AuthService', () => {
     name: 'Test Clinician',
     username: 'clinician@example.com',
     roles: [CARETRACK_ROLES.clinician],
+    isDemoAccount: false,
   };
 
   const administratorUser: AuthenticatedUser = {
@@ -62,6 +63,7 @@ describe('AuthService', () => {
     name: 'Test Administrator',
     username: 'administrator@example.com',
     roles: [CARETRACK_ROLES.administrator],
+    isDemoAccount: false,
   };
 
   beforeEach(() => {

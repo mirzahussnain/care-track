@@ -92,6 +92,17 @@
       (signOut)="signOut()"
     />
 
+    @if (isDemoAccount()) {
+      <div
+        role="status"
+        data-testid="demo-account-banner"
+        class="flex min-h-10 items-center justify-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-center text-xs font-extrabold tracking-[0.08em] text-amber-950"
+      >
+        <i class="ph ph-flask" aria-hidden="true"></i>
+        <span>DEMO ACCOUNT · SYNTHETIC DATA ONLY</span>
+      </div>
+    }
+
     <main
       id="main-content"
       tabindex="-1"

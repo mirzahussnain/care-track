@@ -142,11 +142,11 @@ public sealed class CareTrackSqlServerWebApplicationFactory
             .GetRequiredService<
                 CareTrackDbContext>();
 
-    dbContext.Appointments.RemoveRange(
-          dbContext.Appointments);
-
     dbContext.ClinicalNotes.RemoveRange(
         dbContext.ClinicalNotes);
+
+    dbContext.Appointments.RemoveRange(
+          dbContext.Appointments);
 
     dbContext.Referrals.RemoveRange(
         dbContext.Referrals);

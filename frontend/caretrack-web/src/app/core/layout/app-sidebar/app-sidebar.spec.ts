@@ -42,7 +42,7 @@ describe('AppSidebar', () => {
       route: '/patients',
       icon: 'ph-users',
       exact: false,
-      roles: [CARETRACK_ROLES.clinician, CARETRACK_ROLES.referralCoordinator],
+      roles: [CARETRACK_ROLES.clinician],
     },
 
     {
@@ -129,7 +129,7 @@ describe('AppSidebar', () => {
 
     expect(element.textContent).toContain('Dashboard');
 
-    expect(element.textContent).toContain('Patients');
+    expect(element.textContent).not.toContain('Patients');
 
     expect(element.textContent).toContain('Referrals');
 

@@ -9,4 +9,7 @@
     <Project Path="tests/CareTrack.IntegrationTests/CareTrack.IntegrationTests.csproj" />
     <Project Path="tests/CareTrack.UnitTests/CareTrack.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/CareTrack.DemoSeeder/CareTrack.DemoSeeder.csproj" />
+  </Folder>
 </Solution>

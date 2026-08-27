@@ -11,6 +11,7 @@ import { LandingPage } from './landing-page';
 describe('LandingPage', () => {
   let activeAccount: AccountInfo | null;
   let cachedAccounts: AccountInfo[];
+  const writeClipboardText = vi.fn<(value: string) => Promise<void>>();
 
   const account = {
     homeAccountId: 'home-account-id',
@@ -24,6 +25,30 @@ describe('LandingPage', () => {
   beforeEach(async () => {
     activeAccount = null;
     cachedAccounts = [];
+    writeClipboardText.mockReset();
+    writeClipboardText.mockResolvedValue();
+
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: writeClipboardText,
+      },
+    });
+
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true,
+      value: function (this: HTMLDialogElement): void {
+        this.setAttribute('open', '');
+      },
+    });
+
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+      configurable: true,
+      value: function (this: HTMLDialogElement): void {
+        this.removeAttribute('open');
+        this.dispatchEvent(new Event('close'));
+      },
+    });
 
     await TestBed.configureTestingModule({
       imports: [LandingPage],
@@ -155,6 +180,96 @@ describe('LandingPage', () => {
     tabs[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
     expect(tabs[3].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('presents exactly two policy-accurate interactive demo roles', () => {
+    const element = createPage().nativeElement as HTMLElement;
+    const launchButtons = Array.from(
+      element.querySelectorAll<HTMLButtonElement>('[data-demo-launch]'),
+    );
+    const demoSection = element.querySelector<HTMLElement>('#interactive-demo');
+
+    expect(launchButtons).toHaveLength(2);
+    expect(demoSection?.textContent).toContain('Referral Coordinator');
+    expect(demoSection?.textContent).toContain('Clinician');
+    expect(demoSection?.textContent).toContain('Clinical Notes');
+    expect(demoSection?.textContent).toContain('Shared synthetic environment');
+    expect(demoSection?.textContent).toContain('Never enter real patient or personal information');
+  });
+
+  it('opens an accessible dialog with the password hidden and supports Show and Hide', () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('[data-demo-launch]')?.click();
+    fixture.detectChanges();
+
+    const dialog = element.querySelector<HTMLDialogElement>('dialog');
+    const password = element.querySelector<HTMLInputElement>('#demo-account-password');
+    const visibilityButton = element.querySelector<HTMLButtonElement>(
+      '[aria-label="Show demo account password"]',
+    );
+
+    expect(dialog?.open).toBe(true);
+    expect(dialog?.getAttribute('aria-labelledby')).toBe('demo-dialog-title');
+    expect(password?.readOnly).toBe(true);
+    expect(password?.type).toBe('password');
+    expect(visibilityButton?.getAttribute('aria-pressed')).toBe('false');
+
+    visibilityButton?.click();
+    fixture.detectChanges();
+    expect(password?.type).toBe('text');
+    expect(
+      element
+        .querySelector('[aria-label="Hide demo account password"]')
+        ?.getAttribute('aria-pressed'),
+    ).toBe('true');
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Hide demo account password"]')?.click();
+    fixture.detectChanges();
+    expect(password?.type).toBe('password');
+  });
+
+  it('copies a credential without logging or rendering a copy payload', async () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('[data-demo-launch]')?.click();
+    fixture.detectChanges();
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Copy demo account password"]')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(writeClipboardText).toHaveBeenCalledOnce();
+    expect(element.querySelector('[aria-live="polite"]')?.textContent).toContain(
+      'Password copied.',
+    );
+  });
+
+  it('restores focus when the dialog closes and continues only through the sign-in route', async () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    const trigger = element.querySelector<HTMLButtonElement>('[data-demo-launch]')!;
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+
+    expect(element.querySelector<HTMLAnchorElement>('dialog a[href="/auth/sign-in"]')).toBeTruthy();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    await Promise.resolve();
+
+    expect(element.querySelector<HTMLDialogElement>('dialog')?.open).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('does not call an API when a recruiter opens the demo dialog', () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('[data-demo-launch]')?.click();
+    fixture.detectChanges();
+
+    TestBed.inject(HttpTestingController).verify();
   });
 
   it('exposes one accessible mobile menu control and closes the menu with Escape', () => {

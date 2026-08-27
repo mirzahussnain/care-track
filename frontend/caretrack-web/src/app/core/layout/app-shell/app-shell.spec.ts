@@ -15,6 +15,7 @@ describe('AppShell', () => {
     name: 'Amina Khan',
     username: 'amina.khan@example.test',
     roles: [CARETRACK_ROLES.clinician],
+    isDemoAccount: false,
   });
   const signOut = vi.fn();
 
@@ -27,6 +28,13 @@ describe('AppShell', () => {
 
   beforeEach(async () => {
     rolesSignal.set([CARETRACK_ROLES.clinician]);
+    currentUserSignal.set({
+      id: 'user-1',
+      name: 'Amina Khan',
+      username: 'amina.khan@example.test',
+      roles: [CARETRACK_ROLES.clinician],
+      isDemoAccount: false,
+    });
     signOut.mockReset();
 
     await TestBed.configureTestingModule({
@@ -121,6 +129,25 @@ describe('AppShell', () => {
     signOutButton.click();
 
     expect(signOut).toHaveBeenCalledOnce();
+  });
+
+  it('shows the synthetic-data banner only for server-identified demo accounts', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('[data-testid="demo-account-banner"]')).toBeNull();
+
+    currentUserSignal.update((user) =>
+      user
+        ? {
+            ...user,
+            isDemoAccount: true,
+          }
+        : null,
+    );
+    fixture.detectChanges();
+
+    expect(element.querySelector('[data-testid="demo-account-banner"]')?.textContent).toContain(
+      'DEMO ACCOUNT · SYNTHETIC DATA ONLY',
+    );
   });
 
   it('keeps sign out reachable from mobile navigation and closes the drawer', () => {

@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CareTrack.Api\CareTrack.Api.csproj" />
+    <ProjectReference Include="..\..\tools\CareTrack.DemoSeeder\CareTrack.DemoSeeder.csproj" />
   </ItemGroup>
   <ItemGroup>
   <None Update="appsettings.Integration.json">

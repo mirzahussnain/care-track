@@ -3,6 +3,7 @@ export interface AuthenticatedUser {
   readonly name: string;
   readonly username: string;
   readonly roles: readonly string[];
+  readonly isDemoAccount: boolean;
 }
 
 export type AuthLoadStatus = 'idle' | 'loading' | 'ready' | 'error';
