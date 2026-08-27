@@ -1,3 +1,4 @@
+using System.Data;
 using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using CareTrack.Domain.Entities;
@@ -39,51 +40,62 @@ public class StartAppointmentService
           Guid appointmentId,
           CancellationToken cancellationToken = default)
   {
-    var appointment =
-        await _appointmentRepository
-            .GetByIdAsync(
-                appointmentId,
-                cancellationToken);
-
-    if (appointment is null)
-    {
-      throw new NotFoundException(
-          $"Appointment '{appointmentId}' was not found.");
-    }
-    var referral =
-    await _referralRepository.GetByIdAsync(
-        appointment.ReferralId,
-        cancellationToken);
-
-    if (referral is null)
-    {
-      throw new NotFoundException(
-          $"Referral '{appointment.ReferralId}' was not found.");
-    }
-
-    try
-    {
-      appointment.Start();
-    }
-    catch (InvalidOperationException ex)
-    {
-      throw new InvalidStateTransitionException(
-          ex.Message);
-    }
-
-
-    if (referral.Status ==
-    ReferralStatus.Scheduled)
-    {
-      referral.StartProgress();
-    }
+    Appointment appointment = null!;
+    DateTime startedAtMarker = default;
 
     await _applicationTransaction.ExecuteAsync(
     async ct =>
     {
+      appointment =
+          await _appointmentRepository
+              .GetByIdAsync(
+                  appointmentId,
+                  ct)
+          ?? throw new NotFoundException(
+              $"Appointment '{appointmentId}' was not found.");
+
+      var referral =
+          await _referralRepository
+              .GetByIdAsync(
+                  appointment.ReferralId,
+                  ct)
+          ?? throw new NotFoundException(
+              $"Referral '{appointment.ReferralId}' was not found.");
+
+      startedAtMarker = DateTime.UtcNow;
+
+      try
+      {
+        appointment.Start(
+            startedAtMarker);
+      }
+      catch (InvalidOperationException exception)
+      {
+        throw new InvalidStateTransitionException(
+            exception.Message);
+      }
+
+      if (referral.Status ==
+          ReferralStatus.Scheduled)
+      {
+        referral.StartProgress();
+      }
+
       await _appointmentRepository
           .SaveChangesAsync(ct);
     },
+    async ct =>
+    {
+      var persistedAppointment =
+          await _appointmentRepository
+              .GetByIdAsync(
+                  appointmentId,
+                  ct);
+
+      return persistedAppointment?.StartedAt ==
+          startedAtMarker;
+    },
+    IsolationLevel.ReadCommitted,
     cancellationToken);
 
     _logger.LogInformation(

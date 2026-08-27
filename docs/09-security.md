@@ -29,7 +29,8 @@ CareTrack uses synthetic data only and does not claim production healthcare cert
 Business endpoints require explicit named policies.
 
 Intentionally anonymous:
-- `/api/health`
+- `/api/health` (SQL-independent liveness)
+- `/api/health/ready` (database readiness with sanitized output)
 
 Development-only:
 - OpenAPI endpoint(s)
@@ -69,11 +70,7 @@ User account lifecycle, passwords, MFA, and app-role assignment remain Microsoft
 A future CareTrack admin dashboard could integrate with Microsoft Graph for selected staff-access operations, but such permissions would be introduced only with a defined requirement and threat model.
 
 ## Logging
-Security-relevant logging should avoid:
-- clinical note content
-- tokens
-- secrets
-- unnecessary personal data
+Production logging records only HTTP method, matched route template, status, trace ID, sanitized exception category, SQL error number, and retry-exhausted state where applicable. Raw route values, request data, exception messages, provider details, clinical content, tokens, credentials, and unnecessary identifiers are excluded.
 
 Unexpected server failures return generic client-facing details.
 

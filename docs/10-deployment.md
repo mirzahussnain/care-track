@@ -1,86 +1,37 @@
 # Deployment
 
-## Current Status
-Deployment remains a future phase.
+## Production Architecture
 
-The backend currently runs locally with:
-- .NET 10 / ASP.NET Core
-- Microsoft SQL Server
+CareTrack is a synthetic-data portfolio application deployed with:
+
+- Angular on Azure Static Web Apps
+- ASP.NET Core .NET 10 on Azure App Service
+- Azure SQL Database serverless
 - Microsoft Entra ID authentication
-- local development configuration
 
-The Angular frontend has not yet been implemented.
+The API is hosted at `https://caretrack-api-g3ghhnddhefvg8c4.centralus-01.azurewebsites.net` and the frontend at `https://caretrack.hussnainali.me`.
 
-## Current Local Development Components
-- `CareTrack.Api`
-- `CareTrack.Application`
-- `CareTrack.Domain`
-- `CareTrack.Infrastructure`
-- unit tests
-- integration tests
-- SQL Server integration database
-- temporary Entra authentication test client
+## Health Probes
 
-## Planned Frontend
-Phase 6:
-- Angular
-- MSAL Angular
-- Authorization Code Flow with PKCE
-- protected API requests
+- `GET /api/health` is anonymous liveness. It confirms that the API process is responding and never queries SQL.
+- `GET /api/health/ready` is anonymous readiness. It verifies database connectivity and returns a sanitized `200` or `503` JSON response.
 
-## Planned Hosting / Deployment Learning Areas
+Configure Azure App Service Health Check to use `/api/health/ready`. Azure SQL serverless can cold-start, so readiness can briefly report unavailable while the database resumes.
 
-### API
-Potential options:
-- Azure App Service
-- Windows/IIS
+## Runtime Configuration
 
-Concerns:
-- environment-specific configuration
-- HTTPS
-- logging
-- health checks
-- Entra configuration
-- SQL connection security
+Production configuration remains in Azure App Service environment variables and connection-string settings. In particular:
 
-### Database
-Potential:
-- Azure SQL
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`
+- `AzureAd__TenantId`
+- `AzureAd__ClientId`
+- the `CareTrack` SQL connection string
 
-Concerns:
-- migrations
-- connection-string management
-- least-privilege database access
-- backups and recovery concepts
+The production SQL connection timeout is configured in the App Service connection string and is currently 60 seconds. Tenant IDs, client IDs, SQL credentials, connection strings, tokens, and publishing credentials must not be committed to source control.
 
-### Frontend
-Potential:
-- Azure Static Web Apps
-- App Service
-- other static hosting compatible with Angular
+Production CORS permits only `https://caretrack.hussnainali.me`. HTTPS Only and a modern supported minimum TLS version must remain enabled.
 
-### CI/CD
-Planned:
-- GitHub Actions
-- restore/build/test pipeline
-- deployment workflow
-- environment separation
+## Operational Verification
 
-## Security Requirements for Deployment
-- no secrets committed to Git
-- environment-specific Entra identifiers/configuration
-- HTTPS
-- protected production configuration
-- minimal public API surface
-- health endpoint suitable for probes
-- production OpenAPI exposure reviewed separately
-- secure SQL connectivity
-
-## Not Yet Implemented
-- production hosting
-- IIS configuration
-- Azure infrastructure
-- CI/CD
-- production secrets/configuration
-- Angular deployment
-- Playwright deployment-gate tests
+After deployment, verify both health endpoints, App Service configuration, production CORS, and that no secrets entered Git. Database failures are logged only as sanitized categories, numeric SQL error numbers where available, retry state, route template, status, and trace identifier.

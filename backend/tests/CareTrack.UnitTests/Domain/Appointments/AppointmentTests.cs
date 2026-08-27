@@ -430,6 +430,35 @@ public class AppointmentTests
   }
 
   [Fact]
+  public void Start_WithTimestamp_UsesExactTimestampForCommitMarker()
+  {
+    var scheduledStart =
+        DateTime.UtcNow.AddDays(2);
+
+    var appointment =
+        new Appointment(
+            "APT-MARKER-001",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            AppointmentType.Consultation,
+            scheduledStart,
+            scheduledStart.AddMinutes(30),
+            "Birmingham Clinic");
+
+    appointment.CheckIn();
+
+    var marker =
+        new DateTime(
+            638918451061234567,
+            DateTimeKind.Utc);
+
+    appointment.Start(marker);
+
+    Assert.Equal(marker, appointment.StartedAt);
+    Assert.Equal(marker, appointment.UpdatedAt);
+  }
+
+  [Fact]
   public void Start_WhenScheduled_ThrowsInvalidStateTransitionException()
   {
     // Arrange

@@ -3,7 +3,7 @@ using CareTrack.Application.Common.Exceptions;
 using CareTrack.Application.Common.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace CareTrack.Infrastructure.Persistance;
 
@@ -11,59 +11,59 @@ public sealed class ApplicationTransaction
     : IApplicationTransaction
 {
     private readonly CareTrackDbContext _dbContext;
-    private readonly ILogger<ApplicationTransaction> _logger;
 
     public ApplicationTransaction(
-        CareTrackDbContext dbContext,
-        ILogger<ApplicationTransaction> logger)
+        CareTrackDbContext dbContext)
     {
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public Task ExecuteAsync(
         Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<bool>> verifySucceeded,
         CancellationToken cancellationToken = default)
     {
         return ExecuteAsync(
             operation,
+            verifySucceeded,
             IsolationLevel.ReadCommitted,
             cancellationToken);
     }
 
     public async Task ExecuteAsync(
         Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<bool>> verifySucceeded,
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
     {
-        await using var transaction =
-            await _dbContext.Database
-                .BeginTransactionAsync(
-                    isolationLevel,
-                    cancellationToken);
-
         try
         {
-            await operation(
-                cancellationToken);
+            var executionStrategy =
+                _dbContext.Database
+                    .CreateExecutionStrategy();
 
-            await transaction.CommitAsync(
+            await executionStrategy.ExecuteInTransactionAsync(
+                async ct =>
+                {
+                    // Start every attempt without entities retained by a
+                    // previous failed or commit-ambiguous attempt.
+                    _dbContext.ChangeTracker.Clear();
+
+                    await operation(ct);
+                },
+                async ct =>
+                {
+                    // Verification must query persisted state, not the
+                    // entities retained by the uncertain attempt.
+                    _dbContext.ChangeTracker.Clear();
+
+                    return await verifySucceeded(ct);
+                },
+                isolationLevel,
                 cancellationToken);
         }
         catch (Exception exception)
         {
-            try
-            {
-                await transaction.RollbackAsync(
-                    CancellationToken.None);
-            }
-            catch (Exception rollbackException)
-            {
-                _logger.LogError(
-                    rollbackException,
-                    "Transaction rollback failed while handling an operation failure.");
-            }
-
             if (IsSqlServerDeadlockVictim(exception))
             {
                 throw new ConcurrencyException(

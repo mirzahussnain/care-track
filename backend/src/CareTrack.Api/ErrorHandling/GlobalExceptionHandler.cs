@@ -1,6 +1,8 @@
+using CareTrack.Api.Observability;
 using CareTrack.Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 namespace CareTrack.Api.ErrorHandling;
 
@@ -49,11 +51,22 @@ public class GlobalExceptionHandler : IExceptionHandler
     if (statusCode ==
         StatusCodes.Status500InternalServerError)
     {
+      var failure =
+          DatabaseFailureMetadata.From(exception);
+
+      var routeTemplate =
+          httpContext.GetEndpoint() is RouteEndpoint endpoint
+              ? endpoint.RoutePattern.RawText
+              : "unmatched";
+
       _logger.LogError(
-          exception,
-          "Unhandled exception occurred while processing {Method} {Path}",
+          "Unhandled exception while processing {Method} {RouteTemplate}. Category {ExceptionCategory} SqlErrorNumber {SqlErrorNumber} RetryExhausted {RetryExhausted} TraceId {TraceId}",
           httpContext.Request.Method,
-          httpContext.Request.Path);
+          routeTemplate,
+          failure.Category,
+          failure.SqlErrorNumber,
+          failure.RetryExhausted,
+          httpContext.TraceIdentifier);
     }
 
     httpContext.Response.StatusCode = statusCode;

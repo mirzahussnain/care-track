@@ -9,6 +9,7 @@ public sealed class FakeApplicationTransaction
 
     public async Task ExecuteAsync(
         Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<bool>> verifySucceeded,
         CancellationToken cancellationToken = default)
     {
         await operation(
@@ -17,6 +18,7 @@ public sealed class FakeApplicationTransaction
 
     public async Task ExecuteAsync(
         Func<CancellationToken, Task> operation,
+        Func<CancellationToken, Task<bool>> verifySucceeded,
         IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
     {

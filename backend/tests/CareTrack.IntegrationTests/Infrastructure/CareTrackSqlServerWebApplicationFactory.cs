@@ -82,7 +82,13 @@ public sealed class CareTrackSqlServerWebApplicationFactory
               options =>
               {
                 options.UseSqlServer(
-                        connectionString);
+                    connectionString,
+                    sqlServerOptions =>
+                        sqlServerOptions.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay:
+                                TimeSpan.FromSeconds(5),
+                            errorNumbersToAdd: null));
               });
 
       var serviceProvider =

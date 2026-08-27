@@ -223,7 +223,7 @@ Clinical Notes
 → ClinicianAccess
 ```
 
-`/api/health` is intentionally anonymous.
+`/api/health` is the anonymous SQL-independent liveness probe. `/api/health/ready` is the anonymous database readiness probe.
 
 OpenAPI is exposed only in Development.
 

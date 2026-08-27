@@ -1,6 +1,8 @@
 using CareTrack.Api.Authorization;
 using CareTrack.Api.ErrorHandling;
+using CareTrack.Api.Health;
 using CareTrack.Api.Identity;
+using CareTrack.Api.Observability;
 using CareTrack.Application.Appointments.CancelAppointment;
 using CareTrack.Application.Appointments.CheckInAppointment;
 using CareTrack.Application.Appointments.CompleteAppointment;
@@ -36,7 +38,9 @@ using CareTrack.Infrastructure.Configuration;
 using CareTrack.Infrastructure.Persistance;
 using CareTrack.Infrastructure.Persistance.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,9 +51,15 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<CareTrackDbContext>(options =>
 {
   options.UseSqlServer(
-  builder.Configuration.GetConnectionString("CareTrack")
-  );
+      builder.Configuration.GetConnectionString("CareTrack"),
+      sqlServerOptions =>
+          sqlServerOptions.EnableRetryOnFailure(
+              maxRetryCount: 3,
+              maxRetryDelay: TimeSpan.FromSeconds(5),
+              errorNumbersToAdd: null));
 });
+builder.Services.AddHealthChecks()
+    .AddCheck<CareTrackDatabaseHealthCheck>("database", tags: ["ready"]);
 builder.Services.AddScoped<IApplicationTransaction, ApplicationTransaction>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
@@ -157,6 +167,7 @@ if (app.Environment.IsDevelopment())
   app.MapOpenApi();
 }
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseCors(FrontendCorsPolicy);
@@ -173,7 +184,24 @@ app.MapGet("/api/health", () =>
     status = "healthy",
     service = "CareTrack.Api"
   });
-});
+})
+.AllowAnonymous();
+
+app.MapHealthChecks(
+    "/api/health/ready",
+    new HealthCheckOptions
+    {
+      Predicate = registration =>
+          registration.Tags.Contains("ready"),
+      ResultStatusCodes =
+      {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+      },
+      ResponseWriter = HealthCheckResponseWriter.WriteAsync
+    })
+    .AllowAnonymous();
 
 app.Run();
 

@@ -208,23 +208,26 @@ public class Appointment
 
   public void Start()
   {
+    Start(DateTime.UtcNow);
+  }
+
+  public void Start(
+      DateTime startedAt)
+  {
     if (Status != AppointmentStatus.CheckedIn)
     {
       throw new InvalidOperationException(
           $"Cannot start an appointment from status '{Status}'.");
     }
 
-    var now =
-        DateTime.UtcNow;
-
     Status =
         AppointmentStatus.InProgress;
 
     StartedAt =
-        now;
+        startedAt;
 
     UpdatedAt =
-        now;
+        startedAt;
   }
 
   public void Complete()

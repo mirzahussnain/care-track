@@ -46,35 +46,35 @@ public class CreateAppointmentService
   {
     var appointmentReference = command.AppointmentReference.Trim();
 
-    var existingAppointment =
-        await _appointmentRepository
-            .GetByReferenceAsync(
-                appointmentReference,
-                cancellationToken);
-
-    if (existingAppointment is not null)
-    {
-      throw new ConflictException(
-          $"Appointment reference '{appointmentReference}' already exists.");
-    }
-
-    var patient =
-        await _patientRepository
-            .GetByIdAsync(
-                command.PatientId,
-                cancellationToken);
-
-    if (patient is null)
-    {
-      throw new NotFoundException(
-          $"Patient '{command.PatientId}' was not found.");
-    }
-
     Appointment appointment = null!;
 
     await _applicationTransaction.ExecuteAsync(
     async ct =>
     {
+        var existingAppointment =
+            await _appointmentRepository
+                .GetByReferenceAsync(
+                    appointmentReference,
+                    ct);
+
+        if (existingAppointment is not null)
+        {
+          throw new ConflictException(
+              $"Appointment reference '{appointmentReference}' already exists.");
+        }
+
+        var patient =
+            await _patientRepository
+                .GetByIdAsync(
+                    command.PatientId,
+                    ct);
+
+        if (patient is null)
+        {
+          throw new NotFoundException(
+              $"Patient '{command.PatientId}' was not found.");
+        }
+
         var referral =
             await _referralRepository
                 .GetByIdAsync(
@@ -134,6 +134,16 @@ public class CreateAppointmentService
             await _referralRepository.SaveChangesAsync(
                 ct);
         }
+    },
+    async ct =>
+    {
+      var persistedAppointment =
+          await _appointmentRepository
+              .GetByIdAsync(
+                  appointment.Id,
+                  ct);
+
+      return persistedAppointment is not null;
     },
     IsolationLevel.Serializable,
     cancellationToken);
