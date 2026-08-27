@@ -11,6 +11,6 @@ export const environment = {
     apiScope:
       'api://60b13615-4add-447e-ab95-323298bcc308/access_as_user',
 
-    redirectUri: 'https://caretrack.hussnainali.me',
+    redirectUri: 'https://caretrack.hussnainali.me/auth/sign-in',
   },
 };
