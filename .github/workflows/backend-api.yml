@@ -1,0 +1,128 @@
+name: CareTrack API CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-api.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-api.yml"
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  API_PROJECT: "backend/src/CareTrack.Api/CareTrack.Api.csproj"
+  PUBLISH_DIR: "${{ github.workspace }}/artifacts/caretrack-api"
+
+jobs:
+  build-test:
+    name: Build and test backend
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore backend/CareTrack.slnx
+
+      - name: Build
+        run: >
+          dotnet build backend/CareTrack.slnx
+          --configuration Release
+          --no-restore
+
+      - name: Run unit tests
+        run: >
+          dotnet test backend/tests/CareTrack.UnitTests/CareTrack.UnitTests.csproj
+          --configuration Release
+          --no-build
+          --logger "console;verbosity=normal"
+
+      - name: Publish API
+        run: >
+          dotnet publish ${{ env.API_PROJECT }}
+          --configuration Release
+          --no-build
+          --output "${{ env.PUBLISH_DIR }}"
+
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: caretrack-api
+          path: ${{ env.PUBLISH_DIR }}
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy-production:
+    name: Deploy production API
+    runs-on: windows-latest
+    needs: build-test
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    environment:
+      name: production
+      url: https://caretrack-api-g3ghhnddhefvg8c4.centralus-01.azurewebsites.net
+
+    steps:
+      - name: Download API artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: caretrack-api
+          path: ./publish
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: caretrack-api
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_CARETRACK }}
+          package: ./publish
+
+      - name: Verify production health
+        shell: pwsh
+        run: |
+          $healthUrl = "https://caretrack-api-g3ghhnddhefvg8c4.centralus-01.azurewebsites.net/api/health"
+
+          Write-Host "Waiting briefly for App Service deployment..."
+          Start-Sleep -Seconds 15
+
+          $maxAttempts = 6
+
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+              try {
+                  Write-Host "Health check attempt $attempt of $maxAttempts"
+
+                  $response = Invoke-WebRequest `
+                      -Uri $healthUrl `
+                      -UseBasicParsing `
+                      -TimeoutSec 30
+
+                  if ($response.StatusCode -eq 200) {
+                      Write-Host "CareTrack API is healthy."
+                      Write-Host $response.Content
+                      exit 0
+                  }
+              }
+              catch {
+                  Write-Host "Health check failed: $($_.Exception.Message)"
+              }
+
+              Start-Sleep -Seconds 10
+          }
+
+          throw "CareTrack API failed production health verification."
