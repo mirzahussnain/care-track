@@ -6,6 +6,7 @@
   --landing-blue: #1769aa;
   background: #fff;
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 .landing-page * {
   box-sizing: border-box;
@@ -1025,8 +1026,9 @@
   width: 100%;
 }
 .landing-page__demo-dialog {
-  width: min(calc(100% - 2rem), 39rem);
-  max-height: min(90vh, 48rem);
+  width: min(calc(100vw - 2rem), 39rem);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
   overflow: auto;
   border: 0;
   border-radius: 1.2rem;
@@ -1034,6 +1036,16 @@
   padding: 0;
   color: #173d58;
   box-shadow: 0 32px 90px rgb(4 25 40 / 35%);
+  overscroll-behavior: contain;
+}
+.landing-page__demo-dialog[open] {
+  position: fixed;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
 }
 .landing-page__demo-dialog::backdrop {
   background: rgb(5 28 45 / 68%);
@@ -1513,6 +1525,11 @@
   }
   .landing-page__credential-field input {
     flex-basis: 100%;
+  }
+  .landing-page__demo-dialog {
+    width: calc(100vw - 1rem);
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
   }
   .landing-page__demo-dialog footer {
     align-items: stretch;

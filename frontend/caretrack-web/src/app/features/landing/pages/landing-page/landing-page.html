@@ -1,4 +1,4 @@
-<div class="landing-page min-h-screen w-full max-w-full overflow-x-hidden text-ct-text">
+<div class="landing-page min-h-screen w-full max-w-full overflow-x-clip text-ct-text">
   <a class="landing-page__skip-link" href="#landing-main">Skip to main content</a>
   <header class="landing-page__header" [class.landing-page__header--elevated]="headerElevated()">
     <nav class="landing-page__nav" aria-label="Public navigation">
@@ -605,13 +605,15 @@
           <button type="button" class="landing-page__dialog-cancel" (click)="closeDemoDialog()">
             Cancel
           </button>
-          <a
+          <button
+            type="button"
             class="landing-page__button landing-page__button--primary"
-            routerLink="/auth/sign-in"
-            (click)="continueToSignIn()"
+            data-demo-primary-action
+            (click)="copyPasswordAndSignIn(account)"
           >
-            Continue to sign in<i class="ph ph-arrow-right" aria-hidden="true"></i>
-          </a>
+            Copy password &amp; sign in as {{ account.roleLabel }}
+            <i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </button>
         </footer>
       </div>
     }

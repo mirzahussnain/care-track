@@ -12,6 +12,7 @@ import {
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
+import { RedirectRequest } from '@azure/msal-browser';
 
 import {
   INTERACTIVE_DEMO_ACCOUNTS,
@@ -21,6 +22,7 @@ import {
   buttonFromEvent,
   restoreFocusIfAvailable,
 } from '../../../../shared/utils/focus-management';
+import { environment } from '../../../../../environments/environment';
 
 interface ProductDemo {
   readonly label: string;
@@ -229,18 +231,43 @@ export class LandingPage implements AfterViewInit {
   }
 
   async copyCredential(label: 'Email' | 'Password', value: string): Promise<void> {
+    await this.tryCopyCredential(label, value);
+  }
+
+  async copyPasswordAndSignIn(account: InteractiveDemoAccount): Promise<void> {
+    const passwordCopied = await this.tryCopyCredential('Password', account.password);
+
+    this.credentialCopyStatus.set(
+      passwordCopied
+        ? `Password copied. Redirecting to Microsoft sign-in for ${account.roleLabel}.`
+        : 'Password could not be copied. It is now visible for manual copying. Continuing to Microsoft sign-in.',
+    );
+
+    await new Promise<void>((resolve) => globalThis.setTimeout(resolve, 150));
+
+    const request: RedirectRequest = {
+      scopes: [environment.auth.apiScope],
+      loginHint: account.email,
+    };
+
+    this.msalService.loginRedirect(request);
+  }
+
+  private async tryCopyCredential(label: 'Email' | 'Password', value: string): Promise<boolean> {
     try {
       await globalThis.navigator.clipboard.writeText(value);
       this.credentialCopyStatus.set(`${label} copied.`);
+      return true;
     } catch {
+      if (label === 'Password') {
+        this.passwordVisible.set(true);
+      }
+
       this.credentialCopyStatus.set(
         `Unable to copy ${label.toLowerCase()}. Select and copy it manually.`,
       );
+      return false;
     }
-  }
-
-  continueToSignIn(): void {
-    this.closeDemoDialog();
   }
 
   @HostListener('document:keydown.escape')

@@ -12,6 +12,7 @@ describe('LandingPage', () => {
   let activeAccount: AccountInfo | null;
   let cachedAccounts: AccountInfo[];
   const writeClipboardText = vi.fn<(value: string) => Promise<void>>();
+  const loginRedirect = vi.fn();
 
   const account = {
     homeAccountId: 'home-account-id',
@@ -27,6 +28,7 @@ describe('LandingPage', () => {
     cachedAccounts = [];
     writeClipboardText.mockReset();
     writeClipboardText.mockResolvedValue();
+    loginRedirect.mockReset();
 
     Object.defineProperty(globalThis.navigator, 'clipboard', {
       configurable: true,
@@ -59,6 +61,7 @@ describe('LandingPage', () => {
         {
           provide: MsalService,
           useValue: {
+            loginRedirect,
             instance: {
               getActiveAccount: vi.fn(() => activeAccount),
               getAllAccounts: vi.fn(() => cachedAccounts),
@@ -211,6 +214,13 @@ describe('LandingPage', () => {
 
     expect(dialog?.open).toBe(true);
     expect(dialog?.getAttribute('aria-labelledby')).toBe('demo-dialog-title');
+    expect(dialog?.classList.contains('landing-page__demo-dialog')).toBe(true);
+
+    const dialogStyles = globalThis.getComputedStyle(dialog!);
+    expect(dialogStyles.position).toBe('fixed');
+    expect(dialogStyles.top).toBe('50%');
+    expect(dialogStyles.left).toBe('50%');
+    expect(dialogStyles.transform).toContain('translate(-50%, -50%)');
     expect(password?.readOnly).toBe(true);
     expect(password?.type).toBe('password');
     expect(visibilityButton?.getAttribute('aria-pressed')).toBe('false');
@@ -245,15 +255,84 @@ describe('LandingPage', () => {
     );
   });
 
-  it('restores focus when the dialog closes and continues only through the sign-in route', async () => {
+  it('uses a role-aware primary action label for each demo account', () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    const launchButtons = Array.from(
+      element.querySelectorAll<HTMLButtonElement>('[data-demo-launch]'),
+    );
+
+    fixture.componentInstance.interactiveDemoAccounts.forEach((demoAccount, index) => {
+      launchButtons[index].click();
+      fixture.detectChanges();
+
+      const primaryAction = element.querySelector<HTMLButtonElement>('[data-demo-primary-action]');
+      expect(primaryAction?.textContent).toContain(
+        `Copy password & sign in as ${demoAccount.roleLabel}`,
+      );
+
+      fixture.componentInstance.closeDemoDialog();
+      fixture.detectChanges();
+    });
+  });
+
+  it('attempts the password copy and sends the selected account email as the login hint', async () => {
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    const selectedAccount = fixture.componentInstance.interactiveDemoAccounts[0];
+
+    element.querySelector<HTMLButtonElement>('[data-demo-launch]')?.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('[data-demo-primary-action]')?.click();
+
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 175));
+    fixture.detectChanges();
+
+    expect(writeClipboardText).toHaveBeenCalledOnce();
+    expect(loginRedirect).toHaveBeenCalledOnce();
+    expect(loginRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        loginHint: selectedAccount.email,
+      }),
+    );
+    expect(element.querySelector('[aria-live="polite"]')?.textContent).toContain(
+      'Password copied.',
+    );
+  });
+
+  it('reveals the password and continues sign-in when clipboard access fails', async () => {
+    writeClipboardText.mockRejectedValueOnce(new DOMException('Clipboard unavailable'));
+    const fixture = createPage();
+    const element = fixture.nativeElement as HTMLElement;
+    const selectedAccount = fixture.componentInstance.interactiveDemoAccounts[1];
+
+    const launchButtons = element.querySelectorAll<HTMLButtonElement>('[data-demo-launch]');
+    launchButtons[1].click();
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('[data-demo-primary-action]')?.click();
+
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 175));
+    fixture.detectChanges();
+
+    expect(writeClipboardText).toHaveBeenCalledOnce();
+    expect(element.querySelector<HTMLInputElement>('#demo-account-password')?.type).toBe('text');
+    expect(element.querySelector('[aria-live="polite"]')?.textContent).toContain(
+      'visible for manual copying',
+    );
+    expect(loginRedirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        loginHint: selectedAccount.email,
+      }),
+    );
+  });
+
+  it('restores focus when the dialog closes', async () => {
     const fixture = createPage();
     const element = fixture.nativeElement as HTMLElement;
     const trigger = element.querySelector<HTMLButtonElement>('[data-demo-launch]')!;
     trigger.focus();
     trigger.click();
     fixture.detectChanges();
-
-    expect(element.querySelector<HTMLAnchorElement>('dialog a[href="/auth/sign-in"]')).toBeTruthy();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
