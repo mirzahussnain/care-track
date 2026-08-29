@@ -1,111 +1,63 @@
 # Testing Strategy
 
-## Current Status
-Backend automated testing is implemented and includes unit and SQL Server-backed integration coverage.
+CareTrack has automated backend unit, SQL Server integration, and Angular/Vitest coverage. The recorded baseline before this documentation phase was 249 unit tests, 198 integration tests, and 307 frontend tests passing; the production Angular and backend Release builds also passed. Counts are a recorded checkpoint, not a permanent assertion as coverage evolves.
 
-Frontend and Playwright testing remain planned for Phase 6/7.
+## Backend Unit Tests
 
-## Unit Testing
-xUnit unit tests cover areas including:
-- domain rules
-- workflow transitions
-- application services
-- validation and exception translation
-- current-user dependent application behavior using test doubles
+xUnit tests cover domain transitions, invariants, application services, validation, exception translation, transaction behavior through fakes, configured assignment targets, and the deterministic demo dataset/reset application. Unit tests avoid Entra and SQL where those dependencies are not part of the behavior.
 
-Unit tests remain isolated from Microsoft Entra and SQL Server where appropriate.
+## SQL Server Integration Tests
 
-## Integration Testing
-Integration tests exercise the real ASP.NET Core application host and SQL Server persistence.
+Integration tests run the real ASP.NET Core host and EF Core SQL Server provider. Coverage includes:
 
-Coverage includes:
-- API behavior
-- database persistence
-- workflow behavior
-- validation
-- pagination/search
-- concurrency
-- transaction rollback
-- exception/status-code mapping
-- authentication
-- authorization policies
-- route-to-policy wiring
-- clinical-note authenticated ownership
+- API contracts, persistence, migrations, filtering, paging, and ordering
+- referral and appointment workflow integration
+- patient optimistic concurrency
+- serializable appointment scheduling and overlap behavior
+- transaction rollback, transient retry safety, and ambiguous-commit verification
+- Problem Details and status-code mapping
+- liveness/readiness and sanitized production logging
+- demo-seeder guards, repeat resets, referential integrity, and migration-history preservation
 
-## Deterministic Test Authentication
-External Entra authentication is replaced in integration tests with a deterministic authentication handler.
+The configured database is `CareTrackIntegrationTests` on local SQL Server. The repository does not currently provision a Docker container. Developers must keep this database disposable and separate from shared demo/production data.
 
-Reusable test identities model:
-- Clinician
-- ReferralCoordinator
-- Administrator
-- basic authenticated user
+## Deterministic Authentication and Authorization
 
-Tests explicitly create authenticated clients with the minimum required scope/role.
+Integration tests replace external Entra authentication with a deterministic scheme while retaining the production authorization policies. Test identities model anonymous, authenticated/no-role, missing-scope, Clinician, ReferralCoordinator, and Administrator callers.
 
-Anonymous clients remain anonymous so 401 behavior can be verified.
+Coverage verifies policy definitions and route wiring, including:
 
-## Authorization Testing Layers
+- `401` for an absent/unusable authentication context
+- `403` for authenticated callers missing scope or role
+- full patient reads and appointment workflow requiring `ClinicianAccess`
+- referral-safe patient lookup, referral workflow, and appointment creation using `ReferralManagement`
+- no implicit Administrator clinical bypass
+- Clinical Note creator identity derived from the authenticated principal
+- `GET /api/me` role and demo metadata without demo-based elevation
 
-### Policy Tests
-Verify that policy definitions behave correctly for:
-- valid role + scope
-- missing scope
-- missing role
-- wrong role
+## Frontend Tests
 
-### Route-Level Tests
-Verify that real API endpoints are attached to the intended policy.
+Angular unit/component tests run with the Angular unit-test builder and Vitest. Coverage includes services and API URL construction, validation/error mapping, authentication state, role directives/navigation, page states and actions, accessible focus behavior, the recruiter credentials dialog, demo login hint/clipboard flow, and the authenticated demo banner.
 
-Examples include:
-- patient read → `ClinicianAccess`
-- appointment creation → `ReferralManagement`
-- appointment check-in → `ClinicianAccess`
-- clinical note read → `ClinicianAccess`
+## Build Verification
 
-## Security-Sensitive Clinical Note Tests
-Tests verify:
-- authenticated user becomes `CreatedBy`
-- client-supplied `createdBy` cannot override identity
-- anonymous caller receives 401
-- insufficient role receives 403
+```powershell
+dotnet build backend/CareTrack.slnx --configuration Release
+dotnet test backend/tests/CareTrack.UnitTests/CareTrack.UnitTests.csproj --configuration Release
+dotnet test backend/tests/CareTrack.IntegrationTests/CareTrack.IntegrationTests.csproj --configuration Release
 
-## SQL Server Integration
-Integration tests use the SQL Server provider rather than replacing relational behavior with SQLite.
-
-This is important for:
-- SQL Server concurrency behavior
-- constraints
-- transactions
-- migrations
-- provider-specific behavior
-
-## Regression Strategy
-After focused changes:
-1. run relevant unit/integration test subset
-2. run the full integration suite
-3. run unit tests
-4. build the solution
-
-Exact discovered test totals may change as coverage grows; successful sign-off is based on zero failures rather than a fixed historic count.
-
-## Planned Frontend Testing
-Phase 6:
-- Angular component tests
-- Angular service tests
-- authentication/interceptor tests
-- route guard tests
-
-## Planned End-to-End Testing
-Later Playwright scenarios may cover:
-
-```text
-Sign in
-→ create/search patient
-→ create referral
-→ triage/assign
-→ schedule appointment
-→ clinician workflow
-→ clinical note
-→ verify role boundaries
+Set-Location frontend/caretrack-web
+npm test -- --watch=false
+npm run build
 ```
+
+The backend GitHub Actions workflow runs restore, Release build, and unit tests before publish. The frontend workflow runs `npm ci`, a production build, and artifact/path checks. The current CI does not provision SQL Server for the integration suite.
+
+## Remaining Gaps
+
+- no automated end-to-end browser suite
+- no repository-managed disposable SQL container
+- no load/performance evidence
+- no formal accessibility audit or penetration test
+
+These are explicit portfolio limitations rather than implied coverage.

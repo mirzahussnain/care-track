@@ -6,7 +6,7 @@
 
 | Hazard | Potential consequence | Current / Planned Controls |
 |---|---|---|
-| Wrong patient selected | Information associated with the wrong patient | unique patient records; explicit patient identifiers in API workflows; future persistent patient banner in UI |
+| Wrong patient selected | Information associated with the wrong patient | unique patient records; explicit patient identifiers; persistent patient context on detail/workflow screens |
 | Unauthorized access | Sensitive information exposed | Microsoft Entra authentication; named authorization policies; role + scope checks; least privilege |
 | Spoofed clinical-note author | Incorrect attribution of clinical documentation | `CreatedBy` derived server-side from authenticated Entra object ID |
 | Referral accidentally completed | Outstanding work becomes less visible | explicit state machine; invalid-transition rejection; completion prerequisites |
@@ -16,7 +16,7 @@
 | Appointment/referral state mismatch | Inconsistent workflow | application-layer cross-aggregate orchestration and transactions |
 | Clinical note orphaning | Documentation detached from encounter | foreign-key relationship and restricted appointment deletion |
 | Sensitive clinical content in logs | Confidentiality exposure | logging avoids clinical-note content; unexpected errors return generic details |
-| Important referral state not noticed | Workflow delay | structured referral states; future dashboard/queue UI |
+| Important referral state not noticed | Workflow delay | structured states; dashboard attention queues; filterable referral/appointment views |
 
 ## Implemented Safety-Oriented Engineering Practices
 - explicit workflow transitions rather than free-form status assignment
@@ -28,13 +28,16 @@
 - explicit authorization policies
 - synthetic data only
 
-## Future UI / Operational Controls
-Planned frontend controls may include:
-- persistent patient identity context
-- confirmation before high-impact actions
-- clearer queue/status visualization
-- warnings around conflicting or stale data
-- operational dashboards
+## Implemented UI / Operational Controls
+
+- persistent patient identity context on detailed workflows
+- explicit, state-aware workflow actions rather than free-form status editing
+- dashboard/queue and status visualization
+- conflict and stale-update error presentation
+- role-aware navigation backed by API enforcement
+- prominent synthetic-data warnings for public and authenticated demo use
+
+Future hardening for real-world use would require formal hazard analysis, accessibility and security assessment, operational monitoring, incident processes, and clinical governance—not only additional UI controls.
 
 ## Scope Boundary
 These controls demonstrate engineering awareness only. They are not evidence of formal hazard analysis, clinical safety case approval, certification, or production fitness.

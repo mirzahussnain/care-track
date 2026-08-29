@@ -1,9 +1,8 @@
 # Authentication & Authorization
 
 ## Current Status
-Microsoft Entra ID authentication and CareTrack authorization are implemented for the backend.
 
-The Angular client uses MSAL for authentication and its existing HTTP interceptor for protected API calls.
+Microsoft Entra ID authentication is implemented end to end. Angular uses MSAL redirects and an HTTP interceptor for protected API calls; ASP.NET Core validates delegated access tokens and enforces named scope/role policies.
 
 ## Identity Provider
 CareTrack uses Microsoft Entra ID as the identity provider.
@@ -22,6 +21,7 @@ CareTrack does not implement its own:
 - refresh-token store
 
 ## Application Roles
+
 - `Clinician`
 - `ReferralCoordinator`
 - `Administrator`
@@ -61,6 +61,10 @@ Requires:
 No production admin endpoint exists yet. The policy is established and tested for future administrative features.
 
 `Administrator` is deliberately not a universal clinical bypass.
+
+### ApiAccess
+
+Requires an authenticated user and `access_as_user`, with no additional role. It is used only by `GET /api/me` so the SPA can load identity, roles, and presentation metadata after sign-in.
 
 ## Current User Abstraction
 The Application layer exposes:
@@ -105,6 +109,18 @@ Policy
 - `401 Unauthorized` — authentication is absent or unsuccessful
 - `403 Forbidden` — caller is authenticated but does not satisfy the required policy
 
+## Angular / MSAL Flow
+
+The SPA uses Authorization Code Flow with PKCE. It requests the delegated API scope, stores MSAL state in session storage, and attaches the access token only to the configured API base URL. The SPA is a public client and has no client secret.
+
+Role-aware navigation and controls reflect roles returned by `GET /api/me`, but never replace endpoint authorization.
+
+## Recruiter Demo Identities
+
+The landing page offers separate Clinician and Referral Coordinator demo identities. Both are real restricted Entra users and follow the same MSAL/token/policy path as other identities. Credentials are shown only in the landing-page interaction and are not repeated in repository documentation.
+
+`GET /api/me` returns `isDemoAccount` when the authenticated object ID belongs to the demo directory. This controls the synthetic-data banner only. It does not grant a role, satisfy a policy, alter resource access, or bypass the delegated scope.
+
 ## Automated Test Authentication
 Integration tests replace external Entra authentication with a deterministic test authentication scheme.
 
@@ -131,13 +147,6 @@ Manual verification has confirmed:
 - 401 behavior without a token
 - server-derived ClinicalNote `CreatedBy`
 - inability of client-supplied `createdBy` to override authenticated identity
-
-## Planned Angular Authentication
-Phase 6 will use:
-- Angular
-- MSAL Angular
-- Authorization Code Flow with PKCE
-- bearer-token attachment for protected API calls
 
 ## Future Administrative Access
 A future admin dashboard may manage CareTrack-specific configuration.

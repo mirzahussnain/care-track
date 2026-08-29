@@ -1,110 +1,142 @@
 # API Design
 
-## Current Status
+The ASP.NET Core REST API groups endpoints by patients, referrals, appointments, Clinical Notes, current-user metadata, and health. Business endpoints declare named authorization policies; application/domain failures use centralized Problem Details handling.
 
-The ASP.NET Core REST API is implemented for the current backend scope.
+## Authorization Policies
 
-Business endpoints use explicit named authorization policies. Errors are returned through centralized Problem Details handling.
+Every named business policy requires an authenticated user and delegated `access_as_user` scope.
+
+| Policy | Additional role requirement |
+| --- | --- |
+| `ApiAccess` | none |
+| `ClinicianAccess` | `Clinician` |
+| `ReferralManagement` | `ReferralCoordinator` or `Clinician` |
+| `AdministrativeAccess` | `Administrator` |
+
+`Administrator` is not a universal bypass. No current endpoint uses `AdministrativeAccess` because no administrative feature has been implemented.
+
+## Compact Role / Endpoint Matrix
+
+| Area | Clinician | Referral Coordinator | Administrator only |
+| --- | --- | --- | --- |
+| `GET /api/me` | Yes | Yes | Yes |
+| Full patient search/detail | Yes | No | No |
+| Referral-safe patient lookup/summary | Yes | Yes | No |
+| Patient create/update | Yes | Yes | No |
+| Referral read/workflow/history | Yes | Yes | No |
+| Appointment create | Yes | Yes | No |
+| Appointment search/detail/workflow | Yes | No | No |
+| Clinical Note create/read/update | Yes | No | No |
+| Health endpoints | Anonymous | Anonymous | Anonymous |
+
+This matrix reflects API policies, not just visible Angular navigation.
 
 ## Patients
 
-| Method | Route                                 | Policy               |
-| ------ | ------------------------------------- | -------------------- |
-| GET    | `/api/patients`                       | `ClinicianAccess`    |
-| GET    | `/api/patients/{id}`                  | `ClinicianAccess`    |
-| GET    | `/api/patients/referral-lookup`       | `ReferralManagement` |
-| GET    | `/api/patients/{id}/referral-summary` | `ReferralManagement` |
-| POST   | `/api/patients`                       | `ReferralManagement` |
-| PUT    | `/api/patients/{id}`                  | `ReferralManagement` |
+| Method | Route | Policy |
+| --- | --- | --- |
+| GET | `/api/patients` | `ClinicianAccess` |
+| GET | `/api/patients/{id}` | `ClinicianAccess` |
+| GET | `/api/patients/referral-lookup` | `ReferralManagement` |
+| GET | `/api/patients/{id}/referral-summary` | `ReferralManagement` |
+| POST | `/api/patients` | `ReferralManagement` |
+| PUT | `/api/patients/{id}` | `ReferralManagement` |
+
+The referral-safe lookup contracts expose only ID, patient reference, full name, and date of birth. They allow a Referral Coordinator to choose a patient for referral work without broadening the full patient-list policy.
+
+Patient updates require the response `rowVersion` to be returned as Base64. Invalid Base64 produces `400`; a stale row version becomes a `409 Concurrency Conflict` rather than silently overwriting a newer update.
 
 ## Referrals
 
-| Method | Route                                          | Policy               |
-| ------ | ---------------------------------------------- | -------------------- |
-| POST   | `/api/referrals`                               | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/submit`                   | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/start-triage`             | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/accept`                   | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/request-more-information` | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/reject`                   | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/resubmit`                 | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/triage-assessment`        | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/assign`                   | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/reassign`                 | `ReferralManagement` |
-| POST   | `/api/referrals/{id}/complete`                 | `ReferralManagement` |
-| GET    | `/api/referrals/{id}/history`                  | `ReferralManagement` |
-| GET    | `/api/referrals/assignment-targets`            | `ReferralManagement` |
-| GET    | `/api/referrals`                               | `ReferralManagement` |
-| GET    | `/api/referrals/{id}`                          | `ReferralManagement` |
+All referral routes use `ReferralManagement`.
 
-### Referral frontend prerequisite contracts
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | `/api/referrals` | paged/filterable search |
+| GET | `/api/referrals/{id}` | detail |
+| GET | `/api/referrals/{id}/history` | ordered workflow history |
+| GET | `/api/referrals/assignment-targets` | configured canonical team names |
+| POST | `/api/referrals` | create Draft referral |
+| POST | `/api/referrals/{id}/submit` | Draft → Submitted |
+| POST | `/api/referrals/{id}/start-triage` | Submitted → AwaitingTriage |
+| POST | `/api/referrals/{id}/triage-assessment` | record priority/note without changing status |
+| POST | `/api/referrals/{id}/request-more-information` | AwaitingTriage → MoreInformationRequired |
+| POST | `/api/referrals/{id}/resubmit` | MoreInformationRequired → Submitted |
+| POST | `/api/referrals/{id}/accept` | AwaitingTriage → Accepted |
+| POST | `/api/referrals/{id}/reject` | AwaitingTriage → Rejected |
+| POST | `/api/referrals/{id}/assign` | Accepted → Assigned |
+| POST | `/api/referrals/{id}/reassign` | replace target while Assigned |
+| POST | `/api/referrals/{id}/complete` | explicitly complete an eligible InProgress referral |
 
-`GET /api/patients/referral-lookup` accepts `search`, `page` (default `1`), and `pageSize` (default `20`). It uses fixed `lastName asc` ordering and returns the standard paging metadata with patient items limited to:
+Referral status, priority, and history-event enums serialize as numbers. There is no generic status-update route and no referral-cancellation route. `Cancelled` exists in the enum but has no current domain transition.
 
-```json
-{
-  "id": "guid",
-  "patientReference": "PAT-001",
-  "fullName": "Amina Khan",
-  "dateOfBirth": "1988-04-12"
-}
-```
-
-`GET /api/patients/{id}/referral-summary` returns the same four-field item. The existing full patient GET/search routes remain protected by `ClinicianAccess`.
-
-`GET /api/referrals/assignment-targets` returns `{ "items": ["Cardiology Team A"] }`. Values come from the ordered `ReferralAssignment:Targets` configuration array. Startup trims values and rejects an empty list, blank values, values over 200 characters, and case-insensitive duplicates. Assign/reassign trims the submitted name, matches it case-insensitively, persists the exact canonical configured value, and returns `400 Bad Request` for an unavailable value. These values are clinical-team names, not user identities or Entra object IDs; there is no persistent team directory.
-
-Referral status, priority, and history-event enums continue to serialize as numbers. Workflow mutation remains endpoint-specific; there is no generic status mutation or cancellation endpoint.
+Assignment targets come from `ReferralAssignment:Targets`; they are canonical clinical-team names, not Entra identities or a persistent team directory.
 
 ## Appointments
 
-| Method | Route                                   | Policy               |
-| ------ | --------------------------------------- | -------------------- |
-| POST   | `/api/appointments`                     | `ReferralManagement` |
-| POST   | `/api/appointments/{id}/check-in`       | `ClinicianAccess`    |
-| POST   | `/api/appointments/{id}/start`          | `ClinicianAccess`    |
-| POST   | `/api/appointments/{id}/complete`       | `ClinicianAccess`    |
-| POST   | `/api/appointments/{id}/cancel`         | `ClinicianAccess`    |
-| POST   | `/api/appointments/{id}/did-not-attend` | `ClinicianAccess`    |
-| GET    | `/api/appointments/{id}`                | `ClinicianAccess`    |
-| GET    | `/api/appointments`                     | `ClinicianAccess`    |
+| Method | Route | Policy |
+| --- | --- | --- |
+| POST | `/api/appointments` | `ReferralManagement` |
+| GET | `/api/appointments` | `ClinicianAccess` |
+| GET | `/api/appointments/{id}` | `ClinicianAccess` |
+| POST | `/api/appointments/{id}/check-in` | `ClinicianAccess` |
+| POST | `/api/appointments/{id}/start` | `ClinicianAccess` |
+| POST | `/api/appointments/{id}/complete` | `ClinicianAccess` |
+| POST | `/api/appointments/{id}/cancel` | `ClinicianAccess` |
+| POST | `/api/appointments/{id}/did-not-attend` | `ClinicianAccess` |
+
+Creation validates referral/patient ownership and scheduling eligibility, rejects duplicate references and overlapping active time slots, and can advance an Assigned referral to Scheduled atomically. Starting an appointment can advance a Scheduled referral to InProgress. Appointment completion does not complete the referral.
 
 ## Clinical Notes
 
-| Method | Route                                              | Policy            |
-| ------ | -------------------------------------------------- | ----------------- |
-| POST   | `/api/appointments/{appointmentId}/clinical-notes` | `ClinicianAccess` |
-| GET    | `/api/clinical-notes/{id}`                         | `ClinicianAccess` |
-| GET    | `/api/appointments/{appointmentId}/clinical-notes` | `ClinicianAccess` |
-| PUT    | `/api/clinical-notes/{id}`                         | `ClinicianAccess` |
+All Clinical Note routes require `ClinicianAccess`.
 
-## Infrastructure Endpoint
+| Method | Route |
+| --- | --- |
+| POST | `/api/appointments/{appointmentId}/clinical-notes` |
+| GET | `/api/clinical-notes/{id}` |
+| GET | `/api/appointments/{appointmentId}/clinical-notes` |
+| PUT | `/api/clinical-notes/{id}` |
 
-| Method | Route               | Authorization                                       |
-| ------ | ------------------- | --------------------------------------------------- |
-| GET    | `/api/health`       | anonymous liveness; does not query SQL              |
-| GET    | `/api/health/ready` | anonymous readiness; verifies database connectivity |
+Creation accepts appointment ID and content; `CreatedBy` is always derived from the authenticated Entra object ID through `ICurrentUser`. Client-supplied ownership is not part of the contract. Updating content preserves the original creator value. There is no delete endpoint.
 
-OpenAPI is mapped only in the Development environment.
+## Current User and Demo Metadata
 
-## Error Handling
+`GET /api/me` uses `ApiAccess` and returns the stable object ID, display name, username, role claims, and `isDemoAccount`. The demo flag is calculated by matching the authenticated object ID against the configured application directory. It is presentation metadata for the banner and does not satisfy a scope, role, policy, or ownership check.
 
-Centralized exception handling maps known application/domain failures to consistent HTTP responses, including:
+## Health Endpoints
 
-- 400 Bad Request
-- 404 Not Found
-- 409 Conflict
-- 500 Internal Server Error
+| Method | Route | Authorization | Meaning |
+| --- | --- | --- | --- |
+| GET | `/api/health` | anonymous | SQL-independent process liveness |
+| GET | `/api/health/ready` | anonymous | database connectivity readiness; sanitized `200`/`503` |
 
-Unexpected failures return generic server-error details rather than exposing internals.
+OpenAPI is mapped only in Development.
 
-## API Design Principles
+## Problem Details and Status Codes
 
-- explicit request and response contracts
-- appropriate HTTP status codes
-- centralized Problem Details
-- pagination and filtering for search endpoints
-- deterministic sorting
-- explicit named authorization policies
-- no client-controlled security-sensitive ownership fields
+Known application exceptions are converted by the global exception handler to RFC-style Problem Details:
+
+| Status | Meaning in CareTrack |
+| --- | --- |
+| `400 Bad Request` | invalid argument/contract value, such as unavailable assignment target or malformed row version |
+| `404 Not Found` | requested patient, referral, appointment, or note does not exist |
+| `409 Conflict` | duplicate/conflicting operation, stale concurrency token, scheduling collision, or invalid workflow transition |
+| `500 Internal Server Error` | unexpected failure with generic client detail and sanitized server logging |
+
+Authentication/authorization failures are generated by the ASP.NET Core authentication pipeline:
+
+- `401 Unauthorized`: no usable authentication was supplied, including an absent/invalid token.
+- `403 Forbidden`: the token authenticated the user, but the delegated scope or required role is missing.
+
+Invalid state transitions deliberately return `409`, for example starting a Scheduled appointment without check-in or accepting a referral that is not AwaitingTriage.
+
+## Design Principles
+
+- resource-oriented grouping plus endpoint-specific workflow commands
+- API authorization as the source of truth
+- explicit request/response contracts and server-owned security fields
+- pagination, filtering, and deterministic sorting for list endpoints
 - cancellation-token propagation
+- explicit transactions for cross-aggregate consistency
+- generic public failure detail and sanitized operational logging

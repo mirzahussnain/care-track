@@ -1,7 +1,8 @@
 # Requirements
 
 ## Purpose
-CareTrack is a portfolio demonstration of an internal clinical referral and workflow management system. The implemented backend demonstrates how administrative and clinical teams can manage patients, referrals, appointments, and clinical notes through a structured workflow using synthetic data only.
+
+CareTrack is a portfolio demonstration of an internal clinical referral and workflow management system. The deployed application demonstrates how administrative and clinical teams can manage patients, referrals, appointments, and Clinical Notes through a structured workflow using synthetic data only.
 
 CareTrack is not a production healthcare system and does not connect to real NHS systems or contain real patient data.
 
@@ -24,16 +25,19 @@ CareTrack is not a production healthcare system and does not connect to real NHS
 - deterministic authentication/authorization integration testing
 - SQL Server persistence with Entity Framework Core
 - Problem Details-based API error handling
-- health endpoint for local/infrastructure verification
+- Angular staff workspace with MSAL, role-aware presentation, and responsive workflow UI
+- public recruiter landing page with two real Entra demo identities
+- GitHub Actions deployment to Azure Static Web Apps and Azure App Service
+- SQL-independent liveness and SQL-backed readiness endpoints
+- guarded deterministic shared-demo reset
 
 ### Planned / Future
-- Angular SPA
-- staff-facing dashboards
+
 - operational reporting
 - dedicated administrative features
 - optional Microsoft Graph-based staff access management
-- deployment and CI/CD
 - Playwright end-to-end testing
+- optional scheduled demo reset if usage justifies it
 
 ### Out of Scope for v1
 - diagnosis
@@ -86,27 +90,22 @@ A Patient is currently a domain entity, not an authenticated CareTrack actor. An
 ## Referral Workflow
 
 ```mermaid
-flowchart LR
-    D[Draft] --> S[Submitted]
-    S --> AT[Awaiting Triage]
-    AT --> A[Accepted]
-    A --> AS[Assigned]
-    AS --> SC[Scheduled]
-    SC --> IP[In Progress]
-    IP --> C[Completed]
-
-    AT --> MIR[More Information Required]
-    MIR --> AT
-
-    AT --> R[Rejected]
-
-    S --> X[Cancelled]
-    AT --> X
-    A --> X
-    AS --> X
-    SC --> X
-    IP --> X
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Submitted: submit
+    Submitted --> AwaitingTriage: start triage
+    AwaitingTriage --> MoreInformationRequired: request information
+    MoreInformationRequired --> Submitted: resubmit
+    AwaitingTriage --> Accepted: accept
+    AwaitingTriage --> Rejected: reject
+    Accepted --> Assigned: assign
+    Assigned --> Assigned: reassign
+    Assigned --> Scheduled: create appointment
+    Scheduled --> InProgress: start appointment
+    InProgress --> Completed: explicit completion
 ```
+
+`Cancelled` exists in the referral enum but has no implemented transition or endpoint.
 
 ## Appointment Workflow
 

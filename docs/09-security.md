@@ -79,6 +79,12 @@ Credentials and environment-specific identifiers must remain outside Git.
 
 The temporary development authentication client uses local environment configuration and must not commit secrets or tokens.
 
+## Recruiter Demo Boundary
+
+Public demo credentials are acceptable only for the dedicated, restricted Entra identities connected to this shared synthetic environment. They must not be reused for another service, granted tenant-wide privileges, or given access to real data.
+
+The API derives `isDemoAccount` from authenticated object IDs for a visible banner. That metadata is not an authorization requirement or grant; the normal delegated scope and app-role policies remain authoritative.
+
 ## Privacy & Governance Awareness
 The project demonstrates awareness of:
 - UK GDPR principles
