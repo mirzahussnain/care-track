@@ -1,6 +1,6 @@
 # Recruiter Demo Guide
 
-CareTrack can be evaluated in a few minutes without publishing demo passwords in the repository.
+CareTrack can be evaluated in a few minutes without duplicating demo passwords in repository documentation. The intentionally public credentials exist only in the dedicated Angular interactive-demo configuration that presents them on the landing page.
 
 ## Start the Demo
 

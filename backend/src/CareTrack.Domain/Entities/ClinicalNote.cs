@@ -16,8 +16,8 @@ public class ClinicalNote
 
   private ClinicalNote()
   {
-    Content = null;
-    CreatedBy = null;
+    Content = null!;
+    CreatedBy = null!;
   }
   public ClinicalNote(
   Guid appointmentId,

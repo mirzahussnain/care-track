@@ -15,7 +15,7 @@ public class Patient
 
   public string FullName => $"{FirstName} {LastName}";
 
-  public byte[] RowVersion { get; private set; }
+  public byte[] RowVersion { get; private set; } = null!;
   public Patient(
   string patientReference,
   string firstName,

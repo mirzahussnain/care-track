@@ -1,6 +1,6 @@
 # Testing Strategy
 
-CareTrack has automated backend unit, SQL Server integration, and Angular/Vitest coverage. The recorded baseline before this documentation phase was 249 unit tests, 198 integration tests, and 307 frontend tests passing; the production Angular and backend Release builds also passed. Counts are a recorded checkpoint, not a permanent assertion as coverage evolves.
+CareTrack has automated backend unit, SQL Server integration, and Angular/Vitest coverage. The current verified baseline is 249 unit tests, 198 integration tests, and 310 frontend tests passing; the production Angular and backend Release builds also pass. Counts are a recorded checkpoint, not a permanent assertion as coverage evolves.
 
 ## Backend Unit Tests
 

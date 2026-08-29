@@ -68,6 +68,8 @@ Thumbs.db
 # Private certificates / Azure publishing credentials
 *.PublishSettings
 *.publishsettings
+*.pubxml
+*.pubxml.user
 *.pfx
 *.p12
 *.pem

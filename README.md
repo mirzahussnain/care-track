@@ -2,7 +2,7 @@
 
 Clinical referral and workflow management platform demonstrating secure, role-based healthcare operations with Angular, ASP.NET Core, Azure SQL, and Microsoft Entra ID.
 
-**Live application:** [caretrack.hussnainali.me](https://caretrack.hussnainali.me) — recruiter demo access is available from the **Interactive Demo** section. No password is published in this repository.
+**Live application:** [caretrack.hussnainali.me](https://caretrack.hussnainali.me) — recruiter demo access is available from the **Interactive Demo** section. The restricted demo credentials are confined to the dedicated frontend demo configuration and are not duplicated in documentation.
 
 > **Synthetic data only.** CareTrack is an independent portfolio project. It is not affiliated with, endorsed by, commissioned by, or certified by the NHS or any healthcare provider, and it is not presented as clinically approved or ready for real patient care.
 
@@ -94,7 +94,7 @@ The SPA uses the OAuth 2.0 Authorization Code Flow with PKCE through MSAL. Micro
 - `ReferralManagement`: scope plus `ReferralCoordinator` or `Clinician`
 - `AdministrativeAccess`: scope plus `Administrator`
 
-CareTrack stores no passwords and places no client secret in the SPA. `isDemoAccount` is response metadata used for the banner; it is never an authorization input. Details are in [authentication and authorization](docs/06-authentication-authorization.md).
+CareTrack has no local credential store and places no client secret in the SPA. The only password literals are the intentionally public restricted-demo credentials in the dedicated frontend demo configuration. `isDemoAccount` is response metadata used for the banner; it is never an authorization input. Details are in [authentication and authorization](docs/06-authentication-authorization.md).
 
 ## 10. Production Deployment
 
@@ -118,13 +118,13 @@ Secrets and production settings remain in Azure/GitHub configuration, not source
 
 ## 12. Testing
 
-The recorded pre-documentation baseline is:
+The current verified baseline is:
 
 | Suite | Result |
 | --- | ---: |
 | Backend unit tests | 249 passed |
 | Backend integration tests | 198 passed |
-| Frontend tests | 307 passed |
+| Frontend tests | 310 passed |
 | Production Angular build | Passed |
 | Backend Release build | Passed cleanly |
 
