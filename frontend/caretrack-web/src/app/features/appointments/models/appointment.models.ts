@@ -29,7 +29,10 @@ export interface AppointmentSearchItem {
   readonly id: string;
   readonly appointmentReference: string;
   readonly patientId: string;
+  readonly patientReference: string;
+  readonly patientDisplayName: string;
   readonly referralId: string;
+  readonly referralReference: string;
   readonly appointmentType: AppointmentType;
   readonly scheduledStart: string;
   readonly scheduledEnd: string;
@@ -38,14 +41,17 @@ export interface AppointmentSearchItem {
   readonly createdAt: string;
 }
 
-export interface Appointment extends AppointmentSearchItem {
+export type Appointment = Omit<
+  AppointmentSearchItem,
+  'patientReference' | 'patientDisplayName' | 'referralReference'
+> & {
   readonly updatedAt: string | null;
   readonly checkedInAt: string | null;
   readonly startedAt: string | null;
   readonly completedAt: string | null;
   readonly cancelledAt: string | null;
   readonly didNotAttendAt: string | null;
-}
+};
 
 export interface AppointmentSearchQuery {
   readonly patientId?: string;

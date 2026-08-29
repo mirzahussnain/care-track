@@ -176,23 +176,15 @@
                     }}</time>
                   </td>
                   <td data-label="Patient">
-                    @if (patientFor(appointment.patientId); as patient) {
-                      <span class="appointments-page__cell-value">
-                        <strong>{{ patient.fullName }}</strong>
-                        <span>{{ patient.patientReference }}</span>
-                      </span>
-                    } @else {
-                      <span>Unavailable</span>
-                    }
+                    <span class="appointments-page__cell-value">
+                      <strong>{{ appointment.patientDisplayName }}</strong>
+                      <span>{{ appointment.patientReference }}</span>
+                    </span>
                   </td>
                   <td data-label="Referral">
-                    @if (referralFor(appointment.referralId); as referral) {
-                      <a [routerLink]="['/referrals', referral.id]">{{
-                        referral.referralReference
-                      }}</a>
-                    } @else {
-                      <span>Unavailable</span>
-                    }
+                    <a [routerLink]="['/referrals', appointment.referralId]">{{
+                      appointment.referralReference
+                    }}</a>
                   </td>
                   <td data-label="Type and location">
                     <span class="appointments-page__cell-value">

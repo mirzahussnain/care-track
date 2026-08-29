@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subscription, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   Button,
@@ -14,10 +14,6 @@ import {
 } from '../../../../design-system/components';
 import { DataToolbar, PageHeader, Pagination } from '../../../../design-system/patterns';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
-import { PatientApiService } from '../../../patients/data-access/patient-api.service';
-import { ReferralPatientSummary } from '../../../patients/models/patient.models';
-import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
-import { Referral } from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import { appointmentUtcRangeValidator } from '../../forms/appointment-form.validators';
 import { appointmentInputToUtcIso, formatAppointmentUtc } from '../../models/appointment-datetime';
@@ -46,9 +42,6 @@ interface AppliedFilters {
   readonly sortDirection: SortDirection;
 }
 
-type PatientLookup = Readonly<Record<string, ReferralPatientSummary | null>>;
-type ReferralLookup = Readonly<Record<string, Referral | null>>;
-
 @Component({
   selector: 'app-appointments-page',
   standalone: true,
@@ -70,8 +63,6 @@ type ReferralLookup = Readonly<Record<string, Referral | null>>;
 })
 export class AppointmentsPage {
   private readonly appointmentApi = inject(AppointmentApiService);
-  private readonly patientApi = inject(PatientApiService);
-  private readonly referralApi = inject(ReferralApiService);
   private readonly destroyRef = inject(DestroyRef);
   private requestSubscription?: Subscription;
 
@@ -102,8 +93,6 @@ export class AppointmentsPage {
   readonly page = signal(1);
   readonly pageSize = 20;
   readonly result = signal<PagedResult<AppointmentSearchItem> | null>(null);
-  readonly patientLookup = signal<PatientLookup>({});
-  readonly referralLookup = signal<ReferralLookup>({});
   readonly loading = signal(true);
   readonly error = signal<ListError>(null);
   readonly filtersExpanded = signal(false);
@@ -163,14 +152,6 @@ export class AppointmentsPage {
     );
   }
 
-  patientFor(patientId: string): ReferralPatientSummary | null {
-    return this.patientLookup()[patientId] ?? null;
-  }
-
-  referralFor(referralId: string): Referral | null {
-    return this.referralLookup()[referralId] ?? null;
-  }
-
   statusLabel(status: AppointmentStatus): string {
     return appointmentStatusLabel(status);
   }
@@ -222,47 +203,13 @@ export class AppointmentsPage {
         sortBy: filters.sortBy,
         sortDirection: filters.sortDirection,
       })
-      .pipe(
-        switchMap((result) => {
-          const patientIds = [...new Set(result.items.map((item) => item.patientId))];
-          const referralIds = [...new Set(result.items.map((item) => item.referralId))];
-
-          const patients$ = patientIds.length
-            ? forkJoin(
-                patientIds.map((id) =>
-                  this.patientApi.getReferralPatientSummary(id).pipe(
-                    map((patient) => [id, patient] as const),
-                    catchError(() => of([id, null] as const)),
-                  ),
-                ),
-              )
-            : of([] as readonly (readonly [string, ReferralPatientSummary | null])[]);
-
-          const referrals$ = referralIds.length
-            ? forkJoin(
-                referralIds.map((id) =>
-                  this.referralApi.getReferral(id).pipe(
-                    map((referral) => [id, referral] as const),
-                    catchError(() => of([id, null] as const)),
-                  ),
-                ),
-              )
-            : of([] as readonly (readonly [string, Referral | null])[]);
-
-          return forkJoin({ result: of(result), patients: patients$, referrals: referrals$ });
-        }),
-      )
       .subscribe({
-        next: ({ result, patients, referrals }) => {
+        next: (result) => {
           this.result.set(result);
-          this.patientLookup.set(Object.fromEntries(patients));
-          this.referralLookup.set(Object.fromEntries(referrals));
           this.loading.set(false);
         },
         error: (error: HttpErrorResponse) => {
           this.result.set(null);
-          this.patientLookup.set({});
-          this.referralLookup.set({});
           this.error.set(
             error.status === 403 ? 'forbidden' : error.status === 400 ? 'validation' : 'generic',
           );

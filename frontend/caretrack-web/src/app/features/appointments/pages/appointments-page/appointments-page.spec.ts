@@ -6,11 +6,6 @@ import { Subject, of, throwError } from 'rxjs';
 import { PagedResult } from '../../../../shared/models/paged-result.model';
 import { PatientApiService } from '../../../patients/data-access/patient-api.service';
 import { ReferralApiService } from '../../../referrals/data-access/referral-api.service';
-import {
-  REFERRAL_PRIORITIES,
-  REFERRAL_STATUSES,
-  Referral,
-} from '../../../referrals/models/referral.models';
 import { AppointmentApiService } from '../../data-access/appointment-api.service';
 import {
   APPOINTMENT_STATUSES,
@@ -31,7 +26,10 @@ describe('AppointmentsPage', () => {
     id: '33333333-3333-3333-3333-333333333333',
     appointmentReference: 'APT-001',
     patientId,
+    patientReference: 'PAT-001',
+    patientDisplayName: 'Amina Khan',
     referralId,
+    referralReference: 'REF-001',
     appointmentType: APPOINTMENT_TYPES.consultation,
     scheduledStart: '2026-09-01T09:00:00',
     scheduledEnd: '2026-09-01T09:30:00',
@@ -39,34 +37,11 @@ describe('AppointmentsPage', () => {
     status: APPOINTMENT_STATUSES.scheduled,
     createdAt: '2026-08-25T10:00:00Z',
   };
-  const referral: Referral = {
-    id: referralId,
-    referralReference: 'REF-001',
-    patientId,
-    status: REFERRAL_STATUSES.scheduled,
-    priority: REFERRAL_PRIORITIES.routine,
-    reason: 'Synthetic referral',
-    triageNote: null,
-    createdAt: '2026-08-25T09:00:00Z',
-    submittedAt: null,
-    updatedAt: null,
-    triagedAt: null,
-    assignedTo: 'Team A',
-    assignedAt: null,
-  };
-
   beforeEach(async () => {
     response$ = new Subject<PagedResult<AppointmentSearchItem>>();
     searchAppointments.mockReset().mockReturnValue(response$);
-    getReferralPatientSummary.mockReset().mockReturnValue(
-      of({
-        id: patientId,
-        patientReference: 'PAT-001',
-        fullName: 'Amina Khan',
-        dateOfBirth: '1988-04-12',
-      }),
-    );
-    getReferral.mockReset().mockReturnValue(of(referral));
+    getReferralPatientSummary.mockReset();
+    getReferral.mockReset();
 
     await TestBed.configureTestingModule({
       imports: [AppointmentsPage],
@@ -99,9 +74,17 @@ describe('AppointmentsPage', () => {
     ).not.toBeNull();
   });
 
-  it('deduplicates identity enrichment and renders human-readable context', () => {
+  it('renders operational identity fields without patient or referral enrichment calls', () => {
     response$.next({
-      items: [appointment, { ...appointment, id: '44444444-4444-4444-4444-444444444444' }],
+      items: [
+        {
+          ...appointment,
+          reason: 'SENSITIVE-REASON',
+          triageNote: 'SENSITIVE-TRIAGE',
+          clinicalNote: 'SENSITIVE-CLINICAL',
+        } as AppointmentSearchItem,
+        { ...appointment, id: '44444444-4444-4444-4444-444444444444' },
+      ],
       page: 1,
       pageSize: 20,
       totalCount: 2,
@@ -109,34 +92,49 @@ describe('AppointmentsPage', () => {
     });
     fixture.detectChanges();
 
-    expect(getReferralPatientSummary).toHaveBeenCalledOnce();
-    expect(getReferralPatientSummary).toHaveBeenCalledWith(patientId);
-    expect(getReferral).toHaveBeenCalledOnce();
-    expect(getReferral).toHaveBeenCalledWith(referralId);
+    expect(searchAppointments).toHaveBeenCalledOnce();
+    expect(getReferralPatientSummary).not.toHaveBeenCalled();
+    expect(getReferral).not.toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('Amina Khan');
     expect(fixture.nativeElement.textContent).toContain('PAT-001');
     expect(fixture.nativeElement.textContent).toContain('REF-001');
     expect(fixture.nativeElement.textContent).toContain('01 Sep 2026, 09:00 UTC');
+    expect(fixture.nativeElement.textContent).not.toContain('SENSITIVE-REASON');
+    expect(fixture.nativeElement.textContent).not.toContain('SENSITIVE-TRIAGE');
+    expect(fixture.nativeElement.textContent).not.toContain('SENSITIVE-CLINICAL');
   });
 
-  it('degrades failed enrichment to Unavailable without failing results', () => {
+  it('requests the selected page through the appointment API only', () => {
+    searchAppointments.mockReturnValue(
+      of({ items: [], page: 2, pageSize: 20, totalCount: 25, totalPages: 2 }),
+    );
+
+    fixture.componentInstance.changePage(2);
+
+    expect(searchAppointments).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, pageSize: 20 }),
+    );
+    expect(getReferralPatientSummary).not.toHaveBeenCalled();
+    expect(getReferral).not.toHaveBeenCalled();
+  });
+
+  it('renders an empty state from the appointment response without follow-up calls', () => {
     searchAppointments.mockReturnValue(
       of({
-        items: [appointment],
+        items: [],
         page: 1,
         pageSize: 20,
-        totalCount: 1,
-        totalPages: 1,
+        totalCount: 0,
+        totalPages: 0,
       }),
     );
-    getReferralPatientSummary.mockReturnValue(throwError(() => new Error('lookup failed')));
-    getReferral.mockReturnValue(throwError(() => new Error('lookup failed')));
 
     fixture.componentInstance.retry();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('table')).not.toBeNull();
-    expect(fixture.nativeElement.textContent.match(/Unavailable/g)?.length).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('No appointments yet');
+    expect(getReferralPatientSummary).not.toHaveBeenCalled();
+    expect(getReferral).not.toHaveBeenCalled();
   });
 
   it('converts filter values through the UTC convention and preserves numeric zero enums', () => {
