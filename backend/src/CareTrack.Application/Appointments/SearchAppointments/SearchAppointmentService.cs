@@ -1,20 +1,16 @@
-using CareTrack.Application.Common.Interfaces;
 using CareTrack.Application.Common.Models;
-using CareTrack.Domain.Entities;
 
 namespace CareTrack.Application.Appointments.SearchAppointments;
 
 
 public sealed class SearchAppointmentsService
 {
-  private readonly IAppointmentRepository
-      _appointmentRepository;
+  private readonly IAppointmentSearchQuery _appointmentSearchQuery;
 
   public SearchAppointmentsService(
-      IAppointmentRepository appointmentRepository)
+      IAppointmentSearchQuery appointmentSearchQuery)
   {
-    _appointmentRepository =
-        appointmentRepository;
+    _appointmentSearchQuery = appointmentSearchQuery;
   }
 
   public async Task<PagedResult<AppointmentSearchItem>>
@@ -24,34 +20,9 @@ public sealed class SearchAppointmentsService
   {
     Validate(command);
 
-    var result =
-        await _appointmentRepository
-            .SearchAsync(
-                command,
-                cancellationToken);
-
-    var items =
-        result.Items
-            .Select(a =>
-                new AppointmentSearchItem(
-                    a.Id,
-                    a.AppointmentReference,
-                    a.PatientId,
-                    a.ReferralId,
-                    a.AppointmentType,
-                    a.ScheduledStart,
-                    a.ScheduledEnd,
-                    a.Location,
-                    a.Status,
-                    a.CreatedAt))
-            .ToList();
-
-    return new PagedResult<AppointmentSearchItem>(
-        items,
-        result.Page,
-        result.PageSize,
-        result.TotalCount,
-        result.TotalPages);
+    return await _appointmentSearchQuery.SearchAsync(
+        command,
+        cancellationToken);
   }
 
   private static void Validate(

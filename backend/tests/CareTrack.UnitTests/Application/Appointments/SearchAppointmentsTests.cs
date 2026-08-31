@@ -17,12 +17,12 @@ public class SearchAppointmentsTests
   public async Task ExecuteAsync_WhenPageIsLessThanOne_ThrowsArgumentException()
   {
     // Arrange
-    var repository =
-        new FakeAppointmentRepository();
+    var queryHandler =
+        new FakeAppointmentSearchQuery();
 
     var service =
         new SearchAppointmentsService(
-            repository);
+            queryHandler);
 
     var query =
         new AppointmentSearchCommand(
@@ -50,12 +50,12 @@ public class SearchAppointmentsTests
   [Fact]
   public async Task ExecuteAsync_WhenPageSizeExceedsMaximum_ThrowsArgumentException()
   {
-    var repository =
-        new FakeAppointmentRepository();
+    var queryHandler =
+        new FakeAppointmentSearchQuery();
 
     var service =
         new SearchAppointmentsService(
-            repository);
+            queryHandler);
 
     var query =
         new AppointmentSearchCommand(
@@ -81,12 +81,12 @@ public class SearchAppointmentsTests
   [Fact]
   public async Task ExecuteAsync_WhenScheduledToIsBeforeScheduledFrom_ThrowsArgumentException()
   {
-    var repository =
-        new FakeAppointmentRepository();
+    var queryHandler =
+        new FakeAppointmentSearchQuery();
 
     var service =
         new SearchAppointmentsService(
-            repository);
+            queryHandler);
 
     var from =
         DateTime.UtcNow.AddDays(1);
@@ -116,12 +116,12 @@ public class SearchAppointmentsTests
   [Fact]
   public async Task ExecuteAsync_WhenSortFieldIsInvalid_ThrowsArgumentException()
   {
-    var repository =
-        new FakeAppointmentRepository();
+    var queryHandler =
+        new FakeAppointmentSearchQuery();
 
     var service =
         new SearchAppointmentsService(
-            repository);
+            queryHandler);
 
     var query =
         new AppointmentSearchCommand(

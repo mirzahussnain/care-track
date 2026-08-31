@@ -36,6 +36,7 @@ using CareTrack.Application.Referrals.StartTriage;
 using CareTrack.Application.Referrals.SubmitReferral;
 using CareTrack.Infrastructure.Configuration;
 using CareTrack.Infrastructure.Persistance;
+using CareTrack.Infrastructure.Persistance.Queries;
 using CareTrack.Infrastructure.Persistance.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -64,6 +65,7 @@ builder.Services.AddScoped<IApplicationTransaction, ApplicationTransaction>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IAppointmentSearchQuery, AppointmentOperationalSearchQuery>();
 builder.Services.AddScoped<IClinicalNoteRepository, ClinicalNoteRepository>();
 var referralAssignmentTargets = builder.Configuration
     .GetSection("ReferralAssignment:Targets")

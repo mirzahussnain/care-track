@@ -1,6 +1,6 @@
 # Testing Strategy
 
-CareTrack has automated backend unit, SQL Server integration, and Angular/Vitest coverage. The current verified baseline is 249 unit tests, 198 integration tests, and 310 frontend tests passing; the production Angular and backend Release builds also pass. Counts are a recorded checkpoint, not a permanent assertion as coverage evolves.
+CareTrack has automated backend unit, SQL Server integration, and Angular/Vitest coverage. The current verified baseline is 249 unit tests, 199 integration tests, and 311 frontend tests passing; the production Angular and backend Release builds also pass. Counts are a recorded checkpoint, not a permanent assertion as coverage evolves.
 
 ## Backend Unit Tests
 
@@ -18,6 +18,7 @@ Integration tests run the real ASP.NET Core host and EF Core SQL Server provider
 - Problem Details and status-code mapping
 - liveness/readiness and sanitized production logging
 - demo-seeder guards, repeat resets, referential integrity, and migration-history preservation
+- appointment operational-view creation/query/down behavior, joined display values, narrow-column security, and two-command count/page SQL evidence
 
 The configured database is `CareTrackIntegrationTests` on local SQL Server. The repository does not currently provision a Docker container. Developers must keep this database disposable and separate from shared demo/production data.
 
@@ -38,6 +39,8 @@ Coverage verifies policy definitions and route wiring, including:
 ## Frontend Tests
 
 Angular unit/component tests run with the Angular unit-test builder and Vitest. Coverage includes services and API URL construction, validation/error mapping, authentication state, role directives/navigation, page states and actions, accessible focus behavior, the recruiter credentials dialog, demo login hint/clipboard flow, and the authenticated demo banner.
+
+The appointment-list component test deterministically verifies one appointment search call and zero patient/referral enrichment calls while still covering rendered identity fields, loading, empty, error, filter, sorting, and pagination behavior.
 
 ## Build Verification
 

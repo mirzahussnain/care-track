@@ -84,6 +84,14 @@ This models half-open intervals and allows back-to-back appointments.
 
 Conflict checking is performed for the same patient. Cancelled and Did Not Attend appointments do not block scheduling; Completed appointments still count as historical scheduled occupancy.
 
+## Appointment Operational Read Model
+
+`dbo.vw_AppointmentOperationalList` is a narrow, read-only SQL Server view for the appointment list/search path. It joins appointments to the patient name/reference and referral reference that the table displays. It deliberately excludes date of birth, referral reason, triage notes, Clinical Note content, identity fields, and unused workflow timestamps.
+
+Infrastructure maps the view as an EF Core keyless read model. Application owns the immutable outward query result, and the existing clinician-authorized appointment endpoint uses that result without exposing SQL/view concepts. Appointment creation, overlap checks, and workflow transitions remain domain/application-driven EF operations against transactional tables.
+
+The view is versioned through an EF Core migration and removes the browser's per-page patient/referral enrichment fan-out. No elapsed-time or percentage improvement is claimed yet; execution-plan benchmarking and evidence-led index decisions are deferred to Phase 8E.
+
 ## Identity Data
 CareTrack currently does not maintain a local password/user-account table.
 

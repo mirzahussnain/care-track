@@ -1,4 +1,5 @@
 using CareTrack.Domain.Entities;
+using CareTrack.Infrastructure.Persistance.ReadModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareTrack.Infrastructure.Persistance;
@@ -23,4 +24,6 @@ public class CareTrackDbContext : DbContext
   public DbSet<ReferralHistoryEntry> ReferralHistoryEntries => Set<ReferralHistoryEntry>();
   public DbSet<Appointment> Appointments => Set<Appointment>();
   public DbSet<ClinicalNote> ClinicalNotes => Set<ClinicalNote>();
+  public DbSet<AppointmentOperationalListReadModel> AppointmentOperationalList =>
+      Set<AppointmentOperationalListReadModel>();
 }

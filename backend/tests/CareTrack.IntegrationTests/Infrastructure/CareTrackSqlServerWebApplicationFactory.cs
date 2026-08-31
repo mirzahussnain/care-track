@@ -17,6 +17,7 @@ namespace CareTrack.IntegrationTests.Infrastructure;
 public sealed class CareTrackSqlServerWebApplicationFactory
     : WebApplicationFactory<Program>
 {
+  public SqlCommandRecorder CommandRecorder { get; } = new();
 
   protected override void ConfigureWebHost(
       IWebHostBuilder builder)
@@ -89,6 +90,7 @@ public sealed class CareTrackSqlServerWebApplicationFactory
                             maxRetryDelay:
                                 TimeSpan.FromSeconds(5),
                             errorNumbersToAdd: null));
+                options.AddInterceptors(CommandRecorder);
               });
 
       var serviceProvider =

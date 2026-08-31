@@ -198,6 +198,7 @@ public sealed class AppointmentSearchTests
                     .AddMinutes(30));
 
     // Act
+    _factory.CommandRecorder.Clear();
     var response =
         await clinicianClient.GetAsync(
             $"/api/appointments?patientId={patient1.Id}");
@@ -220,6 +221,16 @@ public sealed class AppointmentSearchTests
     Assert.Equal(
         patient1Appointment.Id,
         result.Items[0].Id);
+
+    Assert.Equal(patient1.PatientReference, result.Items[0].PatientReference);
+    Assert.Equal(patient1.FullName, result.Items[0].PatientDisplayName);
+    Assert.Equal(referral1.ReferralReference, result.Items[0].ReferralReference);
+
+    var listCommands = _factory.CommandRecorder.CommandTexts;
+    Assert.Equal(2, listCommands.Count);
+    Assert.All(
+        listCommands,
+        sql => Assert.Contains("[vw_AppointmentOperationalList]", sql));
 
     Assert.All(
         result.Items,

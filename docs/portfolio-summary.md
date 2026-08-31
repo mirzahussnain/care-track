@@ -13,6 +13,7 @@ Built and deployed a full-stack healthcare workflow portfolio application using 
 - Designed an Angular and ASP.NET Core system using Clean Architecture to manage synthetic patient, referral, appointment, and Clinical Note workflows.
 - Integrated Microsoft Entra ID/MSAL with delegated API scopes, app roles, named authorization policies, and deterministic 401/403 integration coverage.
 - Implemented EF Core/SQL Server persistence, optimistic concurrency, serializable overlap protection, and retry-safe cross-aggregate transaction verification.
+- Removed appointment-list request/query fan-out with a narrow SQL Server view mapped as an EF Core keyless operational read model.
 - Deployed independent frontend/API pipelines to Azure Static Web Apps and App Service with Azure SQL serverless, liveness/readiness endpoints, sanitized logging, and a guarded recruiter demo reset.
 
 ## LinkedIn Project Description
@@ -26,6 +27,8 @@ Angular + ASP.NET Core referral workflow portfolio app with Entra RBAC, EF Core/
 ## Interview Explanation: 30 Seconds
 
 CareTrack is a deployed portfolio system for the workflow around referrals: register a synthetic patient, triage and assign a referral, schedule and progress an appointment, and record Clinical Notes. The Angular SPA signs users in with Microsoft Entra, while the .NET API remains authoritative for role and scope checks. The engineering focus is explicit state machines, cross-aggregate transactions, concurrency/retry safety, and a recruiter demo that uses the real auth path without any real healthcare data.
+
+The appointment list originally caused client-side enrichment fan-out, producing many patient and referral lookups per page. I introduced a narrow SQL Server operational view mapped as an EF Core keyless read model so the list is served from one joined read path while keeping transactional workflow logic in the domain and application layers.
 
 ## Interview Explanation: Two Minutes
 

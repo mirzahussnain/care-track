@@ -81,6 +81,8 @@ flowchart LR
 
 Entity Framework migrations live in `CareTrack.Infrastructure/Migrations`. The API does not run migrations on startup; deployment and operators apply them explicitly. Patient updates use a SQL row version for optimistic concurrency. Cross-aggregate scheduling/start operations use explicit transactions, and retry verification queries persisted state after clearing tracked entities.
 
+Appointment list/search is a read-side exception to aggregate loading: an Application query contract is implemented in Infrastructure using the keyless `vw_AppointmentOperationalList` projection. The existing API policy and endpoint remain in place, while Angular receives patient display name/reference and referral reference in the paged response. Transactional appointment commands continue through repositories and domain behavior.
+
 ## Cross-Aggregate Orchestration
 
 The Application layer coordinates operations that touch more than one aggregate:
